@@ -1,0 +1,189 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 222 47% 3%;
+    --foreground: 210 40% 98%;
+
+    --card: 222 47% 6%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222 47% 6%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 187 92% 54%;
+    --primary-foreground: 222 47% 6%;
+
+    --secondary: 217 33% 12%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217 33% 15%;
+    --muted-foreground: 215 20% 55%;
+
+    --accent: 217 33% 15%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 350 89% 60%;
+    --destructive-foreground: 210 40% 98%;
+
+    --success: 158 64% 52%;
+    --success-foreground: 222 47% 6%;
+
+    --warning: 38 92% 50%;
+    --warning-foreground: 222 47% 6%;
+
+    --border: 217 33% 17%;
+    --input: 217 33% 17%;
+    --ring: 187 92% 54%;
+
+    --radius: 0.75rem;
+
+    --glow-cyan: 0 0 20px rgba(34, 211, 238, 0.25);
+    --glow-rose: 0 0 20px rgba(244, 63, 94, 0.25);
+    --glow-emerald: 0 0 20px rgba(52, 211, 153, 0.25);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .font-mono {
+    font-family: 'JetBrains Mono', monospace;
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply bg-card/50 backdrop-blur-xl border border-border rounded-xl;
+  }
+
+  .glow-cyan {
+    box-shadow: var(--glow-cyan);
+  }
+
+  .glow-rose {
+    box-shadow: var(--glow-rose);
+  }
+
+  .glow-emerald {
+    box-shadow: var(--glow-emerald);
+  }
+
+  .text-gradient-cyan {
+    @apply bg-gradient-to-r from-cyan-400 to-cyan-300 bg-clip-text text-transparent;
+  }
+
+  .nav-item {
+    @apply flex items-center gap-3 px-4 py-3 rounded-lg text-muted-foreground transition-all duration-200 hover:bg-secondary hover:text-foreground;
+  }
+
+  .nav-item-active {
+    @apply bg-primary/10 text-primary border border-primary/20 glow-cyan;
+  }
+
+  .stat-card {
+    @apply glass-card p-6 relative overflow-hidden;
+  }
+
+  .stat-card::before {
+    content: '';
+    @apply absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent;
+  }
+
+  .task-card {
+    @apply glass-card p-4 cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:border-primary/30;
+  }
+
+  .task-card-critical {
+    @apply border-l-4 border-l-destructive;
+  }
+
+  .task-card-warning {
+    @apply border-l-4 border-l-warning;
+  }
+
+  .task-card-info {
+    @apply border-l-4 border-l-primary;
+  }
+
+  .integration-btn {
+    @apply glass-card px-6 py-4 flex items-center gap-3 cursor-pointer transition-all duration-300 hover:border-primary/50 hover:glow-cyan;
+  }
+
+  .sensor-card {
+    @apply glass-card p-5 relative;
+  }
+
+  .sensor-card-alert {
+    @apply border-destructive/50 animate-pulse-glow;
+  }
+
+  .dropzone {
+    @apply border-2 border-dashed border-border rounded-2xl p-12 transition-all duration-300;
+  }
+
+  .dropzone:hover,
+  .dropzone-active {
+    @apply border-primary bg-primary/5 glow-cyan;
+  }
+}
+
+@layer utilities {
+  .animate-pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse-glow {
+    0%, 100% {
+      box-shadow: 0 0 20px rgba(244, 63, 94, 0.3);
+    }
+    50% {
+      box-shadow: 0 0 40px rgba(244, 63, 94, 0.6);
+    }
+  }
+
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+
+  .animate-glow-pulse {
+    animation: glow-pulse 3s ease-in-out infinite;
+  }
+
+  @keyframes glow-pulse {
+    0%, 100% {
+      opacity: 0.5;
+    }
+    50% {
+      opacity: 1;
+    }
+  }
+
+  .graph-node {
+    @apply absolute rounded-full transition-all duration-500;
+  }
+
+  .graph-line {
+    @apply absolute bg-gradient-to-r from-primary/30 to-primary/10 h-px origin-left;
+  }
+}
