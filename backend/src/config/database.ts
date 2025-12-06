@@ -1,5 +1,6 @@
 import pg from 'pg';
 import { createClient } from 'redis';
+import bcrypt from 'bcrypt';
 
 const { Pool } = pg;
 
@@ -103,4 +104,26 @@ export async function initDatabase() {
     CREATE INDEX IF NOT EXISTS idx_audit_logs_user ON audit_logs(user_id);
     CREATE INDEX IF NOT EXISTS idx_iot_readings_sensor ON iot_readings(sensor_id, timestamp);
   `);
+
+  // Auto-create default admin user if not exists
+  await createDefaultAdmin();
+}
+
+async function createDefaultAdmin() {
+  try {
+    const existing = await pool.query('SELECT id FROM users WHERE email = $1', ['admin@klens.local']);
+    
+    if (existing.rows.length === 0) {
+      const passwordHash = await bcrypt.hash('Admin@123', 10);
+      await pool.query(
+        'INSERT INTO users (email, password_hash, name, role, department) VALUES ($1, $2, $3, $4, $5)',
+        ['admin@klens.local', passwordHash, 'System Admin', 'admin', 'IT']
+      );
+      console.log('✅ Default admin user created: admin@klens.local / Admin@123');
+    } else {
+      console.log('✅ Admin user already exists');
+    }
+  } catch (error) {
+    console.error('⚠️  Failed to create default admin:', error);
+  }
 }
