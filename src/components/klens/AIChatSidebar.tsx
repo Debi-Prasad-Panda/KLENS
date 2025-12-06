@@ -1,5 +1,6 @@
-import { X, Send, Sparkles, FileText, AlertCircle, CheckCircle } from "lucide-react";
+import { X, Send, Sparkles, FileText, AlertCircle, CheckCircle, Loader2 } from "lucide-react";
 import { useState } from "react";
+import { api } from "@/lib/api";
 
 interface Message {
   role: "user" | "assistant";
@@ -21,9 +22,10 @@ export function AIChatSidebar({ isOpen, onClose }: AIChatSidebarProps) {
     }
   ]);
   const [input, setInput] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSend = () => {
-    if (!input.trim()) return;
+  const handleSend = async () => {
+    if (!input.trim() || isLoading) return;
 
     const userMessage: Message = {
       role: "user",
@@ -32,17 +34,30 @@ export function AIChatSidebar({ isOpen, onClose }: AIChatSidebarProps) {
     };
 
     setMessages(prev => [...prev, userMessage]);
+    const userInput = input;
     setInput("");
+    setIsLoading(true);
 
-    // Simulate AI response
-    setTimeout(() => {
+    try {
+      const data = await api.sendChatMessage(userInput, messages);
+
       const aiResponse: Message = {
         role: "assistant",
-        content: "I understand your query. Let me analyze that for you...",
+        content: data.message || "I apologize, I couldn't process that request.",
         timestamp: new Date()
       };
       setMessages(prev => [...prev, aiResponse]);
-    }, 1000);
+    } catch (error) {
+      console.error('Chat error:', error);
+      const errorResponse: Message = {
+        role: "assistant",
+        content: "Sorry, I'm having trouble connecting. Please try again.",
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, errorResponse]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -125,9 +140,10 @@ export function AIChatSidebar({ isOpen, onClose }: AIChatSidebarProps) {
             />
             <button
               onClick={handleSend}
-              className="w-12 h-12 rounded-xl bg-primary text-primary-foreground flex items-center justify-center hover:bg-primary/90 transition-colors"
+              disabled={isLoading}
+              className="w-12 h-12 rounded-xl bg-primary text-primary-foreground flex items-center justify-center hover:bg-primary/90 transition-colors disabled:opacity-50"
             >
-              <Send className="w-5 h-5" />
+              {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
             </button>
           </div>
         </div>

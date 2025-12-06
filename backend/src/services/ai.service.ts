@@ -3,7 +3,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
 export async function analyzeDocument(text: string, role: string) {
-  const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+  const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
 
   const prompts = {
     engineer: `Analyze this technical document and extract: equipment specs, error codes, maintenance procedures, part numbers. Document: ${text}`,
@@ -17,7 +17,7 @@ export async function analyzeDocument(text: string, role: string) {
 }
 
 export async function detectRisks(text: string): Promise<string[]> {
-  const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+  const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
   
   const prompt = `Identify all safety risks, compliance violations, and operational hazards in this document. Return as JSON array of strings. Document: ${text}`;
   
@@ -32,7 +32,7 @@ export async function detectRisks(text: string): Promise<string[]> {
 }
 
 export async function checkCompliance(text: string): Promise<{ regulation: string; status: string; details: string }[]> {
-  const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+  const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
   
   const prompt = `Check this document against Factory Act 1948, Boiler Regulations 2017, and Railway Safety Standards. Return JSON array with {regulation, status: "compliant"|"violation"|"missing", details}. Document: ${text}`;
   
@@ -47,7 +47,7 @@ export async function checkCompliance(text: string): Promise<{ regulation: strin
 }
 
 export async function translateText(text: string, targetLang: string): Promise<string> {
-  const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+  const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
   
   const result = await model.generateContent(`Translate to ${targetLang}: ${text}`);
   return result.response.text();

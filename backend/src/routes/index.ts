@@ -3,6 +3,7 @@ import multer from 'multer';
 import { register, login, grantCinderellaAccess, checkCinderellaAccess } from '../controllers/auth.controller.js';
 import { uploadDocument, getDocument, getDocuments, updateDocument, revertDocument } from '../controllers/document.controller.js';
 import { createApproval, approveAction, getApprovals } from '../controllers/approval.controller.js';
+import { chatController } from '../controllers/chat.controller.js';
 import { authenticate, authorize } from '../middleware/auth.js';
 
 const router = express.Router();
@@ -29,5 +30,8 @@ router.post('/documents/:id/revert/:version', authenticate, authorize('admin'), 
 router.post('/approvals', authenticate, authorize('admin'), createApproval);
 router.post('/approvals/:id/approve', authenticate, authorize('admin'), approveAction);
 router.get('/approvals', authenticate, authorize('admin'), getApprovals);
+
+// Chat routes
+router.post('/chat', authenticate, chatController.sendMessage);
 
 export default router;

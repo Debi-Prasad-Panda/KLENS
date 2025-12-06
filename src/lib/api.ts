@@ -118,6 +118,13 @@ class ApiClient {
   async checkCinderellaAccess() {
     return this.request('/auth/cinderella');
   }
+
+  async sendChatMessage(message: string, conversationHistory: any[]) {
+    return this.request('/chat', {
+      method: 'POST',
+      body: JSON.stringify({ message, conversationHistory }),
+    });
+  }
 }
 
 export const api = new ApiClient();
