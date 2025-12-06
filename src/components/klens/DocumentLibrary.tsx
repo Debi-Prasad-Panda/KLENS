@@ -32,10 +32,43 @@ export function DocumentLibrary({ onOpenDocument }: DocumentLibraryProps) {
   const loadDocuments = async () => {
     try {
       const docs = await api.getDocuments({ limit: 50 });
-      setDocuments(docs);
+      if (docs.length === 0) {
+        // Show demo documents if no documents exist
+        setDocuments([
+          {
+            id: 1,
+            filename: "boiler_b7_specs.pdf",
+            original_name: "Boiler B7 Specifications.pdf",
+            file_type: "application/pdf",
+            status: "complete",
+            created_at: new Date().toISOString(),
+            uploaded_by: 1
+          },
+          {
+            id: 2,
+            filename: "safety_manual.pdf",
+            original_name: "Safety Manual v2.3.pdf",
+            file_type: "application/pdf",
+            status: "complete",
+            created_at: new Date().toISOString(),
+            uploaded_by: 1
+          },
+          {
+            id: 3,
+            filename: "maintenance_log.xlsx",
+            original_name: "Maintenance Log 2024.xlsx",
+            file_type: "application/vnd.ms-excel",
+            status: "processing",
+            created_at: new Date().toISOString(),
+            uploaded_by: 1
+          }
+        ]);
+      } else {
+        setDocuments(docs);
+      }
     } catch (error) {
       console.error("Failed to load documents:", error);
-      // Add demo documents if API fails
+      // Show demo documents if API fails
       setDocuments([
         {
           id: 1,
