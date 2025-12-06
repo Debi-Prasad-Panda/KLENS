@@ -21,6 +21,7 @@ type TabType = "dashboard" | "search" | "graph" | "iot" | "ar" | "compliance" | 
 const Index = () => {
   const [activeTab, setActiveTab] = useState<TabType>("dashboard");
   const [selectedDocument, setSelectedDocument] = useState<any>(null);
+  const [isAIChatOpen, setIsAIChatOpen] = useState(false);
 
   // Listen for navigation events from TopNav
   useEffect(() => {
@@ -87,8 +88,10 @@ const Index = () => {
       <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
 
       {/* Main Content */}
-      <div className="pl-64">
-        <TopNav />
+      <div className={`pl-64 transition-all duration-300 ${
+        isAIChatOpen ? "pr-[480px]" : "pr-0"
+      }`}>
+        <TopNav onAIChatToggle={setIsAIChatOpen} />
         <main className="p-6">
           {renderView()}
         </main>

@@ -2,32 +2,53 @@ import { Search, Bell, Moon, User, Sparkles, LogOut, Settings, Shield } from "lu
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { AIChatSidebar } from "./AIChatSidebar";
 
-export function TopNav() {
+interface TopNavProps {
+  onAIChatToggle?: (isOpen: boolean) => void;
+}
+
+export function TopNav({ onAIChatToggle }: TopNavProps = {}) {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [showAIChat, setShowAIChat] = useState(false);
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+
+  const toggleAIChat = () => {
+    const newState = !showAIChat;
+    setShowAIChat(newState);
+    onAIChatToggle?.(newState);
+  };
   return (
-    <header className="h-16 border-b border-border bg-card/30 backdrop-blur-xl flex items-center justify-between px-6 sticky top-0 z-40">
-      {/* Search Bar */}
-      <div className="flex-1 max-w-2xl">
-        <div className="relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-          <input
-            type="text"
-            placeholder="Search documents, people, or ask AI..."
-            className="w-full h-11 pl-12 pr-12 bg-secondary/50 border border-border rounded-xl text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
-          />
-          <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 px-2 py-1 rounded-md bg-primary/10 border border-primary/20">
-            <Sparkles className="w-3 h-3 text-primary" />
-            <span className="text-[10px] font-mono text-primary">AI</span>
+    <>
+      <header className="h-16 border-b border-border bg-card/30 backdrop-blur-xl flex items-center justify-between px-6 sticky top-0 z-40">
+        {/* Search Bar */}
+        <div className="flex-1 max-w-2xl">
+          <div className="relative">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+            <input
+              type="text"
+              placeholder="Search documents, people..."
+              className="w-full h-11 pl-12 pr-4 bg-secondary/50 border border-border rounded-xl text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
+            />
           </div>
         </div>
-      </div>
 
       {/* Actions */}
       <div className="flex items-center gap-2 ml-6">
+        {/* AI Assistant Button */}
+        <button
+          onClick={toggleAIChat}
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl border transition-all ${
+            showAIChat
+              ? "bg-primary text-primary-foreground border-primary"
+              : "bg-gradient-to-r from-primary/20 to-success/20 border-primary/30 hover:from-primary/30 hover:to-success/30"
+          }`}
+        >
+          <Sparkles className={`w-4 h-4 ${showAIChat ? "text-primary-foreground" : "text-primary"}`} />
+          <span className={`text-sm font-medium ${showAIChat ? "text-primary-foreground" : "text-primary"}`}>AI Assistant</span>
+        </button>
         {/* Live Status */}
         <div className="hidden md:flex items-center gap-2 px-4 py-2 glass-card mr-4">
           <div className="w-2 h-2 rounded-full bg-success animate-pulse" />
@@ -150,6 +171,13 @@ export function TopNav() {
           )}
         </div>
       </div>
-    </header>
+      </header>
+
+      {/* AI Chat Sidebar */}
+      <AIChatSidebar isOpen={showAIChat} onClose={() => {
+        setShowAIChat(false);
+        onAIChatToggle?.(false);
+      }} />
+    </>
   );
 }
