@@ -1,0 +1,79 @@
+================================================================================
+                    K-LENS - GETTING STARTED
+================================================================================
+
+FASTEST WAY TO RUN:
+
+Windows:
+  1. Install Docker Desktop: https://www.docker.com/products/docker-desktop/
+  2. Double-click: start-docker.bat
+  3. Edit .env file - Add Gemini API key
+  4. Open: http://localhost
+
+Linux/Mac:
+  1. Install Docker: sudo apt install docker.io docker-compose
+  2. Run: chmod +x start-docker.sh && ./start-docker.sh
+  3. Edit .env file - Add Gemini API key
+  4. Open: http://localhost
+
+================================================================================
+
+GET GEMINI API KEY:
+  1. Visit: https://makersuite.google.com/app/apikey
+  2. Click "Create API Key"
+  3. Copy and paste in .env file
+
+================================================================================
+
+IF DOCKER FAILS:
+
+Windows: Double-click start-local.bat
+Linux/Mac: ./start-local.sh
+
+(Requires: PostgreSQL, Redis, Mosquitto, Node.js 20+)
+
+================================================================================
+
+VERIFY IT'S WORKING:
+
+Windows: check-health.bat
+Linux/Mac: ./check-health.sh
+
+All services should show: ✓ OK
+
+================================================================================
+
+CREATE ADMIN ACCOUNT:
+
+curl -X POST http://localhost:3000/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"email":"admin@klens.local","password":"Admin@123","name":"System Admin","role":"admin","department":"IT"}'
+
+Login: admin@klens.local / Admin@123
+
+================================================================================
+
+DOCUMENTATION:
+
+- START-HERE.md          - Quick start guide
+- SETUP.md               - Detailed setup
+- DEPLOYMENT.md          - Production deployment
+- FEATURES.md            - Feature documentation
+- TROUBLESHOOTING.md     - Common issues
+- PROJECT-STRUCTURE.md   - Code organization
+
+================================================================================
+
+NEED HELP?
+
+1. Check TROUBLESHOOTING.md
+2. Run: docker-compose logs -f
+3. Run health check script
+
+================================================================================
+
+STOP SERVICES:
+
+docker-compose down
+
+================================================================================

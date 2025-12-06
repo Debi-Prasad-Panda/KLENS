@@ -2,14 +2,19 @@ import { useState } from "react";
 import { Sidebar } from "@/components/klens/Sidebar";
 import { TopNav } from "@/components/klens/TopNav";
 import { DashboardView } from "@/components/klens/DashboardView";
+import { MorningBriefing } from "@/components/klens/MorningBriefing";
 import { UploadView } from "@/components/klens/UploadView";
+import { DocumentProcessor } from "@/components/klens/DocumentProcessor";
+import { EnterpriseConnectors } from "@/components/klens/EnterpriseConnectors";
 import { IoTView } from "@/components/klens/IoTView";
 import { KnowledgeGraphView } from "@/components/klens/KnowledgeGraphView";
 import { ComplianceView } from "@/components/klens/ComplianceView";
 import { PlaceholderView } from "@/components/klens/PlaceholderView";
 import { DocumentViewer } from "@/components/klens/DocumentViewer";
+import { FeaturesShowcase } from "@/components/klens/FeaturesShowcase";
+import { ProfileView } from "@/components/klens/ProfileView";
 
-type TabType = "dashboard" | "upload" | "search" | "graph" | "iot" | "ar" | "compliance" | "document";
+type TabType = "dashboard" | "upload" | "search" | "graph" | "iot" | "ar" | "compliance" | "document" | "features" | "profile";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState<TabType>("dashboard");
@@ -17,11 +22,21 @@ const Index = () => {
   const renderView = () => {
     switch (activeTab) {
       case "dashboard":
-        return <DashboardView onOpenDocument={() => setActiveTab("document")} />;
+        return (
+          <>
+            <MorningBriefing />
+            <DashboardView onOpenDocument={() => setActiveTab("document")} />
+          </>
+        );
       case "document":
         return <DocumentViewer onBack={() => setActiveTab("dashboard")} />;
       case "upload":
-        return <UploadView />;
+        return (
+          <div className="space-y-6">
+            <DocumentProcessor />
+            <EnterpriseConnectors />
+          </div>
+        );
       case "iot":
         return <IoTView />;
       case "graph":
@@ -32,8 +47,17 @@ const Index = () => {
         return <PlaceholderView type="search" />;
       case "ar":
         return <PlaceholderView type="ar" />;
+      case "features":
+        return <FeaturesShowcase />;
+      case "profile":
+        return <ProfileView />;
       default:
-        return <DashboardView onOpenDocument={() => setActiveTab("document")} />;
+        return (
+          <>
+            <MorningBriefing />
+            <DashboardView onOpenDocument={() => setActiveTab("document")} />
+          </>
+        );
     }
   };
 

@@ -9,10 +9,15 @@ import {
   Shield,
   User,
   ChevronRight,
-  FileText
+  FileText,
+  Sparkles,
+  LogOut
 } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
+import React from "react";
 
-type TabType = "dashboard" | "upload" | "search" | "graph" | "iot" | "ar" | "compliance" | "document";
+type TabType = "dashboard" | "upload" | "search" | "graph" | "iot" | "ar" | "compliance" | "document" | "features";
 
 interface SidebarProps {
   activeTab: TabType;
@@ -23,14 +28,30 @@ const navItems: Array<{ id: string; label: string; icon: typeof LayoutDashboard;
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
   { id: "document", label: "Document Viewer", icon: FileText },
   { id: "upload", label: "Upload Documents", icon: Upload },
+  { id: "features", label: "Advanced Features", icon: Sparkles, badge: "New" },
   { id: "search", label: "Search & Discovery", icon: Search },
-  { id: "graph", label: "Knowledge Graph", icon: Share2, badge: "New" },
+  { id: "graph", label: "Knowledge Graph", icon: Share2 },
   { id: "iot", label: "IoT & UNS", icon: Radio, badge: "Live" },
   { id: "ar", label: "AR Preview", icon: Glasses, badge: "Beta" },
   { id: "compliance", label: "Compliance", icon: Shield },
 ];
 
 export function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
+
+  // Listen for profile navigation from TopNav
+  React.useEffect(() => {
+    const handleNavigateProfile = () => setActiveTab('profile');
+    window.addEventListener('navigate-profile', handleNavigateProfile);
+    return () => window.removeEventListener('navigate-profile', handleNavigateProfile);
+  }, [setActiveTab]);
+
   return (
     <aside className="fixed left-0 top-0 h-screen w-64 bg-card/30 backdrop-blur-xl border-r border-border flex flex-col z-50">
       {/* Logo */}
@@ -76,15 +97,27 @@ export function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
 
       {/* User Profile */}
       <div className="p-4 border-t border-border">
-        <div className="glass-card p-3 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-success flex items-center justify-center">
-            <User className="w-5 h-5 text-background" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold truncate">Eng. Rajesh</p>
-            <p className="text-xs text-muted-foreground truncate">Maintenance Lead</p>
-          </div>
-          <div className="w-2 h-2 rounded-full bg-success animate-pulse" />
+        <div className="glass-card p-3">
+          <button
+            onClick={() => setActiveTab('profile')}
+            className="flex items-center gap-3 mb-3 w-full hover:bg-secondary/50 p-2 rounded-lg transition-colors"
+          >
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-success flex items-center justify-center">
+              <User className="w-5 h-5 text-background" />
+            </div>
+            <div className="flex-1 min-w-0 text-left">
+              <p className="text-sm font-semibold truncate">{user?.name || 'User'}</p>
+              <p className="text-xs text-muted-foreground truncate">{user?.department || 'Department'}</p>
+            </div>
+            <div className="w-2 h-2 rounded-full bg-success animate-pulse" />
+          </button>
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-destructive/20 hover:bg-destructive/30 text-destructive rounded-lg text-sm font-medium transition-colors"
+          >
+            <LogOut className="w-4 h-4" />
+            Logout
+          </button>
         </div>
       </div>
     </aside>
