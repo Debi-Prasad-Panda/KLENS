@@ -113,7 +113,11 @@ export function TopNav() {
               </button>
               
               <button
-                onClick={() => setShowProfileMenu(false)}
+                onClick={() => {
+                  setShowProfileMenu(false);
+                  navigate('/dashboard');
+                  window.dispatchEvent(new CustomEvent('navigate-settings'));
+                }}
                 className="w-full flex items-center gap-3 px-3 py-2 hover:bg-secondary rounded-lg transition-colors text-left"
               >
                 <Settings className="w-4 h-4 text-muted-foreground" />

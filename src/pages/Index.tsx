@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Sidebar } from "@/components/klens/Sidebar";
 import { TopNav } from "@/components/klens/TopNav";
 import { DashboardView } from "@/components/klens/DashboardView";
@@ -14,12 +14,27 @@ import { DocumentViewer } from "@/components/klens/DocumentViewer";
 import { FeaturesShowcase } from "@/components/klens/FeaturesShowcase";
 import { ProfileView } from "@/components/klens/ProfileView";
 import { DocumentLibrary } from "@/components/klens/DocumentLibrary";
+import { SettingsView } from "@/components/klens/SettingsView";
 
-type TabType = "dashboard" | "search" | "graph" | "iot" | "ar" | "compliance" | "documents" | "document-view" | "features" | "profile";
+type TabType = "dashboard" | "search" | "graph" | "iot" | "ar" | "compliance" | "documents" | "document-view" | "features" | "profile" | "settings";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState<TabType>("dashboard");
   const [selectedDocument, setSelectedDocument] = useState<any>(null);
+
+  // Listen for navigation events from TopNav
+  useEffect(() => {
+    const handleNavigateProfile = () => setActiveTab("profile");
+    const handleNavigateSettings = () => setActiveTab("settings");
+    
+    window.addEventListener('navigate-profile', handleNavigateProfile);
+    window.addEventListener('navigate-settings', handleNavigateSettings);
+    
+    return () => {
+      window.removeEventListener('navigate-profile', handleNavigateProfile);
+      window.removeEventListener('navigate-settings', handleNavigateSettings);
+    };
+  });
 
   const renderView = () => {
     switch (activeTab) {
@@ -54,6 +69,8 @@ const Index = () => {
         return <FeaturesShowcase />;
       case "profile":
         return <ProfileView />;
+      case "settings":
+        return <SettingsView />;
       default:
         return (
           <>
