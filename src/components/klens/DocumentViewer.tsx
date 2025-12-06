@@ -25,6 +25,7 @@ import { toast } from "@/hooks/use-toast";
 
 interface DocumentViewerProps {
   onBack: () => void;
+  document?: any;
 }
 
 const technicalInsights = {
@@ -70,7 +71,9 @@ const managerialInsights = {
   ]
 };
 
-export function DocumentViewer({ onBack }: DocumentViewerProps) {
+export function DocumentViewer({ onBack, document }: DocumentViewerProps) {
+  const docTitle = document?.original_name || "Boiler_B7_Specifications.pdf";
+  const docPages = document?.metadata?.pages || 102;
   const [viewMode, setViewMode] = useState<"engineer" | "manager">("engineer");
   const [zoom, setZoom] = useState(100);
   const [selectedLanguage, setSelectedLanguage] = useState("English");
@@ -94,9 +97,9 @@ export function DocumentViewer({ onBack }: DocumentViewerProps) {
           <div>
             <h2 className="text-lg font-semibold flex items-center gap-2">
               <FileText className="w-5 h-5 text-primary" />
-              Boiler_B7_Specifications.pdf
+              {docTitle}
             </h2>
-            <p className="text-sm text-muted-foreground">102 pages • Last updated: Nov 2024</p>
+            <p className="text-sm text-muted-foreground">{docPages} pages • Last updated: Nov 2024</p>
           </div>
         </div>
 

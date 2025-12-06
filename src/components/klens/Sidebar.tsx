@@ -17,7 +17,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import React from "react";
 
-type TabType = "dashboard" | "upload" | "search" | "graph" | "iot" | "ar" | "compliance" | "document" | "features";
+type TabType = "dashboard" | "search" | "graph" | "iot" | "ar" | "compliance" | "documents" | "document-view" | "features" | "profile";
 
 interface SidebarProps {
   activeTab: TabType;
@@ -26,8 +26,7 @@ interface SidebarProps {
 
 const navItems: Array<{ id: string; label: string; icon: typeof LayoutDashboard; badge?: string }> = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { id: "document", label: "Document Viewer", icon: FileText },
-  { id: "upload", label: "Upload Documents", icon: Upload },
+  { id: "documents", label: "Documents", icon: FileText },
   { id: "features", label: "Advanced Features", icon: Sparkles, badge: "New" },
   { id: "search", label: "Search & Discovery", icon: Search },
   { id: "graph", label: "Knowledge Graph", icon: Share2 },

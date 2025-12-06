@@ -13,11 +13,13 @@ import { PlaceholderView } from "@/components/klens/PlaceholderView";
 import { DocumentViewer } from "@/components/klens/DocumentViewer";
 import { FeaturesShowcase } from "@/components/klens/FeaturesShowcase";
 import { ProfileView } from "@/components/klens/ProfileView";
+import { DocumentLibrary } from "@/components/klens/DocumentLibrary";
 
-type TabType = "dashboard" | "upload" | "search" | "graph" | "iot" | "ar" | "compliance" | "document" | "features" | "profile";
+type TabType = "dashboard" | "search" | "graph" | "iot" | "ar" | "compliance" | "documents" | "document-view" | "features" | "profile";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState<TabType>("dashboard");
+  const [selectedDocument, setSelectedDocument] = useState<any>(null);
 
   const renderView = () => {
     switch (activeTab) {
@@ -25,18 +27,19 @@ const Index = () => {
         return (
           <>
             <MorningBriefing />
-            <DashboardView onOpenDocument={() => setActiveTab("document")} />
+            <DashboardView onOpenDocument={() => {
+              setActiveTab("documents");
+            }} />
           </>
         );
-      case "document":
-        return <DocumentViewer onBack={() => setActiveTab("dashboard")} />;
-      case "upload":
-        return (
-          <div className="space-y-6">
-            <DocumentProcessor />
-            <EnterpriseConnectors />
-          </div>
-        );
+      case "documents":
+        return <DocumentLibrary onOpenDocument={(doc) => {
+          setSelectedDocument(doc);
+          setActiveTab("document-view");
+        }} />;
+      case "document-view":
+        return <DocumentViewer onBack={() => setActiveTab("documents")} document={selectedDocument} />;
+
       case "iot":
         return <IoTView />;
       case "graph":
