@@ -125,6 +125,13 @@ class ApiClient {
       body: JSON.stringify({ message, conversationHistory }),
     });
   }
+
+  async extractGraph(text: string, documentName: string) {
+    return this.request('/graph/extract', {
+      method: 'POST',
+      body: JSON.stringify({ text, documentName }),
+    });
+  }
 }
 
 export const api = new ApiClient();

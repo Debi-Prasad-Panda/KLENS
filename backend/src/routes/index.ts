@@ -5,6 +5,7 @@ import { uploadDocument, getDocument, getDocuments, updateDocument, revertDocume
 import { createApproval, approveAction, getApprovals } from '../controllers/approval.controller.js';
 import { chatController } from '../controllers/chat.controller.js';
 import { authenticate, authorize } from '../middleware/auth.js';
+import graphRouter from './graph.js';
 
 const router = express.Router();
 
@@ -33,5 +34,8 @@ router.get('/approvals', authenticate, authorize('admin'), getApprovals);
 
 // Chat routes
 router.post('/chat', authenticate, chatController.sendMessage);
+
+// Graph routes
+router.use('/graph', authenticate, graphRouter);
 
 export default router;

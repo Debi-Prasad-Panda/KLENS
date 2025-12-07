@@ -46,12 +46,14 @@ A modern, real-time industrial intelligence platform for document management, Io
 - **AR Preview (Beta)**: Overlay repair instructions on physical machines
 - **1,240 data points/sec** with sub-20ms network latency
 
-### 🕸️ Knowledge Nexus (Graph)
-- **3D Interactive Graph**: Documents (Cyan), Risks (Red), People (Green) visualization
-- **Time Slider Forensics**: Scroll back to see historical document states
-- **Semantic Search**: FAISS Vector Database for natural language queries
-- **Risk Propagation**: Visualize failure impact across machines and personnel
-- **Dynamic Relationships**: Real-time connection updates
+### 🕸️ Knowledge Nexus (3D Graph)
+- **Auto-Rotating 3D Visualization**: WebGL-powered graph with neon glow effects
+- **Live AI Extraction**: Gemini-powered entity and relationship extraction
+- **Interactive Physics**: D3-force simulation with 60 FPS rendering
+- **Risk Propagation Tracing**: Visualize failure impact across machines and personnel
+- **Particle Flow Animation**: Real-time data flow visualization along connections
+- **Demo + Live Modes**: Hardcoded perfect scenario + real-time extraction
+- **Color-Coded Entities**: Documents (Cyan), Risks (Red), People (Green), Machines (Orange)
 
 ### 🛡️ Governance & Audit
 - **Git-Style Version Control**: Immutable commit history with instant revert
@@ -340,12 +342,13 @@ This project is private and proprietary.
 ## 🏆 Hackathon Highlights
 
 ### Innovation Points
-1. **Cinderella Access**: Novel time-bound privilege escalation
-2. **Nuclear Keys**: Multi-signature approval for critical actions
-3. **Morning Briefing Agent**: AI-powered task prioritization
-4. **Role-Based Jargon Killer**: Same document, different perspectives
-5. **Git-Style Audit**: Version control for industrial documents
-6. **The Trap**: Enterprise connector UI proving architecture readiness
+1. **3D Knowledge Graph**: Auto-rotating WebGL visualization with AI extraction
+2. **Cinderella Access**: Novel time-bound privilege escalation
+3. **Nuclear Keys**: Multi-signature approval for critical actions
+4. **Morning Briefing Agent**: AI-powered task prioritization
+5. **Role-Based Jargon Killer**: Same document, different perspectives
+6. **Git-Style Audit**: Version control for industrial documents
+7. **The Trap**: Enterprise connector UI proving architecture readiness
 
 ### Technical Excellence
 - Clean TypeScript architecture
@@ -367,6 +370,8 @@ This project is private and proprietary.
 - **[📚 Features Documentation](./FEATURES.md)** - Complete feature list
 - **[📁 Project Structure](./PROJECT-STRUCTURE.md)** - Code organization
 - **[🐛 Troubleshooting](./TROUBLESHOOTING.md)** - Common issues and fixes
+- **[🕸️ 3D Graph Demo Guide](./GRAPH-DEMO-GUIDE.md)** - Hackathon presentation guide
+- **[⚡ Graph Quick Reference](./GRAPH-QUICK-REF.md)** - 30-second demo script
 
 ## 📊 System Requirements
 
