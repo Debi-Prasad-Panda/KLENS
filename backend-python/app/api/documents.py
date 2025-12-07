@@ -15,6 +15,7 @@ from ..models.audit_log import AuditLog
 from ..models.user import User
 from ..api.auth import get_current_user
 from ..services.gemini_service import gemini_service
+from ..services.neo4j_service import neo4j_service
 from pypdf import PdfReader
 
 router = APIRouter(prefix="/documents", tags=["documents"])
@@ -83,9 +84,14 @@ def process_document(doc_id: int, file_path: str, user_id: int):
         embedding = gemini_service.generate_embedding(text)
         doc.embedding = embedding
         
-        # Extract graph entities
+        # Extract graph entities and save to Neo4j
         graph_data = gemini_service.extract_graph_entities(text, doc.original_name)
-        # TODO: Save to Neo4j
+        neo4j_service.save_graph_entities(
+            doc_id=doc_id,
+            doc_name=doc.original_name,
+            nodes=graph_data.get("nodes", []),
+            links=graph_data.get("links", [])
+        )
         
         doc.status = DocumentStatus.complete
         db.commit()
@@ -115,7 +121,7 @@ def process_document(doc_id: int, file_path: str, user_id: int):
 
 
 @router.post("/", response_model=DocumentResponse)
-async def upload_document(
+def upload_document(
     background_tasks: BackgroundTasks,
     file: UploadFile = File(...),
     current_user: User = Depends(get_current_user),
@@ -282,3 +288,122 @@ def get_document_versions(
         }
         for v in versions
     ]
+
+
+@router.get("/stats/dashboard", response_model=dict)
+def get_dashboard_stats(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Get dashboard statistics."""
+    from ..models.approval import Approval, ApprovalStatus
+    
+    # Document counts
+    total_docs = db.query(func.count(Document.id)).scalar() or 0
+    complete_docs = db.query(func.count(Document.id)).filter(
+        Document.status == DocumentStatus.complete
+    ).scalar() or 0
+    processing_docs = db.query(func.count(Document.id)).filter(
+        Document.status.in_([DocumentStatus.processing, DocumentStatus.ocr, DocumentStatus.analyzing])
+    ).scalar() or 0
+    failed_docs = db.query(func.count(Document.id)).filter(
+        Document.status == DocumentStatus.failed
+    ).scalar() or 0
+    
+    # Pending approvals
+    pending_approvals = db.query(func.count(Approval.id)).filter(
+        Approval.status == ApprovalStatus.pending
+    ).scalar() or 0
+    
+    # Compliance score (simulated based on failed ratio)
+    compliance_score = round(((total_docs - failed_docs) / max(total_docs, 1)) * 100, 1)
+    
+    # Recent documents for activity
+    recent_docs = db.query(Document).order_by(
+        Document.created_at.desc()
+    ).limit(5).all()
+    
+    # Documents by department (user's department)
+    dept_stats = db.query(
+        User.department,
+        func.count(Document.id)
+    ).join(Document, Document.uploaded_by == User.id).group_by(
+        User.department
+    ).all()
+    
+    department_data = [
+        {"name": dept or "Unknown", "value": count}
+        for dept, count in dept_stats
+    ]
+    
+    return {
+        "stats": {
+            "totalDocuments": total_docs,
+            "complianceScore": compliance_score,
+            "pendingApprovals": pending_approvals,
+            "systemAlerts": failed_docs
+        },
+        "departmentData": department_data,
+        "recentActivity": [
+            {
+                "id": doc.id,
+                "title": doc.original_name,
+                "status": doc.status.value if doc.status else "unknown",
+                "time": doc.created_at.isoformat() if doc.created_at else None
+            }
+            for doc in recent_docs
+        ]
+    }
+
+
+@router.get("/{doc_id}/insights", response_model=dict)
+def get_document_insights(
+    doc_id: int,
+    role: str = "engineer",
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Get AI-generated role-based insights for a document.
+    
+    Args:
+        doc_id: Document ID
+        role: Either 'engineer' or 'manager'
+    
+    Returns:
+        Role-specific AI analysis of the document
+    """
+    doc = db.query(Document).filter(Document.id == doc_id).first()
+    if not doc:
+        raise HTTPException(status_code=404, detail="Document not found")
+    
+    # Use OCR text for analysis, fallback to summary
+    text = doc.ocr_text or doc.ai_summary or ""
+    
+    if not text:
+        # Return placeholder if no text available
+        if role == "engineer":
+            return {
+                "summary": ["Document content not yet processed", "Please wait for OCR to complete"],
+                "specs": [{"label": "Status", "value": "Processing"}],
+                "compliance": {"status": "PENDING", "standards": [], "nextAudit": "N/A"},
+                "risks": []
+            }
+        else:
+            return {
+                "summary": "Document is still being processed. Insights will be available once OCR and analysis are complete.",
+                "financials": [],
+                "risks": [],
+                "recommendations": ["Wait for document processing to complete"]
+            }
+    
+    # Generate role-based insights using Gemini
+    insights = gemini_service.generate_role_insights(
+        text=text,
+        role=role,
+        doc_name=doc.original_name
+    )
+    
+    # Log audit
+    log_audit(db, current_user.id, "view_insights", "document", doc_id, {"role": role})
+    
+    return insights
