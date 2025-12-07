@@ -32,6 +32,6 @@ router.post('/approvals/:id/approve', authenticate, authorize('admin'), approveA
 router.get('/approvals', authenticate, authorize('admin'), getApprovals);
 
 // Chat routes
-router.post('/chat', authenticate, chatController.sendMessage);
+router.post('/chat', chatController.sendMessage);
 
 export default router;
