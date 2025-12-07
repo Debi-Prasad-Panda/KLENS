@@ -137,6 +137,76 @@
   .dropzone-active {
     @apply border-primary bg-primary/5 glow-cyan;
   }
+
+  /* Chat Markdown Prose Styles */
+  .chat-prose {
+    @apply text-sm leading-relaxed;
+  }
+
+  .chat-prose h2 {
+    @apply text-base font-semibold mt-4 mb-2 text-foreground border-b border-border/50 pb-1;
+  }
+
+  .chat-prose h3 {
+    @apply text-sm font-semibold mt-3 mb-1.5 text-foreground;
+  }
+
+  .chat-prose p {
+    @apply my-2;
+  }
+
+  .chat-prose ul,
+  .chat-prose ol {
+    @apply my-2 ml-4 space-y-1;
+  }
+
+  .chat-prose li {
+    @apply list-disc text-sm;
+  }
+
+  .chat-prose ol li {
+    @apply list-decimal;
+  }
+
+  .chat-prose strong {
+    @apply font-semibold text-primary;
+  }
+
+  .chat-prose blockquote {
+    @apply border-l-2 border-warning pl-3 my-2 text-muted-foreground italic bg-warning/5 py-1 rounded-r;
+  }
+
+  .chat-prose hr {
+    @apply my-3 border-border/50;
+  }
+
+  .chat-prose code {
+    @apply bg-secondary px-1.5 py-0.5 rounded text-xs font-mono;
+  }
+
+  .chat-prose pre {
+    @apply bg-secondary p-3 rounded-lg my-2 overflow-x-auto;
+  }
+
+  .chat-prose pre code {
+    @apply bg-transparent p-0;
+  }
+
+  .chat-prose table {
+    @apply w-full my-3 border-collapse text-sm;
+  }
+
+  .chat-prose th {
+    @apply bg-secondary/80 px-3 py-2 text-left font-semibold border border-border;
+  }
+
+  .chat-prose td {
+    @apply px-3 py-2 border border-border;
+  }
+
+  .chat-prose tr:nth-child(even) {
+    @apply bg-secondary/30;
+  }
 }
 
 @layer utilities {
@@ -145,9 +215,12 @@
   }
 
   @keyframes pulse-glow {
-    0%, 100% {
+
+    0%,
+    100% {
       box-shadow: 0 0 20px rgba(244, 63, 94, 0.3);
     }
+
     50% {
       box-shadow: 0 0 40px rgba(244, 63, 94, 0.6);
     }
@@ -158,9 +231,12 @@
   }
 
   @keyframes float {
-    0%, 100% {
+
+    0%,
+    100% {
       transform: translateY(0px);
     }
+
     50% {
       transform: translateY(-10px);
     }
@@ -171,9 +247,12 @@
   }
 
   @keyframes glow-pulse {
-    0%, 100% {
+
+    0%,
+    100% {
       opacity: 0.5;
     }
+
     50% {
       opacity: 1;
     }

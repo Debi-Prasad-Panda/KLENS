@@ -6,7 +6,7 @@ genai.configure(api_key=settings.GEMINI_API_KEY)
 
 class GeminiService:
     def __init__(self):
-        self.model = genai.GenerativeModel('gemini-1.5-flash')
+        self.model = genai.GenerativeModel('gemini-flash-latest')
     
     def analyze_document(self, text: str) -> Dict:
         """Analyze document and extract key information"""
@@ -25,6 +25,8 @@ Return as JSON with keys: summary, risks, compliance, actions"""
             response = self.model.generate_content(prompt)
             return {"summary": response.text, "status": "success"}
         except Exception as e:
+            print(f"❌ Gemini Error: {e}")
+            # print(f"Available models: {[m.name for m in genai.list_models()]}")
             return {"summary": "Analysis failed", "status": "error", "error": str(e)}
     
     def extract_graph_entities(self, text: str, doc_name: str) -> Dict:
