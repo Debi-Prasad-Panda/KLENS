@@ -11,7 +11,7 @@ services:
     ports:
       - "5432:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U klens_user"]
+      test: [ "CMD-SHELL", "pg_isready -U klens_user -d klens" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -25,7 +25,7 @@ services:
     volumes:
       - redis_data:/data
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: [ "CMD", "redis-cli", "ping" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -45,20 +45,19 @@ services:
     restart: unless-stopped
 
   backend:
-    build: 
+    build:
       context: ./backend-python
       dockerfile: Dockerfile
     container_name: klens-backend
     ports:
       - "8000:8000"
-    env_file:
-      - ./backend-python/.env
     environment:
       DATABASE_URL: postgresql://klens_user:klens_secure_password_2024@postgres:5432/klens
       REDIS_URL: redis://redis:6379
       NEO4J_URI: bolt://neo4j:7687
       NEO4J_USER: neo4j
       NEO4J_PASSWORD: klens_neo4j_2024
+      GEMINI_API_KEY: AIzaSyCfDLK5EvsJaIkBf-CcTRA05QnZVa-K54o
     depends_on:
       postgres:
         condition: service_healthy
@@ -86,6 +85,7 @@ volumes:
   redis_data:
   neo4j_data:
   uploads:
+
 
 networks:
   default:

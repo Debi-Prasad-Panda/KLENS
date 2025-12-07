@@ -26,7 +26,7 @@ class Settings(BaseSettings):
     MAX_FILE_SIZE: int = 52428800  # 50MB
     
     # CORS
-    CORS_ORIGINS: list = ["http://localhost", "http://localhost:80", "http://localhost:5173"]
+    CORS_ORIGINS: list = ["http://localhost", "http://localhost:80", "http://localhost:5173", "http://localhost:3000"]
     
     class Config:
         env_file = ".env"

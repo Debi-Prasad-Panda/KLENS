@@ -17,9 +17,10 @@ def get_db():
 
 def init_db():
     """Initialize database with pgvector extension"""
-    Base.metadata.create_all(bind=engine)
-    
-    # Enable pgvector extension
+    # Enable pgvector extension FIRST (before creating tables)
     with engine.connect() as conn:
         conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
         conn.commit()
+    
+    # Now create tables (which use the vector type)
+    Base.metadata.create_all(bind=engine)

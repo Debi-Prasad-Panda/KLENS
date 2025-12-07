@@ -21,5 +21,5 @@ services:
       - ./vite.config.ts:/app/vite.config.ts
       - ./tailwind.config.ts:/app/tailwind.config.ts
     ports:
-      - "80:5173"
+      - "3000:8080"
     command: npm run dev -- --host 0.0.0.0
