@@ -1,4 +1,4 @@
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
 
 class ApiClient {
   private token: string | null = null;
@@ -38,12 +38,25 @@ class ApiClient {
   }
 
   async login(email: string, password: string) {
-    const data = await this.request('/auth/login', {
+    const formData = new URLSearchParams();
+    formData.append('username', email);
+    formData.append('password', password);
+
+    const response = await fetch(`${API_URL}/auth/login`, {
       method: 'POST',
-      body: JSON.stringify({ email, password }),
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: formData,
     });
-    this.setToken(data.token);
-    return data;
+
+    if (!response.ok) {
+      throw new Error('Invalid credentials');
+    }
+
+    const data = await response.json();
+    this.setToken(data.access_token);
+    return { user: data.user, token: data.access_token };
   }
 
   async register(userData: any) {
