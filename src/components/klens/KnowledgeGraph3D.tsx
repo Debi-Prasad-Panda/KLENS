@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import ReactFlow, { 
   Background, 
   Controls, 
@@ -6,23 +6,45 @@ import ReactFlow, {
   useNodesState, 
   useEdgesState, 
   MarkerType,
+  Handle, 
+  Position,
   Node,
   Edge,
-  ConnectionLineType
+  useReactFlow
 } from 'reactflow';
+import { RotateCw } from 'lucide-react';
 import 'reactflow/dist/style.css';
-import 'reactflow/dist/base.css';
 import dagre from 'dagre';
 import demoData from '../../data/demo-graph.json';
 
-// Auto-layout with Dagre
+const NODE_DETAILS: Record<string, any> = {
+  'Boiler_B7': {
+    status: 'CRITICAL FAILURE',
+    details: 'Pressure sensor reading 450 PSI (Limit: 300). Variance detected in log #492.',
+    action: 'Dispatch Maintenance Team',
+    assignee: 'Eng. Rajesh'
+  },
+  'Safety_Officer': {
+    status: 'ON DUTY',
+    details: 'Shift Lead, Sector 4. Currently active on radio channel 2.',
+    action: 'Send WhatsApp Alert',
+    assignee: 'HR Dept'
+  },
+  'Boiler_B7_Specs': {
+    status: 'PROCESSED',
+    details: 'Uploaded 10 mins ago. Contains 3 critical warnings regarding valves.',
+    action: 'Open Original PDF',
+    assignee: 'System'
+  }
+};
+
+const nodeWidth = 220;
+const nodeHeight = 80;
+
 const getLayoutedElements = (nodes: Node[], edges: Edge[]) => {
   const dagreGraph = new dagre.graphlib.Graph();
   dagreGraph.setDefaultEdgeLabel(() => ({}));
   dagreGraph.setGraph({ rankdir: 'LR' });
-
-  const nodeWidth = 200;
-  const nodeHeight = 60;
 
   nodes.forEach((node) => {
     dagreGraph.setNode(node.id, { width: nodeWidth, height: nodeHeight });
@@ -48,12 +70,11 @@ const getLayoutedElements = (nodes: Node[], edges: Edge[]) => {
   return { nodes: layoutedNodes, edges };
 };
 
-// Custom Node Component
-const CustomNode = ({ data }: any) => {
+const CustomNode = ({ data, selected }: any) => {
   let borderColor = '#333';
-  let bgColor = '#111';
+  let bgColor = '#0a0a0a';
   let icon = '📄';
-  let glow = 'none';
+  let shadow = 'none';
 
   switch (data.type) {
     case 'Document':
@@ -61,17 +82,17 @@ const CustomNode = ({ data }: any) => {
       icon = '📂';
       break;
     case 'Risk':
-      borderColor = '#ff0033';
-      bgColor = '#330011';
+      borderColor = '#ff0055';
+      bgColor = '#1a0505';
       icon = '⚠️';
-      glow = '0 0 15px #ff0033';
+      shadow = '0 0 10px #ff0055';
       break;
     case 'Person':
-      borderColor = '#00ff66';
+      borderColor = '#00ff9d';
       icon = '👤';
       break;
     case 'Machine':
-      borderColor = '#ffaa00';
+      borderColor = '#f0e300';
       icon = '⚙️';
       break;
     case 'Dept':
@@ -84,114 +105,171 @@ const CustomNode = ({ data }: any) => {
 
   return (
     <div 
+      className={`px-4 py-3 rounded-lg flex items-center gap-3 min-w-[180px] transition-all duration-300 ${selected ? 'scale-105 ring-2 ring-white' : ''}`}
       style={{
-        padding: '10px 15px',
-        border: `2px solid ${borderColor}`,
-        borderRadius: '8px',
+        border: `1px solid ${borderColor}`,
         background: bgColor,
-        color: '#fff',
-        minWidth: '180px',
-        textAlign: 'center',
-        fontFamily: 'monospace',
-        boxShadow: glow,
-        display: 'flex',
-        alignItems: 'center',
-        gap: '10px',
-        fontSize: '12px',
-        transition: 'all 0.3s ease'
+        boxShadow: selected ? `0 0 20px ${borderColor}` : shadow,
       }}
-      className="hover:scale-105 cursor-pointer"
     >
-      <span style={{ fontSize: '18px' }}>{icon}</span>
-      <div style={{ display:'flex', flexDirection:'column', alignItems:'flex-start'}}>
-        <span style={{color: borderColor, fontSize:'9px', fontWeight:'bold'}}>{data.type.toUpperCase()}</span>
-        <span style={{fontWeight:'bold'}}>{data.label}</span>
+      <Handle type="target" position={Position.Left} style={{ background: borderColor }} />
+      
+      <span className="text-2xl">{icon}</span>
+      <div className="flex flex-col text-left">
+        <span style={{ color: borderColor }} className="text-[9px] font-bold tracking-wider uppercase">{data.type}</span>
+        <span className="text-xs font-bold text-gray-100">{data.label}</span>
       </div>
+
+      <Handle type="source" position={Position.Right} style={{ background: borderColor }} />
     </div>
   );
 };
 
 const nodeTypes = { customNode: CustomNode };
 
-// Transform data
-const initialNodes: Node[] = demoData.nodes.map(n => ({
-  id: n.id,
-  data: { label: n.id.replace(/_/g, ' '), type: n.group },
-  position: { x: 0, y: 0 },
-  type: 'customNode',
-}));
-
-const initialEdges: Edge[] = demoData.links.map((l, i) => ({
-  id: `e-${l.source}-${l.target}-${i}`,
-  source: l.source,
-  target: l.target,
-  type: 'default',
-  animated: true,
-  style: { 
-    stroke: '#00f3ff', 
-    strokeWidth: 2
-  },
-  markerEnd: { 
-    type: MarkerType.ArrowClosed, 
-    color: '#00f3ff'
-  },
-}));
-
-console.log('Nodes:', initialNodes.map(n => n.id));
-console.log('Edges:', initialEdges);
-
-const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(
-  initialNodes,
-  initialEdges
-);
-
 const KnowledgeGraph3D = () => {
-  const [nodes, setNodes, onNodesChange] = useNodesState(layoutedNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(layoutedEdges);
+  const [nodes, setNodes, onNodesChange] = useNodesState([]);
+  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+  const [selectedNode, setSelectedNode] = useState<any>(null);
+  const [riskFilter, setRiskFilter] = useState(false);
+  const [reactFlowInstance, setReactFlowInstance] = useState<any>(null);
+
+  useEffect(() => {
+    const rawNodes: Node[] = demoData.nodes.map(n => ({
+      id: n.id,
+      data: { label: n.id.replace(/_/g, ' '), type: n.group },
+      position: { x: 0, y: 0 },
+      type: 'customNode',
+    }));
+
+    const rawEdges: Edge[] = demoData.links.map((l, i) => ({
+      id: `e${i}`,
+      source: l.source,
+      target: l.target,
+      animated: true,
+      type: 'smoothstep',
+      style: { stroke: '#555', strokeWidth: 2 },
+      markerEnd: { type: MarkerType.ArrowClosed, color: '#555' },
+    }));
+
+    const { nodes: layoutNodes, edges: layoutEdges } = getLayoutedElements(rawNodes, rawEdges);
+    setNodes(layoutNodes);
+    setEdges(layoutEdges);
+  }, []);
+
+  useEffect(() => {
+    setNodes((nds) => 
+      nds.map((node) => {
+        if (riskFilter && node.data.type !== 'Risk' && node.data.type !== 'Document') {
+          return { ...node, hidden: true };
+        }
+        return { ...node, hidden: false };
+      })
+    );
+  }, [riskFilter, setNodes]);
+
+  const onNodeClick = (_: any, node: any) => {
+    setSelectedNode(node);
+  };
+
+  const handleReset = () => {
+    if (reactFlowInstance) {
+      reactFlowInstance.fitView({ padding: 0.2, duration: 800 });
+    }
+    setSelectedNode(null);
+    setRiskFilter(false);
+  };
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold flex items-center gap-2">
-            📊 Knowledge Graph Blueprint
-          </h2>
-          <p className="text-muted-foreground mt-1">
-            Interactive 2D visualization of entity relationships
-          </p>
-        </div>
-      </div>
+      <div className="relative h-[600px] w-full bg-black border border-gray-800 rounded-xl overflow-hidden shadow-2xl flex">
+        
+        <div className="flex-1 h-full relative">
+          <div className="absolute top-4 left-4 z-10 flex gap-4">
+            <div className="p-2 bg-black/60 border border-cyan-500/30 rounded backdrop-blur-md">
+              <h3 className="text-cyan-400 font-mono text-sm font-bold">K-LENS BLUEPRINT</h3>
+            </div>
+            <button 
+              onClick={() => setRiskFilter(!riskFilter)}
+              className={`px-3 py-1 rounded text-xs font-bold border transition-colors ${riskFilter ? 'bg-red-900/50 border-red-500 text-red-400' : 'bg-black/60 border-gray-700 text-gray-400 hover:text-white'}`}
+            >
+              {riskFilter ? '🔴 SHOW ALL' : '⭕ FILTER: RISKS ONLY'}
+            </button>
+            <button 
+              onClick={handleReset}
+              className="px-3 py-1 rounded text-xs font-bold border bg-black/60 border-gray-700 text-gray-400 hover:text-white transition-colors flex items-center gap-2"
+            >
+              <RotateCw className="w-3 h-3" />
+              RESET VIEW
+            </button>
+          </div>
 
-      <div className="h-[600px] w-full bg-black border border-gray-800 rounded-xl overflow-hidden shadow-2xl relative">
-        <div className="absolute top-4 left-4 z-10 p-2 bg-black/60 border border-cyan-500/30 rounded backdrop-blur-md">
-          <h3 className="text-cyan-400 font-mono text-sm font-bold">K-LENS BLUEPRINT VIEW</h3>
-          <p className="text-xs text-gray-400 font-mono mt-1">MODE: LEFT-TO-RIGHT FLOW</p>
+          <ReactFlow
+            nodes={nodes}
+            edges={edges}
+            onNodesChange={onNodesChange}
+            onEdgesChange={onEdgesChange}
+            onNodeClick={onNodeClick}
+            onInit={setReactFlowInstance}
+            nodeTypes={nodeTypes}
+            fitView
+            fitViewOptions={{ padding: 0.2, duration: 800 }}
+            minZoom={0.1}
+            maxZoom={2}
+            defaultViewport={{ x: 0, y: 0, zoom: 0.5 }}
+            attributionPosition="bottom-right"
+          >
+            <Background color="#222" gap={25} />
+            <Controls style={{ fill: '#00f3ff', borderRadius: '4px', borderColor: '#333' }} />
+          </ReactFlow>
         </div>
 
-        <ReactFlow
-          nodes={nodes}
-          edges={edges}
-          onNodesChange={onNodesChange}
-          onEdgesChange={onEdgesChange}
-          nodeTypes={nodeTypes}
-          fitView
-          attributionPosition="bottom-right"
-          connectionLineType={ConnectionLineType.SmoothStep}
-          minZoom={0.2}
-          maxZoom={4}
-          defaultViewport={{ x: 0, y: 0, zoom: 0.8 }}
-        >
-          <Background color="#333" gap={20} />
-          <Controls style={{ fill: '#00f3ff' }} />
-          <MiniMap 
-            nodeColor={(n: any) => {
-              if (n.data.type === 'Risk') return '#ff0033';
-              if (n.data.type === 'Person') return '#00ff66';
-              return '#00f3ff';
-            }} 
-            style={{background: '#000'}} 
-          />
-        </ReactFlow>
+        <div className={`w-80 border-l border-gray-800 bg-[#0a0a0a] transition-all duration-300 transform ${selectedNode ? 'translate-x-0' : 'translate-x-full'} absolute right-0 top-0 bottom-0 z-20 shadow-2xl`}>
+          {selectedNode && (
+            <div className="p-6 h-full flex flex-col">
+              <div className="flex justify-between items-center mb-6">
+                <span className="text-[10px] font-mono border border-gray-600 px-2 rounded text-gray-400">
+                  ID: {selectedNode.id.substring(0, 8)}...
+                </span>
+                <button onClick={() => setSelectedNode(null)} className="text-gray-400 hover:text-white">✕</button>
+              </div>
+              
+              <h2 className="text-xl font-bold text-white mb-2 leading-tight">
+                {selectedNode.data.label}
+              </h2>
+              <div className={`h-1 w-full mb-6 rounded ${selectedNode.data.type === 'Risk' ? 'bg-red-500 shadow-[0_0_10px_red]' : 'bg-cyan-500'}`}></div>
+
+              <div className="space-y-6 flex-1">
+                <div className="bg-gray-900/50 p-4 rounded border border-gray-800">
+                  <p className="text-xs text-gray-500 uppercase font-bold mb-1">Status</p>
+                  <p className="text-sm font-mono text-white">
+                    {NODE_DETAILS[selectedNode.id]?.status || 'ACTIVE_NORMAL'}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-xs text-gray-500 uppercase font-bold mb-2">AI Analysis</p>
+                  <p className="text-sm text-gray-300 leading-relaxed border-l-2 border-gray-700 pl-3">
+                    {NODE_DETAILS[selectedNode.id]?.details || 'Entity detected in document scan. Cross-referenced with compliance database. No anomalies found.'}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-xs text-gray-500 uppercase font-bold mb-2">Assignee</p>
+                  <div className="flex items-center gap-2">
+                    <div className="w-6 h-6 rounded-full bg-gray-700 flex items-center justify-center text-xs">👤</div>
+                    <span className="text-sm text-white">{NODE_DETAILS[selectedNode.id]?.assignee || 'Admin'}</span>
+                  </div>
+                </div>
+              </div>
+
+              <button className={`w-full py-3 rounded font-bold text-black mt-auto transition-transform active:scale-95 ${selectedNode.data.type === 'Risk' ? 'bg-red-500 hover:bg-red-400' : 'bg-cyan-500 hover:bg-cyan-400'}`}>
+                {NODE_DETAILS[selectedNode.id]?.action || 'VIEW DETAILS'}
+              </button>
+            </div>
+          )}
+        </div>
+
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
