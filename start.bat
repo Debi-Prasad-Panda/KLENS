@@ -6,17 +6,46 @@ echo.
 
 REM Check if .env exists
 if not exist "backend-python\.env" (
-    echo Creating .env file...
-    copy backend-python\.env.example backend-python\.env
-    echo.
-    echo IMPORTANT: Edit backend-python\.env and add your Gemini API key!
-    echo Press any key after adding your API key...
-    pause
+    if exist "backend-python\.env.example" (
+        echo Creating .env file...
+        copy backend-python\.env.example backend-python\.env
+        echo.
+        echo IMPORTANT: Edit backend-python\.env and add your Gemini API key!
+        notepad backend-python\.env
+        echo.
+        echo Press any key after saving your API key...
+        pause
+    ) else (
+        echo ERROR: backend-python\.env.example not found!
+        echo Please ensure you're in the KLENS directory.
+        pause
+        exit /b 1
+    )
 )
 
 echo Starting all services...
+echo.
+echo If build fails with 403 Forbidden:
+echo 1. Check your internet/proxy settings
+echo 2. Try: docker-compose -f docker-compose.python.yml pull
+echo 3. Or use pre-built images
+echo.
 docker-compose -f docker-compose.python.yml up -d --build
 
+echo.
+if errorlevel 1 (
+    echo.
+    echo ERROR: Docker build failed!
+    echo.
+    echo Common fixes:
+    echo 1. Check Docker Desktop is running
+    echo 2. Check internet connection
+    echo 3. If behind proxy, configure Docker proxy settings
+    echo 4. Try: docker system prune -a
+    echo.
+    pause
+    exit /b 1
+)
 echo.
 echo Waiting for services to start (30 seconds)...
 timeout /t 30 /nobreak
