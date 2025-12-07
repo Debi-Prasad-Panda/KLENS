@@ -145,6 +145,14 @@ class ApiClient {
       body: JSON.stringify({ text, documentName }),
     });
   }
+
+  async getDashboardStats() {
+    return this.request('/documents/stats/dashboard');
+  }
+
+  async getDocumentInsights(docId: number, role: 'engineer' | 'manager') {
+    return this.request(`/documents/${docId}/insights?role=${role}`);
+  }
 }
 
 export const api = new ApiClient();

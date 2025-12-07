@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   FileText,
   Wrench,
@@ -19,64 +19,41 @@ import {
   Languages,
   Sparkles,
   Copy,
-  ExternalLink
+  ExternalLink,
+  Loader2
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { useDocumentInsights } from "@/hooks/useDocumentInsights";
 
 interface DocumentViewerProps {
   onBack: () => void;
   document?: any;
 }
 
-const technicalInsights = {
-  summary: [
-    "Maximum operating pressure: 450 PSI at 120°C",
-    "Maintenance interval: Every 2,000 operational hours",
-    "Safety valve calibration required quarterly"
-  ],
-  specs: [
-    { label: "Model", value: "B7-Industrial", icon: FileText },
-    { label: "Max Temp", value: "120°C", icon: Thermometer },
-    { label: "Max Pressure", value: "450 PSI", icon: Gauge },
-    { label: "Service Life", value: "15 years", icon: Clock },
-  ],
-  compliance: {
-    status: "PASS",
-    standards: ["ISO 9001:2015", "ASME BPVC", "API 510"],
-    lastAudit: "Oct 2024",
-    nextAudit: "Apr 2025"
-  },
-  risks: [
-    { severity: "high", text: "Pressure relief valve must be tested monthly" },
-    { severity: "medium", text: "Insulation degradation check at 5-year mark" },
-  ]
-};
-
-const managerialInsights = {
-  summary: "This boiler unit represents a $2.4M capital asset with 8 years remaining useful life. Current maintenance compliance is at 94%, with an estimated annual operating cost of $180K.",
-  financials: [
-    { label: "Asset Value", value: "$2.4M", change: "-8% YoY", icon: DollarSign },
-    { label: "Annual OpEx", value: "$180K", change: "+3% YoY", icon: TrendingUp },
-    { label: "Downtime Cost", value: "$45K/day", change: null, icon: Clock },
-    { label: "Insurance Premium", value: "$28K/yr", change: "-5% YoY", icon: Briefcase },
-  ],
-  risks: [
-    { level: "MEDIUM", text: "Equipment approaching mid-life maintenance cycle - budget $120K for overhaul in Q2 2025" },
-    { level: "LOW", text: "Insurance renewal due in March - recommend competitive quotes" },
-  ],
-  recommendations: [
-    "Approve preventive maintenance budget allocation",
-    "Schedule downtime for Q2 overhaul (3-5 days)",
-    "Review vendor contracts for parts supply"
-  ]
+// Default icon mapping for specs
+const getSpecIcon = (label: string) => {
+  const lower = label.toLowerCase();
+  if (lower.includes('temp')) return Thermometer;
+  if (lower.includes('pressure')) return Gauge;
+  if (lower.includes('time') || lower.includes('life') || lower.includes('hour')) return Clock;
+  return FileText;
 };
 
 export function DocumentViewer({ onBack, document }: DocumentViewerProps) {
-  const docTitle = document?.original_name || "Boiler_B7_Specifications.pdf";
-  const docPages = document?.metadata?.pages || 102;
+  const docTitle = document?.original_name || "Document";
+  const docId = document?.id;
   const [viewMode, setViewMode] = useState<"engineer" | "manager">("engineer");
   const [zoom, setZoom] = useState(100);
   const [selectedLanguage, setSelectedLanguage] = useState("English");
+
+  const { engineerInsights, managerInsights, loading, error, fetchInsights } = useDocumentInsights(docId);
+
+  // Fetch insights when switching roles
+  useEffect(() => {
+    if (docId) {
+      fetchInsights(viewMode);
+    }
+  }, [viewMode, docId, fetchInsights]);
 
   const handleCopyInsight = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -99,7 +76,7 @@ export function DocumentViewer({ onBack, document }: DocumentViewerProps) {
               <FileText className="w-5 h-5 text-primary" />
               {docTitle}
             </h2>
-            <p className="text-sm text-muted-foreground">{docPages} pages • Last updated: Nov 2024</p>
+            <p className="text-sm text-muted-foreground">AI-Powered Analysis • Last updated: {document?.created_at ? new Date(document.created_at).toLocaleDateString() : 'N/A'}</p>
           </div>
         </div>
 
@@ -141,7 +118,7 @@ export function DocumentViewer({ onBack, document }: DocumentViewerProps) {
         <div className="glass-card flex flex-col overflow-hidden">
           {/* PDF Controls */}
           <div className="flex items-center justify-between p-4 border-b border-border">
-            <span className="text-sm text-muted-foreground">Page 1 of 102</span>
+            <span className="text-sm text-muted-foreground">Document Preview</span>
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setZoom(Math.max(50, zoom - 10))}
@@ -165,45 +142,26 @@ export function DocumentViewer({ onBack, document }: DocumentViewerProps) {
               className="bg-card/80 rounded-lg p-8 shadow-lg mx-auto transition-transform"
               style={{ transform: `scale(${zoom / 100})`, transformOrigin: "top center", maxWidth: "600px" }}
             >
-              {/* Simulated PDF Content */}
               <div className="space-y-6">
                 <div className="text-center border-b border-border pb-6">
-                  <h1 className="text-2xl font-bold text-primary mb-2">BOILER B7</h1>
-                  <h2 className="text-lg text-muted-foreground">Technical Specifications & Maintenance Manual</h2>
-                  <p className="text-sm text-muted-foreground mt-4">Document ID: BSM-2024-B7-001</p>
+                  <h1 className="text-2xl font-bold text-primary mb-2">{docTitle}</h1>
+                  <p className="text-sm text-muted-foreground mt-4">Document ID: {docId || 'N/A'}</p>
                 </div>
 
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">1. Overview</h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    The B7 Industrial Boiler is a high-efficiency steam generation unit designed for 
-                    continuous operation in industrial environments. This document outlines operational 
-                    parameters, maintenance schedules, and safety protocols.
-                  </p>
-
-                  <h3 className="text-lg font-semibold mt-6">2. Technical Specifications</h3>
-                  <div className="bg-secondary/30 rounded-lg p-4 font-mono text-sm">
-                    <div className="grid grid-cols-2 gap-2">
-                      <span className="text-muted-foreground">Model:</span>
-                      <span>B7-Industrial</span>
-                      <span className="text-muted-foreground">Capacity:</span>
-                      <span>15,000 kg/hr</span>
-                      <span className="text-muted-foreground">Max Pressure:</span>
-                      <span className="text-destructive">450 PSI</span>
-                      <span className="text-muted-foreground">Max Temperature:</span>
-                      <span className="text-destructive">120°C</span>
-                      <span className="text-muted-foreground">Fuel Type:</span>
-                      <span>Natural Gas / Diesel</span>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2 p-3 bg-destructive/10 border border-destructive/30 rounded-lg mt-4">
-                    <AlertTriangle className="w-5 h-5 text-destructive flex-shrink-0" />
-                    <p className="text-sm text-destructive">
-                      WARNING: Operating beyond specified parameters may result in equipment failure or safety hazards.
+                {document?.ocr_text ? (
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold">Extracted Content</h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
+                      {document.ocr_text.substring(0, 1500)}
+                      {document.ocr_text.length > 1500 && "..."}
                     </p>
                   </div>
-                </div>
+                ) : (
+                  <div className="space-y-4 text-center py-8">
+                    <Loader2 className="w-8 h-8 animate-spin text-primary mx-auto" />
+                    <p className="text-muted-foreground">Processing document...</p>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -250,7 +208,16 @@ export function DocumentViewer({ onBack, document }: DocumentViewerProps) {
 
           {/* Insights Content */}
           <div className="flex-1 overflow-auto p-4 space-y-4">
-            {viewMode === "engineer" ? (
+            {loading ? (
+              <div className="flex flex-col items-center justify-center h-64 gap-4">
+                <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                <p className="text-muted-foreground">Generating AI insights...</p>
+              </div>
+            ) : error ? (
+              <div className="p-4 bg-destructive/10 border border-destructive/30 rounded-lg">
+                <p className="text-sm text-destructive">{error}</p>
+              </div>
+            ) : viewMode === "engineer" && engineerInsights ? (
               <>
                 {/* Technical Summary */}
                 <div className="space-y-3">
@@ -259,7 +226,7 @@ export function DocumentViewer({ onBack, document }: DocumentViewerProps) {
                     Technical Summary
                   </h4>
                   <ul className="space-y-2">
-                    {technicalInsights.summary.map((item, i) => (
+                    {engineerInsights.summary.map((item, i) => (
                       <li
                         key={i}
                         className="flex items-start gap-3 p-3 bg-secondary/30 rounded-lg group cursor-pointer hover:bg-secondary/50 transition-colors"
@@ -274,23 +241,28 @@ export function DocumentViewer({ onBack, document }: DocumentViewerProps) {
                 </div>
 
                 {/* Specs Grid */}
-                <div className="space-y-3">
-                  <h4 className="text-sm font-semibold text-primary flex items-center gap-2">
-                    <Gauge className="w-4 h-4" />
-                    Key Specifications
-                  </h4>
-                  <div className="grid grid-cols-2 gap-3">
-                    {technicalInsights.specs.map((spec) => (
-                      <div key={spec.label} className="p-3 bg-secondary/30 rounded-lg">
-                        <div className="flex items-center gap-2 mb-1">
-                          <spec.icon className="w-4 h-4 text-muted-foreground" />
-                          <span className="text-xs text-muted-foreground">{spec.label}</span>
-                        </div>
-                        <p className="font-mono font-semibold">{spec.value}</p>
-                      </div>
-                    ))}
+                {engineerInsights.specs.length > 0 && (
+                  <div className="space-y-3">
+                    <h4 className="text-sm font-semibold text-primary flex items-center gap-2">
+                      <Gauge className="w-4 h-4" />
+                      Key Specifications
+                    </h4>
+                    <div className="grid grid-cols-2 gap-3">
+                      {engineerInsights.specs.map((spec) => {
+                        const Icon = getSpecIcon(spec.label);
+                        return (
+                          <div key={spec.label} className="p-3 bg-secondary/30 rounded-lg">
+                            <div className="flex items-center gap-2 mb-1">
+                              <Icon className="w-4 h-4 text-muted-foreground" />
+                              <span className="text-xs text-muted-foreground">{spec.label}</span>
+                            </div>
+                            <p className="font-mono font-semibold">{spec.value}</p>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
-                </div>
+                )}
 
                 {/* Compliance */}
                 <div className="space-y-3">
@@ -298,54 +270,70 @@ export function DocumentViewer({ onBack, document }: DocumentViewerProps) {
                     <CheckCircle2 className="w-4 h-4" />
                     Compliance Status
                   </h4>
-                  <div className="p-4 bg-success/10 border border-success/30 rounded-lg">
+                  <div className={`p-4 border rounded-lg ${
+                    engineerInsights.compliance.status === "PASS" 
+                      ? "bg-success/10 border-success/30" 
+                      : engineerInsights.compliance.status === "FAIL"
+                      ? "bg-destructive/10 border-destructive/30"
+                      : "bg-warning/10 border-warning/30"
+                  }`}>
                     <div className="flex items-center justify-between mb-3">
-                      <span className="text-success font-semibold flex items-center gap-2">
+                      <span className={`font-semibold flex items-center gap-2 ${
+                        engineerInsights.compliance.status === "PASS" ? "text-success" :
+                        engineerInsights.compliance.status === "FAIL" ? "text-destructive" : "text-warning"
+                      }`}>
                         <CheckCircle2 className="w-5 h-5" />
-                        {technicalInsights.compliance.status}
+                        {engineerInsights.compliance.status}
                       </span>
                       <span className="text-xs text-muted-foreground">
-                        Next audit: {technicalInsights.compliance.nextAudit}
+                        Next audit: {engineerInsights.compliance.nextAudit}
                       </span>
                     </div>
-                    <div className="flex flex-wrap gap-2">
-                      {technicalInsights.compliance.standards.map((std) => (
-                        <span key={std} className="px-2 py-1 bg-success/20 text-success text-xs rounded-full">
-                          {std}
-                        </span>
-                      ))}
-                    </div>
+                    {engineerInsights.compliance.standards.length > 0 && (
+                      <div className="flex flex-wrap gap-2">
+                        {engineerInsights.compliance.standards.map((std) => (
+                          <span key={std} className="px-2 py-1 bg-primary/20 text-primary text-xs rounded-full">
+                            {std}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
 
                 {/* Technical Risks */}
-                <div className="space-y-3">
-                  <h4 className="text-sm font-semibold text-destructive flex items-center gap-2">
-                    <AlertTriangle className="w-4 h-4" />
-                    Risk Factors
-                  </h4>
-                  {technicalInsights.risks.map((risk, i) => (
-                    <div
-                      key={i}
-                      className={`p-3 rounded-lg border ${
-                        risk.severity === "high"
-                          ? "bg-destructive/10 border-destructive/30"
-                          : "bg-warning/10 border-warning/30"
-                      }`}
-                    >
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className={`text-xs font-semibold uppercase ${
-                          risk.severity === "high" ? "text-destructive" : "text-warning"
-                        }`}>
-                          {risk.severity}
-                        </span>
+                {engineerInsights.risks.length > 0 && (
+                  <div className="space-y-3">
+                    <h4 className="text-sm font-semibold text-destructive flex items-center gap-2">
+                      <AlertTriangle className="w-4 h-4" />
+                      Risk Factors
+                    </h4>
+                    {engineerInsights.risks.map((risk, i) => (
+                      <div
+                        key={i}
+                        className={`p-3 rounded-lg border ${
+                          risk.severity === "high"
+                            ? "bg-destructive/10 border-destructive/30"
+                            : risk.severity === "medium"
+                            ? "bg-warning/10 border-warning/30"
+                            : "bg-success/10 border-success/30"
+                        }`}
+                      >
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className={`text-xs font-semibold uppercase ${
+                            risk.severity === "high" ? "text-destructive" :
+                            risk.severity === "medium" ? "text-warning" : "text-success"
+                          }`}>
+                            {risk.severity}
+                          </span>
+                        </div>
+                        <p className="text-sm">{risk.text}</p>
                       </div>
-                      <p className="text-sm">{risk.text}</p>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                )}
               </>
-            ) : (
+            ) : viewMode === "manager" && managerInsights ? (
               <>
                 {/* Executive Summary */}
                 <div className="space-y-3">
@@ -354,81 +342,90 @@ export function DocumentViewer({ onBack, document }: DocumentViewerProps) {
                     Executive Summary
                   </h4>
                   <p className="text-sm text-muted-foreground p-4 bg-secondary/30 rounded-lg leading-relaxed">
-                    {managerialInsights.summary}
+                    {managerInsights.summary}
                   </p>
                 </div>
 
                 {/* Financial Metrics */}
-                <div className="space-y-3">
-                  <h4 className="text-sm font-semibold text-primary flex items-center gap-2">
-                    <DollarSign className="w-4 h-4" />
-                    Financial Overview
-                  </h4>
-                  <div className="grid grid-cols-2 gap-3">
-                    {managerialInsights.financials.map((item) => (
-                      <div key={item.label} className="p-3 bg-secondary/30 rounded-lg">
-                        <div className="flex items-center gap-2 mb-1">
-                          <item.icon className="w-4 h-4 text-muted-foreground" />
-                          <span className="text-xs text-muted-foreground">{item.label}</span>
+                {managerInsights.financials.length > 0 && (
+                  <div className="space-y-3">
+                    <h4 className="text-sm font-semibold text-primary flex items-center gap-2">
+                      <DollarSign className="w-4 h-4" />
+                      Financial Overview
+                    </h4>
+                    <div className="grid grid-cols-2 gap-3">
+                      {managerInsights.financials.map((item) => (
+                        <div key={item.label} className="p-3 bg-secondary/30 rounded-lg">
+                          <div className="flex items-center gap-2 mb-1">
+                            <TrendingUp className="w-4 h-4 text-muted-foreground" />
+                            <span className="text-xs text-muted-foreground">{item.label}</span>
+                          </div>
+                          <p className="font-mono font-semibold text-lg">{item.value}</p>
+                          {item.change && (
+                            <span className={`text-xs ${
+                              item.change.startsWith("+") ? "text-destructive" : "text-success"
+                            }`}>
+                              {item.change}
+                            </span>
+                          )}
                         </div>
-                        <p className="font-mono font-semibold text-lg">{item.value}</p>
-                        {item.change && (
-                          <span className={`text-xs ${
-                            item.change.startsWith("+") ? "text-destructive" : "text-success"
-                          }`}>
-                            {item.change}
-                          </span>
-                        )}
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Business Risks */}
+                {managerInsights.risks.length > 0 && (
+                  <div className="space-y-3">
+                    <h4 className="text-sm font-semibold text-warning flex items-center gap-2">
+                      <AlertTriangle className="w-4 h-4" />
+                      Risk Assessment
+                    </h4>
+                    {managerInsights.risks.map((risk, i) => (
+                      <div
+                        key={i}
+                        className={`p-3 rounded-lg border ${
+                          risk.level === "HIGH"
+                            ? "bg-destructive/10 border-destructive/30"
+                            : risk.level === "MEDIUM"
+                            ? "bg-warning/10 border-warning/30"
+                            : "bg-success/10 border-success/30"
+                        }`}
+                      >
+                        <span className={`text-xs font-semibold ${
+                          risk.level === "HIGH" ? "text-destructive" :
+                          risk.level === "MEDIUM" ? "text-warning" : "text-success"
+                        }`}>
+                          {risk.level} RISK
+                        </span>
+                        <p className="text-sm mt-1">{risk.text}</p>
                       </div>
                     ))}
                   </div>
-                </div>
-
-                {/* Business Risks */}
-                <div className="space-y-3">
-                  <h4 className="text-sm font-semibold text-warning flex items-center gap-2">
-                    <AlertTriangle className="w-4 h-4" />
-                    Risk Assessment
-                  </h4>
-                  {managerialInsights.risks.map((risk, i) => (
-                    <div
-                      key={i}
-                      className={`p-3 rounded-lg border ${
-                        risk.level === "MEDIUM"
-                          ? "bg-warning/10 border-warning/30"
-                          : "bg-success/10 border-success/30"
-                      }`}
-                    >
-                      <span className={`text-xs font-semibold ${
-                        risk.level === "MEDIUM" ? "text-warning" : "text-success"
-                      }`}>
-                        {risk.level} RISK
-                      </span>
-                      <p className="text-sm mt-1">{risk.text}</p>
-                    </div>
-                  ))}
-                </div>
+                )}
 
                 {/* Recommendations */}
-                <div className="space-y-3">
-                  <h4 className="text-sm font-semibold text-success flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4" />
-                    Recommended Actions
-                  </h4>
-                  <ul className="space-y-2">
-                    {managerialInsights.recommendations.map((rec, i) => (
-                      <li
-                        key={i}
-                        className="flex items-center gap-3 p-3 bg-secondary/30 rounded-lg"
-                      >
-                        <div className="w-6 h-6 rounded-full bg-success/20 flex items-center justify-center flex-shrink-0">
-                          <span className="text-xs font-bold text-success">{i + 1}</span>
-                        </div>
-                        <span className="text-sm">{rec}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+                {managerInsights.recommendations.length > 0 && (
+                  <div className="space-y-3">
+                    <h4 className="text-sm font-semibold text-success flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4" />
+                      Recommended Actions
+                    </h4>
+                    <ul className="space-y-2">
+                      {managerInsights.recommendations.map((rec, i) => (
+                        <li
+                          key={i}
+                          className="flex items-center gap-3 p-3 bg-secondary/30 rounded-lg"
+                        >
+                          <div className="w-6 h-6 rounded-full bg-success/20 flex items-center justify-center flex-shrink-0">
+                            <span className="text-xs font-bold text-success">{i + 1}</span>
+                          </div>
+                          <span className="text-sm">{rec}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
 
                 {/* Quick Actions */}
                 <div className="pt-4 border-t border-border">
@@ -450,6 +447,13 @@ export function DocumentViewer({ onBack, document }: DocumentViewerProps) {
                   </div>
                 </div>
               </>
+            ) : (
+              <div className="flex flex-col items-center justify-center h-64 gap-4">
+                <Sparkles className="w-12 h-12 text-muted-foreground" />
+                <p className="text-muted-foreground text-center">
+                  {docId ? "Loading insights..." : "Select a document to view AI insights"}
+                </p>
+              </div>
             )}
           </div>
         </div>

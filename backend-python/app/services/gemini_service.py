@@ -63,4 +63,82 @@ Focus on industrial safety entities."""
         except Exception as e:
             return [0.0] * 768  # Return zero vector on error
 
+    def generate_role_insights(self, text: str, role: str, doc_name: str = "") -> Dict:
+        """Generate role-specific AI insights for a document.
+        
+        Args:
+            text: Document text content
+            role: Either 'engineer' or 'manager'
+            doc_name: Optional document name for context
+        
+        Returns:
+            Dict with structured insights based on role
+        """
+        if role == "engineer":
+            prompt = f"""Analyze this industrial document from an ENGINEER's perspective.
+Document: {doc_name}
+Content: {text[:6000]}
+
+Return a JSON object with exactly this structure:
+{{
+  "summary": ["point 1", "point 2", "point 3"],
+  "specs": [
+    {{"label": "spec name", "value": "spec value"}},
+    {{"label": "spec name", "value": "spec value"}}
+  ],
+  "compliance": {{
+    "status": "PASS or FAIL or PENDING",
+    "standards": ["ISO standard", "other standard"],
+    "nextAudit": "date or N/A"
+  }},
+  "risks": [
+    {{"severity": "high or medium or low", "text": "risk description"}}
+  ]
+}}
+
+Focus on: technical specifications, operating parameters, maintenance requirements, safety protocols, compliance standards.
+Return ONLY valid JSON, no markdown or explanation."""
+
+        else:  # manager
+            prompt = f"""Analyze this industrial document from a MANAGER's perspective.
+Document: {doc_name}
+Content: {text[:6000]}
+
+Return a JSON object with exactly this structure:
+{{
+  "summary": "2-3 sentence executive summary focusing on business impact",
+  "financials": [
+    {{"label": "metric name", "value": "amount", "change": "+X% or -X% or null"}}
+  ],
+  "risks": [
+    {{"level": "HIGH or MEDIUM or LOW", "text": "business risk description"}}
+  ],
+  "recommendations": ["action item 1", "action item 2", "action item 3"]
+}}
+
+Focus on: financial implications, operational costs, business risks, budget requirements, strategic recommendations.
+Return ONLY valid JSON, no markdown or explanation."""
+
+        try:
+            response = self.model.generate_content(prompt)
+            import json
+            clean_text = response.text.replace("```json", "").replace("```", "").strip()
+            return json.loads(clean_text)
+        except Exception as e:
+            # Return sensible fallback data
+            if role == "engineer":
+                return {
+                    "summary": ["Analysis in progress...", "Upload complete document for full analysis"],
+                    "specs": [{"label": "Status", "value": "Pending Analysis"}],
+                    "compliance": {"status": "PENDING", "standards": [], "nextAudit": "N/A"},
+                    "risks": [{"severity": "low", "text": f"Unable to analyze: {str(e)[:50]}"}]
+                }
+            else:
+                return {
+                    "summary": "Document analysis in progress. Full insights will be available shortly.",
+                    "financials": [{"label": "Status", "value": "Pending", "change": None}],
+                    "risks": [{"level": "LOW", "text": f"Analysis pending: {str(e)[:50]}"}],
+                    "recommendations": ["Complete document upload for full analysis"]
+                }
+
 gemini_service = GeminiService()
