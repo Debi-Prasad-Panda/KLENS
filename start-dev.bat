@@ -1,32 +1,50 @@
 @echo off
 echo ========================================
-echo K-LENS Development Mode (Hot Reload)
+echo K-LENS Development Mode (Auto-Reload)
 echo ========================================
 echo.
 
-docker info >nul 2>&1
-if %errorlevel% neq 0 (
-    echo ERROR: Docker is not running!
+REM Check if .env exists
+if not exist "backend-python\.env" (
+    echo Creating .env file...
+    copy backend-python\.env.example backend-python\.env
+    echo.
+    echo IMPORTANT: Edit backend-python\.env and add your Gemini API key!
+    echo Press any key after adding your API key...
     pause
-    exit /b 1
 )
 
-echo Starting K-LENS in development mode...
-echo Changes will auto-reload without rebuild!
-echo.
+echo Starting databases only...
+docker-compose -f docker-compose.python.yml up -d postgres redis neo4j
 
-docker-compose -f docker-compose.dev.yml up -d
+echo.
+echo Waiting for databases (20 seconds)...
+timeout /t 20 /nobreak
 
 echo.
 echo ========================================
-echo K-LENS Development Server Running!
+echo Starting Backend (Auto-Reload)...
 echo ========================================
+cd backend-python
+start cmd /k "venv\Scripts\activate && uvicorn app.main:app --reload --port 8000"
+cd ..
+
 echo.
-echo Frontend: http://localhost
-echo Backend: http://localhost:3000
+echo ========================================
+echo Starting Frontend (Auto-Reload)...
+echo ========================================
+start cmd /k "npm run dev"
+
+timeout /t 10 /nobreak
+
+echo.
+echo ========================================
+echo Development Mode Started!
+echo ========================================
+echo Frontend: http://localhost:5173 (Vite dev server)
+echo Backend: http://localhost:8000 (Auto-reload enabled)
 echo.
 echo Changes will auto-reload!
-echo To view logs: docker-compose -f docker-compose.dev.yml logs -f
-echo To stop: docker-compose -f docker-compose.dev.yml down
-echo.
+echo Close the terminal windows to stop.
+echo ========================================
 pause

@@ -6,45 +6,58 @@ A modern, real-time industrial intelligence platform powered by Python FastAPI b
 
 ---
 
-## 🚀 Quick Start
+## 🚀 Quick Start (2 Commands)
 
-### Option 1: Docker (Recommended - 5 Minutes)
-
-#### Prerequisites
+### Prerequisites
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed
 - [Gemini API Key](https://makersuite.google.com/app/apikey) (free)
 
-#### Steps
+### Steps
+
+**1. Get your Gemini API key** from https://makersuite.google.com/app/apikey
+
+**2. Run the startup script:**
 ```bash
-# 1. Navigate to project
 cd KLENS
-
-# 2. Copy environment file
-copy backend-python\.env.example backend-python\.env
-
-# 3. Edit backend-python/.env and add your Gemini API key
-# GEMINI_API_KEY=your_actual_key_here
-
-# 4. Start everything
-start-python-backend.bat
-
-# Wait 30 seconds for services to start
+start.bat
 ```
 
-#### Access
+The script will:
+- ✅ Create `.env` file (add your API key when prompted)
+- ✅ Start all services (PostgreSQL, Redis, Neo4j, Backend, Frontend)
+- ✅ Create admin user automatically
+- ✅ Show login credentials
+
+**3. Login at http://localhost**
+- Email: `admin@example.com`
+- Password: `Admin@123`
+
+### Other Commands
+```bash
+stop.bat       # Stop all services
+restart.bat    # Restart services
+start-dev.bat  # Development mode (auto-reload)
+```
+
+### Development vs Production
+
+**Production Mode** (`start.bat`):
+- ✅ Everything in Docker
+- ✅ One command startup
+- ❌ Need to rebuild for changes
+- Use for: Demos, deployment
+
+**Development Mode** (`start-dev.bat`):
+- ✅ Auto-reload on file changes
+- ✅ Faster development
+- ❌ Requires Node.js & Python installed
+- Use for: Active development
+
+### Access Points
 - **Frontend**: http://localhost
 - **Backend API**: http://localhost:8000
 - **API Docs**: http://localhost:8000/docs
 - **Neo4j Browser**: http://localhost:7474
-
-#### Create Admin Account
-```bash
-curl -X POST http://localhost:8000/api/auth/register -H "Content-Type: application/json" -d "{\"email\":\"admin@klens.local\",\"password\":\"Admin@123\",\"name\":\"System Admin\",\"role\":\"admin\",\"department\":\"IT\"}"
-```
-
-#### Login
-- Email: `admin@klens.local`
-- Password: `Admin@123`
 
 ---
 
