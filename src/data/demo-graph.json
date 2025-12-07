@@ -1,0 +1,41 @@
+{
+  "nodes": [
+    { "id": "Safety_Manual_v2", "group": "Document", "val": 8 },
+    { "id": "Boiler_B7_Specs", "group": "Document", "val": 6 },
+    { "id": "Audit_Report_2024", "group": "Document", "val": 7 },
+    { "id": "Maintenance_Log_Dec", "group": "Document", "val": 5 },
+    { "id": "Fire_Hazard", "group": "Risk", "val": 10 },
+    { "id": "Pressure_Variance", "group": "Risk", "val": 9 },
+    { "id": "Equipment_Failure", "group": "Risk", "val": 8 },
+    { "id": "Boiler_Overheating", "group": "Risk", "val": 11 },
+    { "id": "Eng_Rajesh", "group": "Person", "val": 7 },
+    { "id": "Safety_Officer", "group": "Person", "val": 8 },
+    { "id": "Station_Manager", "group": "Person", "val": 6 },
+    { "id": "Engineering_Dept", "group": "Dept", "val": 9 },
+    { "id": "Safety_Dept", "group": "Dept", "val": 8 },
+    { "id": "Boiler_B7", "group": "Machine", "val": 10 },
+    { "id": "Pump_Station_3", "group": "Machine", "val": 7 },
+    { "id": "Cooling_System", "group": "Machine", "val": 6 }
+  ],
+  "links": [
+    { "source": "Safety_Manual_v2", "target": "Fire_Hazard", "type": "MENTIONS" },
+    { "source": "Safety_Manual_v2", "target": "Eng_Rajesh", "type": "ASSIGNED_TO" },
+    { "source": "Boiler_B7_Specs", "target": "Boiler_B7", "type": "DESCRIBES" },
+    { "source": "Boiler_B7_Specs", "target": "Pressure_Variance", "type": "MENTIONS" },
+    { "source": "Boiler_B7", "target": "Boiler_Overheating", "type": "HAS_RISK" },
+    { "source": "Boiler_Overheating", "target": "Safety_Officer", "type": "AFFECTS" },
+    { "source": "Boiler_Overheating", "target": "Fire_Hazard", "type": "CAUSES" },
+    { "source": "Fire_Hazard", "target": "Safety_Dept", "type": "ESCALATED_TO" },
+    { "source": "Audit_Report_2024", "target": "Station_Manager", "type": "REVIEWED_BY" },
+    { "source": "Audit_Report_2024", "target": "Equipment_Failure", "type": "IDENTIFIES" },
+    { "source": "Equipment_Failure", "target": "Pump_Station_3", "type": "AFFECTS" },
+    { "source": "Pump_Station_3", "target": "Engineering_Dept", "type": "MANAGED_BY" },
+    { "source": "Eng_Rajesh", "target": "Engineering_Dept", "type": "MEMBER_OF" },
+    { "source": "Safety_Officer", "target": "Safety_Dept", "type": "MEMBER_OF" },
+    { "source": "Maintenance_Log_Dec", "target": "Eng_Rajesh", "type": "CREATED_BY" },
+    { "source": "Maintenance_Log_Dec", "target": "Cooling_System", "type": "DOCUMENTS" },
+    { "source": "Cooling_System", "target": "Boiler_B7", "type": "SUPPORTS" },
+    { "source": "Pressure_Variance", "target": "Station_Manager", "type": "REPORTED_TO" },
+    { "source": "Engineering_Dept", "target": "Boiler_B7", "type": "MAINTAINS" }
+  ]
+}
