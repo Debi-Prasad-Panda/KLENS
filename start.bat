@@ -25,12 +25,7 @@ if not exist "backend-python\.env" (
 
 echo Starting all services...
 echo.
-echo If build fails with 403 Forbidden:
-echo 1. Check your internet/proxy settings
-echo 2. Try: docker-compose -f docker-compose.python.yml pull
-echo 3. Or use pre-built images
-echo.
-docker-compose -f docker-compose.python.yml up -d --build
+docker-compose up -d --build
 
 echo.
 if errorlevel 1 (

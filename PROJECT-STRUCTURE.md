@@ -6,29 +6,25 @@
 KLENS/
 ├── 🚀 START-HERE.md              # Begin here!
 ├── 📖 README.md                  # Project overview
-├── 📖 README-QUICK-START.md      # Quick start guide
 ├── 🔧 SETUP.md                   # Detailed setup instructions
 ├── 🚢 DEPLOYMENT.md              # Production deployment guide
-├── 📚 FEATURES.md                # Complete feature documentation
 │
 ├── 🐳 Docker Files
-│   ├── docker-compose.yml        # Docker services configuration
+│   ├── docker-compose.yml        # Main Docker services (production)
+│   ├── docker-compose.override.yml # Development overrides (live-reload)
 │   ├── Dockerfile                # Frontend Docker image
+│   ├── Dockerfile.dev            # Frontend dev image (hot-reload)
 │   ├── nginx.conf                # Nginx reverse proxy config
-│   ├── mosquitto.conf            # MQTT broker config
 │   └── .dockerignore             # Docker build exclusions
 │
 ├── 🎬 Startup Scripts
-│   ├── start-docker.bat          # Windows Docker startup
-│   ├── start-docker.sh           # Linux/Mac Docker startup
-│   ├── start-local.bat           # Windows local startup
-│   ├── start-local.sh            # Linux/Mac local startup
-│   ├── check-health.bat          # Windows health check
-│   └── check-health.sh           # Linux/Mac health check
+│   ├── start.bat / start.sh      # Production startup
+│   ├── start-dev.bat / start-dev.sh # Development with live-reload
+│   ├── stop.bat / stop.sh        # Stop all services
+│   └── restart.bat               # Restart services
 │
 ├── ⚙️ Configuration
-│   ├── .env.example              # Docker environment template
-│   ├── .env.local.example        # Local environment template
+│   ├── .env                      # Environment variables
 │   ├── package.json              # Frontend dependencies
 │   ├── tsconfig.json             # TypeScript config
 │   ├── tailwind.config.ts        # Tailwind CSS config
@@ -40,11 +36,9 @@ KLENS/
 │   │   │   ├── DashboardView.tsx
 │   │   │   ├── MorningBriefing.tsx
 │   │   │   ├── DocumentProcessor.tsx
-│   │   │   ├── EnterpriseConnectors.tsx
 │   │   │   ├── RoleBasedView.tsx
 │   │   │   ├── NuclearKeys.tsx
 │   │   │   ├── AuditTrail.tsx
-│   │   │   ├── FeaturesShowcase.tsx
 │   │   │   ├── IoTView.tsx
 │   │   │   ├── KnowledgeGraphView.tsx
 │   │   │   ├── ComplianceView.tsx
@@ -57,42 +51,41 @@ KLENS/
 │   │   └── AuthContext.tsx       # Authentication state
 │   ├── lib/
 │   │   ├── api.ts                # API client
-│   │   ├── websocket.ts          # WebSocket client
 │   │   └── utils.ts              # Utility functions
 │   ├── types/
 │   │   └── auth.ts               # TypeScript types
-│   ├── pages/
-│   │   ├── Index.tsx             # Main page
-│   │   └── NotFound.tsx          # 404 page
-│   └── hooks/                    # Custom React hooks
+│   └── pages/
+│       ├── Index.tsx             # Main page
+│       └── NotFound.tsx          # 404 page
 │
-└── 🔧 Backend (backend/)
-    ├── package.json              # Backend dependencies
-    ├── tsconfig.json             # TypeScript config
+└── 🔧 Backend (backend-python/)
     ├── Dockerfile                # Backend Docker image
-    ├── .env.example              # Environment template
+    ├── requirements.txt          # Python dependencies
+    ├── .env                      # Backend configuration
     │
-    └── src/
-        ├── server.ts             # Main server file
+    └── app/
+        ├── main.py               # FastAPI application
         │
-        ├── config/
-        │   └── database.ts       # PostgreSQL & Redis setup
+        ├── api/                  # API Routers
+        │   ├── auth.py           # Authentication + Cinderella Access
+        │   ├── documents.py      # Document management + versioning
+        │   ├── approvals.py      # Nuclear Keys approval system
+        │   └── chat.py           # AI Chat with Gemini
         │
-        ├── controllers/
-        │   ├── auth.controller.ts      # Authentication
-        │   ├── document.controller.ts  # Document management
-        │   └── approval.controller.ts  # Nuclear Keys approvals
+        ├── core/                 # Core configuration
+        │   ├── config.py         # Settings
+        │   ├── database.py       # PostgreSQL + pgvector
+        │   └── security.py       # JWT + bcrypt
         │
-        ├── services/
-        │   ├── ocr.service.ts          # Tesseract OCR
-        │   ├── ai.service.ts           # Google Gemini AI
-        │   └── mqtt.service.ts         # IoT MQTT broker
+        ├── models/               # SQLAlchemy models
+        │   ├── user.py           # User model
+        │   ├── document.py       # Document model
+        │   ├── document_version.py # Version control
+        │   ├── approval.py       # Nuclear Keys
+        │   └── audit_log.py      # Audit trail
         │
-        ├── middleware/
-        │   └── auth.ts                 # JWT authentication
-        │
-        └── routes/
-            └── index.ts                # API routes
+        └── services/             # Business logic
+            └── gemini_service.py # Google Gemini AI
 ```
 
 ## 🎯 Key Files Explained
@@ -101,29 +94,18 @@ KLENS/
 
 | File | Purpose | When to Use |
 |------|---------|-------------|
-| `start-docker.bat/sh` | Start with Docker | Recommended for everyone |
-| `start-local.bat/sh` | Start without Docker | If Docker fails |
-| `check-health.bat/sh` | Verify all services | After starting |
+| `start.bat/sh` | Start in production mode | Demos, deployment |
+| `start-dev.bat/sh` | Start with live reload | Active development |
+| `stop.bat/sh` | Stop all services | Shutdown |
 
 ### Configuration Files
 
 | File | Purpose |
 |------|---------|
-| `.env` | Docker environment variables |
-| `backend/.env` | Backend configuration |
+| `.env` | Root environment variables |
+| `backend-python/.env` | Backend configuration (Gemini API key) |
 | `docker-compose.yml` | Docker services definition |
-| `mosquitto.conf` | MQTT broker settings |
-| `nginx.conf` | Reverse proxy configuration |
-
-### Documentation Files
-
-| File | Purpose |
-|------|---------|
-| `START-HERE.md` | Quick start guide |
-| `SETUP.md` | Detailed setup instructions |
-| `DEPLOYMENT.md` | Production deployment |
-| `FEATURES.md` | Feature documentation |
-| `README.md` | Project overview |
+| `docker-compose.override.yml` | Development overrides |
 
 ## 🔄 Data Flow
 
@@ -132,14 +114,14 @@ User Browser
     ↓
 Nginx (Port 80)
     ↓
-Frontend (React)
+Frontend (React/Vite)
     ↓
-Backend API (Port 3000)
+Backend API (Port 8000, FastAPI)
     ↓
-├── PostgreSQL (Database)
-├── Redis (Cache)
-├── Gemini AI (Analysis)
-└── MQTT (IoT Sensors)
+├── PostgreSQL + pgvector (Database)
+├── Redis (Cache + Cinderella Access)
+├── Neo4j (Knowledge Graph)
+└── Gemini AI (Analysis)
 ```
 
 ## 🗄️ Database Schema
@@ -156,11 +138,14 @@ users
 documents
 ├── id (PK)
 ├── filename
+├── original_name
 ├── file_type
+├── file_size
 ├── uploaded_by (FK → users)
-├── status (processing/complete/error)
+├── status (processing/ocr/analyzing/complete/failed)
 ├── ocr_text
 ├── ai_summary
+├── embedding (vector)
 └── metadata (JSON)
 
 document_versions
@@ -169,45 +154,35 @@ document_versions
 ├── version
 ├── content
 ├── changed_by (FK → users)
-└── commit_message
+├── commit_message
+└── created_at
 
 audit_logs
 ├── id (PK)
 ├── user_id (FK → users)
-├── action (view/edit/delete/revert)
+├── action (view/edit/delete/revert/upload)
 ├── resource_type
 ├── resource_id
-└── details (JSON)
+├── details (JSON)
+└── created_at
 
 approvals (Nuclear Keys)
 ├── id (PK)
 ├── action_type
+├── resource_id
 ├── required_approvals
 ├── approvers (JSON)
 ├── status (pending/approved/rejected)
-└── created_by (FK → users)
-
-iot_sensors
-├── id (PK)
-├── sensor_id
-├── name
-├── location
-├── sensor_type
-└── thresholds (JSON)
-
-iot_readings
-├── id (PK)
-├── sensor_id (FK → iot_sensors)
-├── reading_type
-├── value
-└── timestamp
+├── created_by (FK → users)
+├── created_at
+└── completed_at
 ```
 
 ## 🔌 API Endpoints
 
 ### Authentication
 - `POST /api/auth/register` - Register user
-- `POST /api/auth/login` - Login
+- `POST /api/auth/login` - Login (OAuth2 form)
 - `POST /api/auth/cinderella` - Grant time-bound access
 - `GET /api/auth/cinderella` - Check Cinderella access
 
@@ -215,49 +190,21 @@ iot_readings
 - `POST /api/documents` - Upload document
 - `GET /api/documents` - List documents
 - `GET /api/documents/:id` - Get document
-- `PUT /api/documents/:id` - Update document
-- `POST /api/documents/:id/revert/:version` - Revert version
+- `PUT /api/documents/:id` - Update document (creates version)
+- `POST /api/documents/:id/revert/:version` - Revert to version
+- `GET /api/documents/:id/versions` - List versions
 
 ### Approvals (Nuclear Keys)
 - `POST /api/approvals` - Create approval request
-- `POST /api/approvals/:id/approve` - Approve/reject
+- `POST /api/approvals/:id/approve` - Vote on approval
 - `GET /api/approvals` - List pending approvals
 
-## 🌐 WebSocket Events
+### Chat
+- `POST /api/chat` - Chat with K-LENS AI
 
-### Client → Server
-- `subscribe` - Subscribe to sensor updates
-
-### Server → Client
-- `reading` - New sensor reading
-- `alert` - Threshold violation alert
-
-## 🎨 UI Components
-
-### Core Views
-- **DashboardView** - Main dashboard with analytics
-- **MorningBriefing** - Personalized task list
-- **DocumentViewer** - Document display with AI analysis
-- **IoTView** - Real-time sensor telemetry
-- **KnowledgeGraphView** - Interactive entity graph
-- **ComplianceView** - Compliance monitoring
-
-### Advanced Features
-- **RoleBasedView** - Engineer/Manager/Safety Officer perspectives
-- **NuclearKeys** - Multi-signature approval system
-- **AuditTrail** - Git-style version history
-- **DocumentProcessor** - Upload with processing stages
-- **EnterpriseConnectors** - Integration UI
-
-## 🔐 Security Features
-
-1. **JWT Authentication** - Stateless token-based auth
-2. **bcrypt Password Hashing** - Secure password storage
-3. **RBAC** - Role-based access control
-4. **Cinderella Access** - Time-bound privilege escalation
-5. **Nuclear Keys** - Multi-signature approvals
-6. **Audit Logging** - Complete action trail
-7. **Version Control** - Immutable document history
+### Health
+- `GET /` - API info
+- `GET /health` - Health check
 
 ## 📊 Technology Stack
 
@@ -267,45 +214,38 @@ iot_readings
 - Tailwind CSS + shadcn/ui
 - Recharts (data visualization)
 - TanStack Query (state management)
+- React Flow (Knowledge Graph)
 
 ### Backend
-- Node.js 20 + Express
-- TypeScript
-- PostgreSQL 16 (database)
+- Python 3.11 + FastAPI
+- SQLAlchemy + Pydantic
+- PostgreSQL 16 + pgvector
 - Redis 7 (cache)
-- Tesseract.js (OCR)
+- Neo4j 5 (graph database)
 - Google Gemini AI
-- MQTT (IoT)
-- WebSocket (real-time)
+- PyMuPDF (PDF processing)
+- bcrypt + JWT (auth)
 
 ### Infrastructure
 - Docker & Docker Compose
 - Nginx (reverse proxy)
-- Mosquitto (MQTT broker)
 
-## 🚀 Deployment Options
+## 🔐 Security Features
 
-1. **Docker Compose** - Single server deployment
-2. **Kubernetes** - Multi-server orchestration
-3. **AWS** - ECS, RDS, ElastiCache, IoT Core
-4. **Azure** - AKS, PostgreSQL, Redis, IoT Hub
-5. **GCP** - GKE, Cloud SQL, Memorystore, IoT Core
+1. **JWT Authentication** - Stateless token-based auth
+2. **bcrypt Password Hashing** - Secure password storage
+3. **RBAC** - Role-based access control
+4. **Cinderella Access** - Time-bound privilege escalation (Redis TTL)
+5. **Nuclear Keys** - Multi-signature approvals
+6. **Audit Logging** - Complete action trail
+7. **Version Control** - Immutable document history
 
-## 📈 Scalability
+## 🚀 Development Workflow
 
-- **Horizontal Scaling** - Multiple backend instances
-- **Load Balancing** - Nginx upstream
-- **Database Replication** - PostgreSQL streaming
-- **Redis Clustering** - Distributed cache
-- **CDN** - Static asset delivery
-
-## 🔧 Development Workflow
-
-1. **Local Development** - `npm run dev`
-2. **Build** - `npm run build`
-3. **Docker Build** - `docker-compose build`
-4. **Deploy** - `docker-compose up -d`
-5. **Monitor** - `docker-compose logs -f`
+1. **Start Dev Mode** - `start-dev.bat` (live reload enabled)
+2. **Make Changes** - Edit Python/React files
+3. **Auto-Reload** - Changes reflect immediately
+4. **Build Production** - `start.bat`
 
 ---
 

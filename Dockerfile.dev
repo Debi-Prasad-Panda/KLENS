@@ -1,0 +1,19 @@
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+COPY bun.lockb ./
+
+# Install dependencies
+RUN npm install
+
+# Copy source (will be overridden by volume mount in dev)
+COPY . .
+
+# Expose Vite dev server port
+EXPOSE 5173
+
+# Start dev server
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]

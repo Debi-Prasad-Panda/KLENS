@@ -1,30 +1,25 @@
 #!/bin/bash
-
 echo "========================================"
-echo "K-LENS Development Mode (Hot Reload)"
+echo "K-LENS Development Mode (Live Reload)"
 echo "========================================"
 echo ""
 
-if ! docker info > /dev/null 2>&1; then
-    echo "ERROR: Docker is not running!"
-    exit 1
+# Check if .env exists
+if [ ! -f "backend-python/.env" ]; then
+    if [ -f "backend-python/.env.example" ]; then
+        echo "Creating .env file..."
+        cp backend-python/.env.example backend-python/.env
+        echo ""
+        echo "IMPORTANT: Edit backend-python/.env and add your Gemini API key!"
+        echo "Press Enter after editing..."
+        read
+    fi
 fi
 
-echo "Starting K-LENS in development mode..."
-echo "Changes will auto-reload without rebuild!"
+echo "Starting services with live reload..."
 echo ""
-
-docker-compose -f docker-compose.dev.yml up -d
-
+echo "Changes to code will automatically reload!"
+echo "- Backend: Python files in backend-python/"
+echo "- Frontend: React files in src/"
 echo ""
-echo "========================================"
-echo "K-LENS Development Server Running!"
-echo "========================================"
-echo ""
-echo "Frontend: http://localhost"
-echo "Backend: http://localhost:3000"
-echo ""
-echo "Changes will auto-reload!"
-echo "To view logs: docker-compose -f docker-compose.dev.yml logs -f"
-echo "To stop: docker-compose -f docker-compose.dev.yml down"
-echo ""
+docker-compose -f docker-compose.yml -f docker-compose.override.yml up --build

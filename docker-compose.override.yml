@@ -1,0 +1,25 @@
+# Development override - enables live reload for both backend and frontend
+# Usage: docker-compose -f docker-compose.yml -f docker-compose.override.yml up
+
+services:
+  backend:
+    volumes:
+      - ./backend-python:/app
+      - uploads:/app/uploads
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    environment:
+      - PYTHONDONTWRITEBYTECODE=1
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./src:/app/src
+      - ./public:/app/public
+      - ./index.html:/app/index.html
+      - ./vite.config.ts:/app/vite.config.ts
+      - ./tailwind.config.ts:/app/tailwind.config.ts
+    ports:
+      - "80:5173"
+    command: npm run dev -- --host 0.0.0.0

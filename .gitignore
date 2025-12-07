@@ -1,10 +1,12 @@
 # Environment files
 .env
-backend-python/.env
+**/.env
 
-# Keep example files
-!.env.example
-!backend-python/.env.example
+Keep example files
+.env.example
+**/.env.example
+**/.env.local
+**/.env.local.example
 
 # Dependencies
 node_modules/
