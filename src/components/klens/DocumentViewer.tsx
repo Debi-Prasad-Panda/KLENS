@@ -16,11 +16,12 @@ import {
   Clock,
   Thermometer,
   Gauge,
-  Languages,
-  Sparkles,
   Copy,
   ExternalLink,
-  Loader2
+  Loader2,
+  RefreshCw,
+  Languages,
+  Sparkles,
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useDocumentInsights } from "@/hooks/useDocumentInsights";
@@ -46,7 +47,7 @@ export function DocumentViewer({ onBack, document }: DocumentViewerProps) {
   const [zoom, setZoom] = useState(100);
   const [selectedLanguage, setSelectedLanguage] = useState("English");
 
-  const { engineerInsights, managerInsights, loading, error, fetchInsights } = useDocumentInsights(docId);
+  const { engineerInsights, managerInsights, loading, error, fetchInsights, regenerate } = useDocumentInsights(docId);
 
   // Fetch insights when switching roles
   useEffect(() => {
@@ -81,6 +82,17 @@ export function DocumentViewer({ onBack, document }: DocumentViewerProps) {
         </div>
 
         <div className="flex items-center gap-3">
+          {/* Header Actions */}
+          <button
+            onClick={() => regenerate(viewMode)}
+            disabled={loading}
+            className="flex items-center gap-2 px-3 py-2 glass-card hover:bg-secondary/50 transition-colors disabled:opacity-50"
+            title="Regenerate AI Analysis"
+          >
+            <RefreshCw className={`w-4 h-4 text-primary ${loading ? 'animate-spin' : ''}`} />
+            <span className="text-sm">Regenerate</span>
+          </button>
+
           {/* Language Selector */}
           <div className="flex items-center gap-2 px-3 py-2 glass-card">
             <Languages className="w-4 h-4 text-primary" />

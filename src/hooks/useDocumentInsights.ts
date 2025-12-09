@@ -48,6 +48,7 @@ interface UseDocumentInsightsReturn {
   loading: boolean;
   error: string | null;
   fetchInsights: (role: 'engineer' | 'manager') => Promise<void>;
+  regenerate: (role: 'engineer' | 'manager') => Promise<void>;
 }
 
 export function useDocumentInsights(docId: number | undefined): UseDocumentInsightsReturn {
@@ -56,18 +57,21 @@ export function useDocumentInsights(docId: number | undefined): UseDocumentInsig
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchInsights = useCallback(async (role: 'engineer' | 'manager') => {
+  const fetchInsights = useCallback(async (role: 'engineer' | 'manager', forceRefresh = false) => {
     if (!docId) return;
 
-    // Check cache first
-    if (role === 'engineer' && engineerInsights) return;
-    if (role === 'manager' && managerInsights) return;
+    // Check cache first (unless forcing refresh)
+    if (!forceRefresh) {
+      if (role === 'engineer' && engineerInsights) return;
+      if (role === 'manager' && managerInsights) return;
+    }
 
     setLoading(true);
     setError(null);
 
     try {
-      const data = await api.getDocumentInsights(docId, role);
+      // Pass refresh=true to API if forcing refresh
+      const data = await api.getDocumentInsights(docId, role, forceRefresh);
       
       if (role === 'engineer') {
         setEngineerInsights(data as EngineerInsights);
@@ -81,12 +85,17 @@ export function useDocumentInsights(docId: number | undefined): UseDocumentInsig
     }
   }, [docId, engineerInsights, managerInsights]);
 
+  const regenerate = useCallback(async (role: 'engineer' | 'manager') => {
+    await fetchInsights(role, true);
+  }, [fetchInsights]);
+
   // Fetch engineer insights on mount if we have a docId
+  // Only first time, not on every render
   useEffect(() => {
-    if (docId) {
+    if (docId && !engineerInsights) {
       fetchInsights('engineer');
     }
   }, [docId]);
 
-  return { engineerInsights, managerInsights, loading, error, fetchInsights };
+  return { engineerInsights, managerInsights, loading, error, fetchInsights, regenerate };
 }

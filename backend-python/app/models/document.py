@@ -25,5 +25,9 @@ class Document(Base):
     ocr_text = Column(Text)
     ai_summary = Column(Text)
     embedding = Column(Vector(768))  # Gemini embedding dimension
+    # Cached AI insights (JSON strings)
+    engineer_insights = Column(Text, nullable=True)
+    manager_insights = Column(Text, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+

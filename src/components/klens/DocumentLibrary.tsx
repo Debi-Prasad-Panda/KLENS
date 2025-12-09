@@ -236,7 +236,10 @@ export function DocumentLibrary({ onOpenDocument }: DocumentLibraryProps) {
               </button>
             </div>
             <div className="p-6 space-y-6">
-              <DocumentProcessor />
+              <DocumentProcessor onUploadComplete={() => {
+                loadDocuments();
+                setShowUploadModal(false);
+              }} />
               <EnterpriseConnectors />
             </div>
           </div>

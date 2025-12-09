@@ -70,7 +70,7 @@ class ApiClient {
     const formData = new FormData();
     formData.append('file', file);
 
-    const response = await fetch(`${API_URL}/documents`, {
+    const response = await fetch(`${API_URL}/documents/`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${this.getToken()}`,
@@ -150,8 +150,8 @@ class ApiClient {
     return this.request('/documents/stats/dashboard');
   }
 
-  async getDocumentInsights(docId: number, role: 'engineer' | 'manager') {
-    return this.request(`/documents/${docId}/insights?role=${role}`);
+  async getDocumentInsights(docId: number, role: string, refresh: boolean = false) {
+    return this.request(`/documents/${docId}/insights?role=${role}&refresh=${refresh}`);
   }
 }
 
