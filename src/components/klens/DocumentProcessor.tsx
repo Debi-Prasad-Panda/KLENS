@@ -1,7 +1,10 @@
 import { useState } from "react";
-import { Upload, FileText, CheckCircle2, Loader2, AlertCircle } from "lucide-react";
+import { Upload, FileText, CheckCircle2, Loader2, AlertCircle, Rocket } from "lucide-react";
 import { api } from "@/lib/api";
 import { toast } from "@/hooks/use-toast";
+import { AccessSettingsPanel, AccessRules } from "./AccessSettingsPanel";
+import { useAuth } from "@/contexts/AuthContext";
+import { Button } from "@/components/ui/button";
 
 interface ProcessingStage {
   name: string;
@@ -23,9 +26,14 @@ const STAGE_MAP: Record<string, number> = {
 };
 
 export function DocumentProcessor({ onUploadComplete }: DocumentProcessorProps) {
+  const { user } = useAuth();
   const [file, setFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [docId, setDocId] = useState<number | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [accessRules, setAccessRules] = useState<AccessRules>({
+    access_level: "public",
+  });
   const [stages, setStages] = useState<ProcessingStage[]>([
     { name: "Uploading", status: "pending" },
     { name: "OCR Extraction", status: "pending" },
@@ -40,7 +48,7 @@ export function DocumentProcessor({ onUploadComplete }: DocumentProcessorProps) 
 
     setFile(uploadedFile);
     setError(null);
-    processFile(uploadedFile);
+    // Don't auto-process - wait for user to configure access and click Start
   };
 
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
@@ -50,7 +58,7 @@ export function DocumentProcessor({ onUploadComplete }: DocumentProcessorProps) 
 
     setFile(droppedFile);
     setError(null);
-    processFile(droppedFile);
+    // Don't auto-process - wait for user to configure access and click Start
   };
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
@@ -63,23 +71,23 @@ export function DocumentProcessor({ onUploadComplete }: DocumentProcessorProps) 
     const wsHost = window.location.hostname;
     const wsPort = window.location.port || (wsProtocol === 'wss:' ? '443' : '80');
     const wsUrl = `${wsProtocol}//${wsHost}:${wsPort}/api/ws/documents/${documentId}/status`;
-    
+
     console.log('Connecting to WebSocket:', wsUrl);
-    
+
     const ws = new WebSocket(wsUrl);
-    
+
     ws.onopen = () => {
       console.log('WebSocket connected for document:', documentId);
     };
-    
+
     ws.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
         console.log('WebSocket message:', data);
-        
+
         if (data.type === 'status_update' || data.stage) {
           const stageIndex = STAGE_MAP[data.stage];
-          
+
           if (stageIndex >= 0) {
             // Mark all previous stages as complete, current as processing
             setStages(prev => prev.map((s, idx) => {
@@ -88,26 +96,26 @@ export function DocumentProcessor({ onUploadComplete }: DocumentProcessorProps) 
               return s;
             }));
           }
-          
+
           if (data.stage === 'complete') {
             // Mark all stages complete
             setStages(prev => prev.map(s => ({ ...s, status: "complete" })));
             ws.close();
-            
+
             toast({
               title: "Processing complete!",
               description: "Your document is ready.",
             });
-            
+
             // Delay slightly before refreshing to let user see complete state
             setTimeout(() => {
               onUploadComplete?.();
             }, 1500);
           }
-          
+
           if (data.stage === 'error') {
             setError(data.message || 'Processing failed');
-            setStages(prev => prev.map(s => 
+            setStages(prev => prev.map(s =>
               s.status === "processing" ? { ...s, status: "error" } : s
             ));
             ws.close();
@@ -117,40 +125,41 @@ export function DocumentProcessor({ onUploadComplete }: DocumentProcessorProps) 
         console.error('Failed to parse WebSocket message:', err);
       }
     };
-    
+
     ws.onerror = (err) => {
       console.error('WebSocket error:', err);
       // Fallback to polling or just assume processing
     };
-    
+
     ws.onclose = () => {
       console.log('WebSocket closed');
     };
-    
+
     return ws;
   };
 
   const processFile = async (uploadFile: File) => {
+    setIsUploading(true);
     // Reset stages
     setStages(prev => prev.map(s => ({ ...s, status: "pending" })));
 
     // Stage 1: Uploading - Actually call the API!
-    setStages(prev => prev.map((s, idx) => 
+    setStages(prev => prev.map((s, idx) =>
       idx === 0 ? { ...s, status: "processing" } : s
     ));
 
     try {
-      const response = await api.uploadDocument(uploadFile);
-      
+      const response = await api.uploadToSupabaseWithAccess(uploadFile, accessRules);
+
       if (response.error) {
         throw new Error(response.error);
       }
 
       // Mark upload complete
-      setStages(prev => prev.map((s, idx) => 
+      setStages(prev => prev.map((s, idx) =>
         idx === 0 ? { ...s, status: "complete" } : s
       ));
-      
+
       // Get document ID from response and connect WebSocket
       const documentId = response.id;
       setDocId(documentId);
@@ -166,11 +175,11 @@ export function DocumentProcessor({ onUploadComplete }: DocumentProcessorProps) 
       } else {
         // Fallback: simulate stages if no doc ID
         for (let i = 1; i < stages.length; i++) {
-          setStages(prev => prev.map((s, idx) => 
+          setStages(prev => prev.map((s, idx) =>
             idx === i ? { ...s, status: "processing" } : s
           ));
           await new Promise(resolve => setTimeout(resolve, 1000));
-          setStages(prev => prev.map((s, idx) => 
+          setStages(prev => prev.map((s, idx) =>
             idx === i ? { ...s, status: "complete" } : s
           ));
         }
@@ -180,10 +189,10 @@ export function DocumentProcessor({ onUploadComplete }: DocumentProcessorProps) 
     } catch (err) {
       console.error("Upload failed:", err);
       setError(err instanceof Error ? err.message : "Upload failed");
-      setStages(prev => prev.map(s => 
+      setStages(prev => prev.map(s =>
         s.status === "processing" ? { ...s, status: "error" } : s
       ));
-      
+
       toast({
         variant: "destructive",
         title: "Upload failed",
@@ -196,12 +205,20 @@ export function DocumentProcessor({ onUploadComplete }: DocumentProcessorProps) 
     setFile(null);
     setError(null);
     setDocId(null);
+    setIsUploading(false);
+    setAccessRules({ access_level: "public" });
     setStages(prev => prev.map(s => ({ ...s, status: "pending" })));
+  };
+
+  const handleStartUpload = () => {
+    if (file) {
+      processFile(file);
+    }
   };
 
   return (
     <div className="space-y-6">
-      <div 
+      <div
         className="dropzone text-center"
         onDrop={handleDrop}
         onDragOver={handleDragOver}
@@ -221,17 +238,18 @@ export function DocumentProcessor({ onUploadComplete }: DocumentProcessorProps) 
       </div>
 
       {file && (
-        <div className="glass-card p-6 space-y-4 animate-fade-in">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <FileText className="w-8 h-8 text-primary" />
-              <div>
-                <p className="font-medium">{file.name}</p>
-                <p className="text-sm text-muted-foreground">
-                  {(file.size / 1024).toFixed(2)} KB
-                  {docId && <span className="ml-2 text-primary">• Doc ID: {docId}</span>}
-                </p>
-              </div>
+        <div className="space-y-4 animate-fade-in">
+          {/* File Info Card */}
+          <div className="glass-card p-4 flex items-center gap-4">
+            <div className="w-12 h-12 rounded-lg bg-primary/20 flex items-center justify-center">
+              <FileText className="w-6 h-6 text-primary" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-medium truncate">{file.name}</p>
+              <p className="text-sm text-muted-foreground">
+                {(file.size / 1024).toFixed(2)} KB
+                {docId && <span className="ml-2 text-primary">• Doc ID: {docId}</span>}
+              </p>
             </div>
             {stages.every(s => s.status === "complete") && (
               <button
@@ -241,40 +259,74 @@ export function DocumentProcessor({ onUploadComplete }: DocumentProcessorProps) 
                 Upload Another
               </button>
             )}
+            {!isUploading && stages.every(s => s.status === "pending") && (
+              <button
+                onClick={resetUpload}
+                className="text-sm text-muted-foreground hover:text-destructive"
+              >
+                Cancel
+              </button>
+            )}
           </div>
 
-          {error && (
-            <div className="flex items-center gap-2 p-3 bg-destructive/10 border border-destructive/30 rounded-lg">
-              <AlertCircle className="w-5 h-5 text-destructive" />
-              <p className="text-sm text-destructive">{error}</p>
-            </div>
+          {/* Access Settings Panel - shown before upload starts */}
+          {!isUploading && stages.every(s => s.status === "pending") && (
+            <>
+              <AccessSettingsPanel
+                accessRules={accessRules}
+                onAccessRulesChange={setAccessRules}
+                userDepartment={user?.department || "Engineering"}
+              />
+
+              {/* Start Upload Button */}
+              <Button
+                onClick={handleStartUpload}
+                className="w-full h-12 text-lg font-semibold gap-2"
+                size="lg"
+              >
+                <Rocket className="w-5 h-5" />
+                Start Secure Upload
+              </Button>
+            </>
           )}
 
-          <div className="space-y-3">
-            {stages.map((stage, idx) => (
-              <div key={idx} className="flex items-center gap-3">
-                {stage.status === "complete" ? (
-                  <CheckCircle2 className="w-5 h-5 text-success" />
-                ) : stage.status === "processing" ? (
-                  <Loader2 className="w-5 h-5 text-primary animate-spin" />
-                ) : stage.status === "error" ? (
+          {/* Processing Stages - shown during/after upload */}
+          {(isUploading || stages.some(s => s.status !== "pending")) && (
+            <div className="glass-card p-6 space-y-4">
+              {error && (
+                <div className="flex items-center gap-2 p-3 bg-destructive/10 border border-destructive/30 rounded-lg">
                   <AlertCircle className="w-5 h-5 text-destructive" />
-                ) : (
-                  <div className="w-5 h-5 rounded-full border-2 border-muted" />
-                )}
-                <span className={`text-sm ${
-                  stage.status === "complete" ? "text-success" :
-                  stage.status === "processing" ? "text-primary" :
-                  stage.status === "error" ? "text-destructive" :
-                  "text-muted-foreground"
-                }`}>
-                  {stage.name}
-                </span>
+                  <p className="text-sm text-destructive">{error}</p>
+                </div>
+              )}
+
+              <div className="space-y-3">
+                {stages.map((stage, idx) => (
+                  <div key={idx} className="flex items-center gap-3">
+                    {stage.status === "complete" ? (
+                      <CheckCircle2 className="w-5 h-5 text-success" />
+                    ) : stage.status === "processing" ? (
+                      <Loader2 className="w-5 h-5 text-primary animate-spin" />
+                    ) : stage.status === "error" ? (
+                      <AlertCircle className="w-5 h-5 text-destructive" />
+                    ) : (
+                      <div className="w-5 h-5 rounded-full border-2 border-muted" />
+                    )}
+                    <span className={`text-sm ${stage.status === "complete" ? "text-success" :
+                      stage.status === "processing" ? "text-primary" :
+                        stage.status === "error" ? "text-destructive" :
+                          "text-muted-foreground"
+                      }`}>
+                      {stage.name}
+                    </span>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            </div>
+          )}
         </div>
       )}
     </div>
   );
 }
+

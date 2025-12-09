@@ -191,6 +191,34 @@ class ApiClient {
   }
 
   /**
+   * Upload document to Supabase with Granular Access Control.
+   * Includes access_rules in form data for RBAC/ABAC enforcement.
+   */
+  async uploadToSupabaseWithAccess(file: File, accessRules: {
+    access_level: string;
+    target_department?: string;
+    allowed_users?: string[];
+  }) {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('access_rules', JSON.stringify(accessRules));
+
+    const response = await fetch(`${API_URL}/upload/`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${this.getToken()}`,
+      },
+      body: formData,
+    });
+
+    if (!response.ok) {
+      throw new Error(await response.text());
+    }
+
+    return response.json();
+  }
+
+  /**
    * Upload document to Supabase (sync processing).
    * Waits for full processing before returning.
    * Use for smaller files when immediate search is needed.

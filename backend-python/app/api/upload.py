@@ -1,16 +1,19 @@
 """
 Upload API - Document ingestion pipeline for Supabase.
 Handles: PDF Upload → Storage → OCR → Embedding → Database
+Supports Granular Access Control (RBAC/ABAC) via access_rules.
 """
 
-from fastapi import APIRouter, Depends, UploadFile, File, HTTPException, BackgroundTasks
+from fastapi import APIRouter, Depends, UploadFile, File, Form, HTTPException, BackgroundTasks
 from pydantic import BaseModel
 from typing import Optional, Dict, Any
 from datetime import datetime
 import tempfile
 import os
+import json
 
 from ..models.user import User
+from ..models.access_rules import AccessRules, AccessLevel
 from ..api.auth import get_current_user
 from ..services.gemini_service import gemini_service
 from ..services.supabase_service import supabase_service
@@ -174,15 +177,22 @@ def process_document_supabase(
 async def upload_document(
     background_tasks: BackgroundTasks,
     file: UploadFile = File(...),
+    access_rules: Optional[str] = Form(None),
     current_user: User = Depends(get_current_user)
 ):
     """
-    Upload a document to the K-LENS Knowledge Hub.
+    Upload a document to the K-LENS Knowledge Hub with Granular Access Control.
     
     This endpoint:
-    1. Accepts a PDF file
+    1. Accepts a PDF file with optional access_rules JSON
     2. Starts background processing (OCR → Chunk → Embed → Store)
     3. Returns immediately with upload confirmation
+    
+    Access Levels:
+    - public: Everyone can access
+    - department: Only specified department
+    - managers_only: Only managers in specified department
+    - custom: Only specific users by email
     
     The document will appear in search results once processing completes.
     """
@@ -200,12 +210,30 @@ async def upload_document(
     if len(file_bytes) > 52428800:
         raise HTTPException(status_code=400, detail="File too large (max 50MB)")
     
-    # Prepare metadata
+    # Parse access rules if provided
+    parsed_access_rules = AccessRules()  # Default: public access
+    if access_rules:
+        try:
+            access_data = json.loads(access_rules)
+            parsed_access_rules = AccessRules(**access_data)
+        except (json.JSONDecodeError, ValueError) as e:
+            print(f"⚠️ Invalid access_rules JSON: {e}, using default (public)")
+    
+    # Get user info for ownership tracking
+    user_id = str(current_user.id) if hasattr(current_user, 'id') else "unknown"
+    user_email = current_user.email if hasattr(current_user, 'email') else "unknown@klens.local"
+    user_department = current_user.department if hasattr(current_user, 'department') else "Unknown"
+    
+    # Prepare metadata with access control
+    access_metadata = parsed_access_rules.to_metadata_dict(user_id, user_email)
     metadata = {
-        "uploaded_by": current_user.email if hasattr(current_user, 'email') else str(current_user.id),
-        "department": current_user.department if hasattr(current_user, 'department') else "Unknown",
+        **access_metadata,
+        "uploaded_by": user_email,
+        "department": user_department,
         "upload_time": datetime.utcnow().isoformat()
     }
+    
+    print(f"📋 Access Control: {parsed_access_rules.access_level} | Metadata: {metadata}")
     
     # Quick upload to storage first (synchronous for immediate URL)
     try:
@@ -238,10 +266,12 @@ async def upload_document(
 @router.post("/sync")
 async def upload_document_sync(
     file: UploadFile = File(...),
+    access_rules: Optional[str] = Form(None),
     current_user: User = Depends(get_current_user)
 ):
     """
-    Synchronous upload - waits for full processing before returning.
+    Synchronous upload with Granular Access Control.
+    Waits for full processing before returning.
     Use for smaller files or when you need immediate search availability.
     """
     if not file.filename.lower().endswith('.pdf'):
@@ -255,12 +285,31 @@ async def upload_document_sync(
             detail="File too large for sync upload (max 10MB). Use async endpoint."
         )
     
+    # Parse access rules if provided
+    parsed_access_rules = AccessRules()  # Default: public access
+    if access_rules:
+        try:
+            access_data = json.loads(access_rules)
+            parsed_access_rules = AccessRules(**access_data)
+        except (json.JSONDecodeError, ValueError) as e:
+            print(f"⚠️ Invalid access_rules JSON: {e}, using default (public)")
+    
+    # Get user info for ownership tracking
+    user_id = str(current_user.id) if hasattr(current_user, 'id') else "unknown"
+    user_email = current_user.email if hasattr(current_user, 'email') else "unknown@klens.local"
+    user_department = current_user.department if hasattr(current_user, 'department') else "Unknown"
+    
+    # Prepare metadata with access control
+    access_metadata = parsed_access_rules.to_metadata_dict(user_id, user_email)
     metadata = {
-        "uploaded_by": current_user.email if hasattr(current_user, 'email') else str(current_user.id),
-        "department": current_user.department if hasattr(current_user, 'department') else "Unknown",
+        **access_metadata,
+        "uploaded_by": user_email,
+        "department": user_department,
         "upload_time": datetime.utcnow().isoformat(),
         "sync_upload": True
     }
+    
+    print(f"📋 Sync Upload Access Control: {parsed_access_rules.access_level}")
     
     try:
         result = process_document_supabase(
