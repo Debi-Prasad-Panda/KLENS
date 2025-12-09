@@ -150,8 +150,8 @@ class ApiClient {
     return this.request('/documents/stats/dashboard');
   }
 
-  async getDocumentInsights(docId: number, role: string, refresh: boolean = false) {
-    return this.request(`/documents/${docId}/insights?role=${role}&refresh=${refresh}`);
+  async getDocumentInsights(docId: number, role: string, refresh: boolean = false, language: string = "English") {
+    return this.request(`/documents/${docId}/insights?role=${role}&refresh=${refresh}&language=${encodeURIComponent(language)}`);
   }
 
   // ==================== SUPABASE ENDPOINTS ====================
@@ -252,8 +252,8 @@ class ApiClient {
   /**
    * Get AI insights for a Supabase document (UUID).
    */
-  async getSupabaseDocumentInsights(docId: string, role: 'engineer' | 'manager' = 'engineer', refresh = false) {
-    return this.request(`/search/documents/${docId}/insights?role=${role}&refresh=${refresh}`);
+  async getSupabaseDocumentInsights(docId: string, role: 'engineer' | 'manager' = 'engineer', refresh = false, language: string = "English") {
+    return this.request(`/search/documents/${docId}/insights?role=${role}&refresh=${refresh}&language=${encodeURIComponent(language)}`);
   }
 }
 

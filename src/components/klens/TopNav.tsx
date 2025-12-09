@@ -3,7 +3,18 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { AIChatSidebar } from "./AIChatSidebar";
+
 import { api } from "@/lib/api";
+import { useLanguage, SUPPORTED_LANGUAGES } from "@/contexts/LanguageContext";
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue, 
+} from "@/components/ui/select";
+import { toast } from "sonner";
+import { Languages } from "lucide-react";
 
 interface SearchResult {
   id: string;
@@ -30,6 +41,7 @@ export function TopNav({ onAIChatToggle }: TopNavProps = {}) {
   const searchRef = useRef<HTMLDivElement>(null);
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const { t } = useLanguage();
 
   // Manual search function
   const performSearch = useCallback(async () => {
@@ -115,7 +127,7 @@ export function TopNav({ onAIChatToggle }: TopNavProps = {}) {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onFocus={() => hasSearched && searchResults.length > 0 && setShowSearchResults(true)}
                 onKeyDown={handleSearchKeyDown}
-                placeholder="Search documents... (Enter or click Search)"
+                placeholder={`${t("Search", "Search")}...`}
                 className="w-full h-11 pl-12 pr-10 bg-secondary/50 border border-border rounded-xl text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors"
               />
               {searchQuery && (
@@ -266,6 +278,9 @@ export function TopNav({ onAIChatToggle }: TopNavProps = {}) {
           <Moon className="w-5 h-5 text-muted-foreground" />
         </button>
 
+        {/* Global Language Selector (Moved to Settings) */}
+
+
         {/* Profile */}
         <div className="relative">
           <button 
@@ -291,19 +306,18 @@ export function TopNav({ onAIChatToggle }: TopNavProps = {}) {
                 className="w-full flex items-center gap-3 px-3 py-2 hover:bg-secondary rounded-lg transition-colors text-left"
               >
                 <User className="w-4 h-4 text-muted-foreground" />
-                <span className="text-sm">Profile</span>
+                <span className="text-sm">{t("Profile", "Profile")}</span>
               </button>
               
               <button
                 onClick={() => {
                   setShowProfileMenu(false);
-                  navigate('/dashboard');
-                  window.dispatchEvent(new CustomEvent('navigate-settings'));
+                  navigate('/settings');
                 }}
                 className="w-full flex items-center gap-3 px-3 py-2 hover:bg-secondary rounded-lg transition-colors text-left"
               >
                 <Settings className="w-4 h-4 text-muted-foreground" />
-                <span className="text-sm">Settings</span>
+                <span className="text-sm">{t("Settings", "Settings")}</span>
               </button>
               
               {user?.role === 'admin' && (
@@ -312,7 +326,7 @@ export function TopNav({ onAIChatToggle }: TopNavProps = {}) {
                   className="w-full flex items-center gap-3 px-3 py-2 hover:bg-secondary rounded-lg transition-colors text-left"
                 >
                   <Shield className="w-4 h-4 text-warning" />
-                  <span className="text-sm">Admin Panel</span>
+                  <span className="text-sm">{t("Admin Panel", "Admin Panel")}</span>
                 </button>
               )}
               
@@ -326,7 +340,7 @@ export function TopNav({ onAIChatToggle }: TopNavProps = {}) {
                 className="w-full flex items-center gap-3 px-3 py-2 hover:bg-destructive/20 text-destructive rounded-lg transition-colors text-left"
               >
                 <LogOut className="w-4 h-4" />
-                <span className="text-sm">Logout</span>
+                <span className="text-sm">{t("Logout", "Logout")}</span>
               </button>
             </div>
           )}

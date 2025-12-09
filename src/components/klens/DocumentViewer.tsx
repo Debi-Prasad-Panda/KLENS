@@ -18,13 +18,22 @@ import {
   Gauge,
   Copy,
   ExternalLink,
-  Loader2,
   RefreshCw,
-  Languages,
   Sparkles,
+  Loader2
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useDocumentInsights } from "@/hooks/useDocumentInsights";
+
+import { useLanguage } from "@/contexts/LanguageContext";
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue, 
+} from "@/components/ui/select";
+import { Languages } from "lucide-react";
 
 interface DocumentViewerProps {
   onBack: () => void;
@@ -45,9 +54,10 @@ export function DocumentViewer({ onBack, document }: DocumentViewerProps) {
   const docId = document?.id;
   const [viewMode, setViewMode] = useState<"engineer" | "manager">("engineer");
   const [zoom, setZoom] = useState(100);
-  const [selectedLanguage, setSelectedLanguage] = useState("English");
+  const [contentLanguage, setContentLanguage] = useState("English");
+  const { t } = useLanguage();
 
-  const { engineerInsights, managerInsights, loading, error, fetchInsights, regenerate } = useDocumentInsights(docId);
+  const { engineerInsights, managerInsights, loading, error, fetchInsights, regenerate } = useDocumentInsights(docId, contentLanguage);
 
   // Fetch insights when switching roles
   useEffect(() => {
@@ -90,26 +100,42 @@ export function DocumentViewer({ onBack, document }: DocumentViewerProps) {
             title="Regenerate AI Analysis"
           >
             <RefreshCw className={`w-4 h-4 text-primary ${loading ? 'animate-spin' : ''}`} />
-            <span className="text-sm">Regenerate</span>
+            <span className="text-sm">{t("Regenerate", "Regenerate")}</span>
           </button>
 
-          {/* Language Selector */}
-          <div className="flex items-center gap-2 px-3 py-2 glass-card">
-            <Languages className="w-4 h-4 text-primary" />
-            <select
-              value={selectedLanguage}
-              onChange={(e) => {
-                setSelectedLanguage(e.target.value);
-                toast({ title: "Language Changed", description: `Translating to ${e.target.value}...` });
+          {/* Local Content Language Selector (Restored) */}
+          <div className="glass-card">
+            <Select 
+              value={contentLanguage} 
+              onValueChange={(value) => {
+                setContentLanguage(value);
+                toast({ title: "Summarizing in " + value, description: "Regenerating AI insights..." });
               }}
-              className="bg-transparent text-sm focus:outline-none cursor-pointer"
             >
-              <option value="English">English</option>
-              <option value="Malayalam">മലയാളം</option>
-              <option value="Hindi">हिंदी</option>
-              <option value="Tamil">தமிழ்</option>
-            </select>
+              <SelectTrigger className="w-[180px] bg-transparent border-none focus:ring-0 text-foreground">
+                 <div className="flex items-center gap-2">
+                    <Languages className="w-4 h-4 text-primary" />
+                    <SelectValue placeholder="Content Language" />
+                 </div>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="English">English</SelectItem>
+                <SelectItem value="Hindi">Hindi (हिंदी)</SelectItem>
+                <SelectItem value="Bengali">Bengali (বাংলা)</SelectItem>
+                <SelectItem value="Telugu">Telugu (తెలుగు)</SelectItem>
+                <SelectItem value="Marathi">Marathi (मराठी)</SelectItem>
+                <SelectItem value="Tamil">Tamil (தமிழ்)</SelectItem>
+                <SelectItem value="Urdu">Urdu (اردو)</SelectItem>
+                <SelectItem value="Gujarati">Gujarati (ગુજરાતી)</SelectItem>
+                <SelectItem value="Kannada">Kannada (ಕನ್ನಡ)</SelectItem>
+                <SelectItem value="Malayalam">Malayalam (മലയാളം)</SelectItem>
+                <SelectItem value="Odia">Odia (ଓଡ଼ିଆ)</SelectItem>
+                <SelectItem value="Punjabi">Punjabi (ਪੰਜਾਬੀ)</SelectItem>
+                <SelectItem value="Assamese">Assamese (অসমীয়া)</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
+
 
           {/* View Original PDF - only for Knowledge Hub docs */}
           {document?.s3_url && (
@@ -121,7 +147,7 @@ export function DocumentViewer({ onBack, document }: DocumentViewerProps) {
               title="Open original PDF"
             >
               <ExternalLink className="w-4 h-4" />
-              <span className="text-sm">View Original</span>
+              <span className="text-sm">{t("View Original", "View Original")}</span>
             </a>
           )}
 
@@ -216,7 +242,7 @@ export function DocumentViewer({ onBack, document }: DocumentViewerProps) {
                 }`}
               >
                 <Wrench className="w-4 h-4" />
-                <span className="text-sm font-medium">Engineer View</span>
+                <span className="text-sm font-medium">{t("Engineer View", "Engineer View")}</span>
               </button>
               <button
                 onClick={() => setViewMode("manager")}
@@ -227,7 +253,7 @@ export function DocumentViewer({ onBack, document }: DocumentViewerProps) {
                 }`}
               >
                 <Briefcase className="w-4 h-4" />
-                <span className="text-sm font-medium">Manager View</span>
+                <span className="text-sm font-medium">{t("Manager View", "Manager View")}</span>
               </button>
             </div>
           </div>
