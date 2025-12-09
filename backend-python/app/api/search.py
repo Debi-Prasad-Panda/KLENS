@@ -124,12 +124,13 @@ async def get_document(
 async def get_document_insights(
     doc_id: str,
     role: str = "engineer",
+    language: str = "English",
     refresh: bool = False,
     current_user: User = Depends(get_current_user)
 ):
     """
     Get AI-generated role-based insights for a Knowledge Hub document (UUID).
-    Uses metadata column for caching.
+    Uses metadata column for caching, keyed by role and language.
     """
     # 1. Fetch document
     doc = supabase_service.get_document_by_id(doc_id)
@@ -138,19 +139,23 @@ async def get_document_insights(
     
     # 2. Check cache in metadata
     metadata = doc.get("metadata", {}) or {}
+    # Cache key includes language if not English
     cache_key = f"{role}_insights"
+    if language != "English":
+        cache_key = f"{role}_insights_{language}"
     
     if not refresh and cache_key in metadata:
-        print(f"[Cache HIT] Returning cached {role} insights for doc {doc_id}")
+        print(f"[Cache HIT] Returning cached {role} insights ({language}) for doc {doc_id}")
         return metadata[cache_key]
     
     # 3. Generate insights API
     try:
-        print(f"[Cache MISS] Generating {role} insights for doc {doc_id}")
+        print(f"[Cache MISS] Generating {role} insights ({language}) for doc {doc_id}")
         insights = gemini_service.generate_role_insights(
             text=doc.get("content_chunk", ""),
             role=role,
-            doc_name=doc.get("file_name", "Document")
+            doc_name=doc.get("file_name", "Document"),
+            language=language
         )
         
         # 4. Cache in metadata

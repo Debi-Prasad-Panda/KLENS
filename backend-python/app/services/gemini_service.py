@@ -63,17 +63,28 @@ Focus on industrial safety entities."""
         except Exception as e:
             return [0.0] * 768  # Return zero vector on error
 
-    def generate_role_insights(self, text: str, role: str, doc_name: str = "") -> Dict:
+    def generate_role_insights(self, text: str, role: str, doc_name: str = "", language: str = "English") -> Dict:
         """Generate role-specific AI insights for a document.
         
         Args:
             text: Document text content
             role: Either 'engineer' or 'manager'
             doc_name: Optional document name for context
+            language: Target language for the insights (default: English)
         
         Returns:
             Dict with structured insights based on role
         """
+        # Add translation instruction if language is not English
+        lang_instruction = ""
+        if language != "English":
+            lang_instruction = f"""
+IMPORTANT TRANSLATION INSTRUCTION: 
+You MUST translate the VALUES of the JSON response into {language}. 
+However, you MUST keep the KEYS of the JSON (e.g., 'summary', 'specs', 'label', 'value', 'compliance', 'risks', 'text') in English.
+Example: {{ "summary": ["Converted text in {language}"] }} NOT {{ "सारांश": [...] }}
+"""
+
         if role == "engineer":
             prompt = f"""Analyze this industrial document from an ENGINEER's perspective.
 Document: {doc_name}
@@ -83,7 +94,6 @@ Return a JSON object with exactly this structure:
 {{
   "summary": ["point 1", "point 2", "point 3"],
   "specs": [
-    {{"label": "spec name", "value": "spec value"}},
     {{"label": "spec name", "value": "spec value"}}
   ],
   "compliance": {{
@@ -97,7 +107,7 @@ Return a JSON object with exactly this structure:
 }}
 
 Focus on: technical specifications, operating parameters, maintenance requirements, safety protocols, compliance standards.
-Return ONLY valid JSON, no markdown or explanation."""
+Return ONLY valid JSON, no markdown or explanation.{lang_instruction}"""
 
         else:  # manager
             prompt = f"""Analyze this industrial document from a MANAGER's perspective.
@@ -117,7 +127,7 @@ Return a JSON object with exactly this structure:
 }}
 
 Focus on: financial implications, operational costs, business risks, budget requirements, strategic recommendations.
-Return ONLY valid JSON, no markdown or explanation."""
+Return ONLY valid JSON, no markdown or explanation.{lang_instruction}"""
 
         try:
             response = self.model.generate_content(prompt)

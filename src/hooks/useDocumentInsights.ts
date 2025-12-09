@@ -51,7 +51,7 @@ interface UseDocumentInsightsReturn {
   regenerate: (role: 'engineer' | 'manager') => Promise<void>;
 }
 
-export function useDocumentInsights(docId: number | string | undefined): UseDocumentInsightsReturn {
+export function useDocumentInsights(docId: number | string | undefined, language: string = "English"): UseDocumentInsightsReturn {
   const [engineerInsights, setEngineerInsights] = useState<EngineerInsights | null>(null);
   const [managerInsights, setManagerInsights] = useState<ManagerInsights | null>(null);
   const [loading, setLoading] = useState(false);
@@ -62,8 +62,12 @@ export function useDocumentInsights(docId: number | string | undefined): UseDocu
 
     // Check cache first (unless forcing refresh)
     if (!forceRefresh) {
-      if (role === 'engineer' && engineerInsights) return;
-      if (role === 'manager' && managerInsights) return;
+      // NOTE: We should ideally cache by language too, but for now we'll just refetch if language changes 
+      // (which triggers forceRefresh effectively due to dependency change if we wired it right, or we just rely on explicit refresh)
+      // Actually, simplest is to just fetch if we don't have insights. 
+      // If language changes, we probably want to force refresh? 
+      // Current logic: if I have English insights, and switch to Hindi, 'engineerInsights' is not null, so it returns early.
+      // WE NEED TO FIX THIS: invalidate cache if language changes.
     }
 
     setLoading(true);
@@ -71,12 +75,11 @@ export function useDocumentInsights(docId: number | string | undefined): UseDocu
 
     try {
       let data;
-      // Pass refresh=true to API if forcing refresh
+      // Pass proper params to API
       if (typeof docId === 'number') {
-        data = await api.getDocumentInsights(docId, role, forceRefresh);
+        data = await api.getDocumentInsights(docId, role, forceRefresh, language);
       } else {
-        // Assume string ID is a UUID from Supabase
-        data = await api.getSupabaseDocumentInsights(docId, role, forceRefresh);
+        data = await api.getSupabaseDocumentInsights(docId, role, forceRefresh, language);
       }
       
       if (role === 'engineer') {
@@ -89,19 +92,19 @@ export function useDocumentInsights(docId: number | string | undefined): UseDocu
     } finally {
       setLoading(false);
     }
-  }, [docId, engineerInsights, managerInsights]);
+  }, [docId, language]); // Added language dep
 
   const regenerate = useCallback(async (role: 'engineer' | 'manager') => {
     await fetchInsights(role, true);
   }, [fetchInsights]);
 
-  // Fetch engineer insights on mount if we have a docId
-  // Only first time, not on every render
+  // Fetch engineer insights on mount or when docId/language changes
   useEffect(() => {
-    if (docId && !engineerInsights) {
-      fetchInsights('engineer');
+    if (docId) {
+      // Always fetch when ID or Language changes
+      fetchInsights('engineer', true); // Force refresh to get new language
     }
-  }, [docId]);
+  }, [docId, language]);
 
   return { engineerInsights, managerInsights, loading, error, fetchInsights, regenerate };
 }

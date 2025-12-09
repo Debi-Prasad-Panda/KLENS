@@ -15,9 +15,10 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { useLanguage } from "@/contexts/LanguageContext";
 import React from "react";
 
-type TabType = "dashboard" | "search" | "graph" | "iot" | "ar" | "compliance" | "documents" | "document-view" | "features" | "profile";
+type TabType = "dashboard" | "search" | "graph" | "iot" | "ar" | "compliance" | "documents" | "document-view" | "features" | "profile" | "settings";
 
 interface SidebarProps {
   activeTab: TabType;
@@ -38,6 +39,19 @@ const navItems: Array<{ id: string; label: string; icon: typeof LayoutDashboard;
 export function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const { t } = useLanguage();
+
+  // Navigation items with translation keys
+  const navItems = [
+    { id: "dashboard", label: t("Dashboard", "Dashboard"), icon: LayoutDashboard },
+    { id: "documents", label: t("Documents", "Documents"), icon: FileText },
+    { id: "features", label: t("Features", "Advanced Features"), icon: Sparkles, badge: t("New", "New") },
+    { id: "search", label: t("Search", "Search & Discovery"), icon: Search },
+    { id: "graph", label: t("Knowledge Graph", "Knowledge Graph"), icon: Share2 },
+    { id: "iot", label: t("IoT Dashboard", "IoT & UNS"), icon: Radio, badge: "Live" },
+    { id: "ar", label: t("AR Visualization", "AR Preview"), icon: Glasses, badge: "Beta" },
+    { id: "compliance", label: t("Compliance", "Compliance"), icon: Shield },
+  ];
 
   const handleLogout = () => {
     logout();
@@ -115,7 +129,7 @@ export function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
             className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-destructive/20 hover:bg-destructive/30 text-destructive rounded-lg text-sm font-medium transition-colors"
           >
             <LogOut className="w-4 h-4" />
-            Logout
+            {t("Logout", "Logout")}
           </button>
         </div>
       </div>

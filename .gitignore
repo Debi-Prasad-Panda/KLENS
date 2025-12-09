@@ -1,12 +1,12 @@
-# # Environment files
-# .env
-# **/.env
+# Environment files
+.env
+**/.env
 
-# Keep example files
-# .env.example
-# **/.env.example
-# **/.env.local
-# **/.env.local.example
+Keep example files
+.env.example
+**/.env.example
+**/.env.local
+**/.env.local.example
 
 # Dependencies
 node_modules/
