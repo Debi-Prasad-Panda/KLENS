@@ -111,6 +111,20 @@ export function DocumentViewer({ onBack, document }: DocumentViewerProps) {
             </select>
           </div>
 
+          {/* View Original PDF - only for Knowledge Hub docs */}
+          {document?.s3_url && (
+            <a
+              href={document.s3_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 px-3 py-2 bg-primary/20 text-primary border border-primary/30 rounded-lg hover:bg-primary/30 transition-colors"
+              title="Open original PDF"
+            >
+              <ExternalLink className="w-4 h-4" />
+              <span className="text-sm">View Original</span>
+            </a>
+          )}
+
           {/* Actions */}
           <button className="w-10 h-10 rounded-lg bg-secondary/50 border border-border flex items-center justify-center hover:bg-secondary transition-colors">
             <Bookmark className="w-5 h-5" />

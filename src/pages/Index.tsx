@@ -15,6 +15,7 @@ import { FeaturesShowcase } from "@/components/klens/FeaturesShowcase";
 import { ProfileView } from "@/components/klens/ProfileView";
 import { DocumentLibrary } from "@/components/klens/DocumentLibrary";
 import { SettingsView } from "@/components/klens/SettingsView";
+import { SearchDiscoveryView } from "@/components/klens/SearchDiscoveryView";
 
 type TabType = "dashboard" | "search" | "graph" | "iot" | "ar" | "compliance" | "documents" | "document-view" | "features" | "profile" | "settings";
 
@@ -63,7 +64,10 @@ const Index = () => {
       case "compliance":
         return <ComplianceView />;
       case "search":
-        return <PlaceholderView type="search" />;
+        return <SearchDiscoveryView onOpenDocument={(doc) => {
+          setSelectedDocument(doc);
+          setActiveTab("document-view");
+        }} />;
       case "ar":
         return <PlaceholderView type="ar" />;
       case "features":

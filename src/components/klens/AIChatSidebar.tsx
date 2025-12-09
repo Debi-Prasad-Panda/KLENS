@@ -1,13 +1,20 @@
-import { X, Send, Sparkles, FileText, AlertCircle, CheckCircle, Loader2 } from "lucide-react";
+import { X, Send, Sparkles, FileText, AlertCircle, CheckCircle, Loader2, ExternalLink } from "lucide-react";
 import { useState } from "react";
 import { api } from "@/lib/api";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
+interface Source {
+  file_name: string;
+  s3_url: string;
+  match_type: string;
+}
+
 interface Message {
   role: "user" | "assistant";
   content: string;
   timestamp: Date;
+  sources?: Source[];
 }
 
 interface AIChatSidebarProps {
@@ -19,7 +26,7 @@ export function AIChatSidebar({ isOpen, onClose }: AIChatSidebarProps) {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
-      content: "Hello! I'm K-LENS AI Assistant. I can help you with document analysis, compliance checks, risk assessments, and more. How can I assist you today?",
+      content: "Hello! I'm K-LENS AI Assistant with **Knowledge Hub access**. I can search your documents and provide informed answers. Try asking about pump stations, boilers, or any uploaded documents!",
       timestamp: new Date()
     }
   ]);
@@ -46,7 +53,8 @@ export function AIChatSidebar({ isOpen, onClose }: AIChatSidebarProps) {
       const aiResponse: Message = {
         role: "assistant",
         content: data.message || "I apologize, I couldn't process that request.",
-        timestamp: new Date()
+        timestamp: new Date(),
+        sources: data.sources || undefined
       };
       setMessages(prev => [...prev, aiResponse]);
     } catch (error) {
@@ -125,6 +133,29 @@ export function AIChatSidebar({ isOpen, onClose }: AIChatSidebarProps) {
               ) : (
                 <p className="text-sm">{msg.content}</p>
               )}
+              
+              {/* RAG Sources */}
+              {msg.sources && msg.sources.length > 0 && (
+                <div className="mt-3 pt-2 border-t border-border/50">
+                  <p className="text-xs text-muted-foreground mb-1">📚 Sources:</p>
+                  <div className="space-y-1">
+                    {msg.sources.map((source, i) => (
+                      <a
+                        key={i}
+                        href={source.s3_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1.5 text-xs text-primary hover:underline"
+                      >
+                        <FileText className="w-3 h-3" />
+                        {source.file_name}
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
               <p className="text-xs opacity-70 mt-1">
                 {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
               </p>

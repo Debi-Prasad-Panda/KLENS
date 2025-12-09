@@ -1,8 +1,18 @@
-import { Search, Bell, Moon, User, Sparkles, LogOut, Settings, Shield } from "lucide-react";
-import { useState } from "react";
+import { Search, Bell, Moon, User, Sparkles, LogOut, Settings, Shield, FileText, Loader2 } from "lucide-react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { AIChatSidebar } from "./AIChatSidebar";
+import { api } from "@/lib/api";
+
+interface SearchResult {
+  id: string;
+  file_name: string;
+  s3_url: string;
+  content_chunk: string;
+  score: number;
+  match_type: string;
+}
 
 interface TopNavProps {
   onAIChatToggle?: (isOpen: boolean) => void;
@@ -12,26 +22,177 @@ export function TopNav({ onAIChatToggle }: TopNavProps = {}) {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showAIChat, setShowAIChat] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [showSearchResults, setShowSearchResults] = useState(false);
+  const [hasSearched, setHasSearched] = useState(false);
+  const searchRef = useRef<HTMLDivElement>(null);
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+
+  // Manual search function
+  const performSearch = useCallback(async () => {
+    if (searchQuery.trim().length < 2) return;
+    
+    setIsSearching(true);
+    setHasSearched(true);
+    try {
+      const response = await api.hybridSearch(searchQuery.trim(), 5);
+      setSearchResults(response.results || []);
+      setShowSearchResults(true);
+    } catch (error) {
+      console.error("Search failed:", error);
+      setSearchResults([]);
+    } finally {
+      setIsSearching(false);
+    }
+  }, [searchQuery]);
+
+  // Debounced auto-search (only when typing)
+  useEffect(() => {
+    if (searchQuery.trim().length < 2) {
+      // Don't clear results immediately - keep them visible
+      return;
+    }
+    
+    const timer = setTimeout(() => {
+      performSearch();
+    }, 500);
+    
+    return () => clearTimeout(timer);
+  }, [searchQuery, performSearch]);
+
+  // Close search results when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setShowSearchResults(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const toggleAIChat = () => {
     const newState = !showAIChat;
     setShowAIChat(newState);
     onAIChatToggle?.(newState);
   };
+
+  const handleResultClick = (result: SearchResult) => {
+    window.open(result.s3_url, "_blank");
+    setShowSearchResults(false);
+  };
+
+  const handleSearchKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      performSearch();
+    }
+    if (e.key === "Escape") {
+      setShowSearchResults(false);
+    }
+  };
+
+  const clearSearch = () => {
+    setSearchQuery("");
+    setSearchResults([]);
+    setShowSearchResults(false);
+    setHasSearched(false);
+  };
+
   return (
     <>
       <header className="h-16 border-b border-border bg-card/30 backdrop-blur-xl flex items-center justify-between px-6 sticky top-0 z-40">
-        {/* Search Bar */}
-        <div className="flex-1 max-w-2xl">
-          <div className="relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-            <input
-              type="text"
-              placeholder="Search documents, people..."
-              className="w-full h-11 pl-12 pr-4 bg-secondary/50 border border-border rounded-xl text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
-            />
+        {/* Search Bar with Hybrid Search */}
+        <div className="flex-1 max-w-2xl" ref={searchRef}>
+          <div className="relative flex gap-2">
+            <div className="relative flex-1">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onFocus={() => hasSearched && searchResults.length > 0 && setShowSearchResults(true)}
+                onKeyDown={handleSearchKeyDown}
+                placeholder="Search documents... (Enter or click Search)"
+                className="w-full h-11 pl-12 pr-10 bg-secondary/50 border border-border rounded-xl text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors"
+              />
+              {searchQuery && (
+                <button
+                  onClick={clearSearch}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                >
+                  ×
+                </button>
+              )}
+            </div>
+            
+            {/* Search Button */}
+            <button
+              onClick={performSearch}
+              disabled={isSearching || searchQuery.trim().length < 2}
+              className="h-11 px-4 bg-primary text-primary-foreground rounded-xl flex items-center gap-2 hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isSearching ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Search className="w-4 h-4" />
+              )}
+              <span className="text-sm font-medium hidden sm:inline">Search</span>
+            </button>
+            
+            {/* Search Results Dropdown */}
+            {showSearchResults && (
+              <div className="absolute top-full left-0 right-0 mt-2 bg-card border border-border rounded-xl shadow-2xl overflow-hidden z-50">
+                {searchResults.length > 0 ? (
+                  <>
+                    <div className="p-3 border-b border-border bg-secondary/30">
+                      <p className="text-xs text-muted-foreground font-medium">
+                        {searchResults.length} result{searchResults.length !== 1 ? 's' : ''} from Knowledge Hub
+                      </p>
+                    </div>
+                    <div className="max-h-80 overflow-y-auto">
+                      {searchResults.map((result) => (
+                        <button
+                          key={result.id}
+                          onClick={() => handleResultClick(result)}
+                          className="w-full p-3 text-left hover:bg-secondary/50 transition-colors border-b border-border/50 last:border-0"
+                        >
+                          <div className="flex items-start gap-3">
+                            <FileText className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
+                            <div className="flex-1 min-w-0">
+                              <p className="font-medium text-sm truncate">{result.file_name}</p>
+                              <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                                {result.content_chunk.substring(0, 100)}...
+                              </p>
+                              <div className="flex items-center gap-2 mt-2">
+                                <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                                  result.match_type === "vector" 
+                                    ? "bg-primary/20 text-primary" 
+                                    : "bg-success/20 text-success"
+                                }`}>
+                                  {result.match_type === "vector" ? "Semantic" : "Keyword"}
+                                </span>
+                                <span className="text-xs text-muted-foreground">
+                                  {(result.score * 100).toFixed(0)}% match
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </>
+                ) : hasSearched ? (
+                  <div className="p-6 text-center">
+                    <FileText className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
+                    <p className="text-sm text-muted-foreground">No documents found</p>
+                    <p className="text-xs text-muted-foreground mt-1">Try different keywords</p>
+                  </div>
+                ) : null}
+              </div>
+            )}
           </div>
         </div>
 

@@ -51,7 +51,7 @@ interface UseDocumentInsightsReturn {
   regenerate: (role: 'engineer' | 'manager') => Promise<void>;
 }
 
-export function useDocumentInsights(docId: number | undefined): UseDocumentInsightsReturn {
+export function useDocumentInsights(docId: number | string | undefined): UseDocumentInsightsReturn {
   const [engineerInsights, setEngineerInsights] = useState<EngineerInsights | null>(null);
   const [managerInsights, setManagerInsights] = useState<ManagerInsights | null>(null);
   const [loading, setLoading] = useState(false);
@@ -70,8 +70,14 @@ export function useDocumentInsights(docId: number | undefined): UseDocumentInsig
     setError(null);
 
     try {
+      let data;
       // Pass refresh=true to API if forcing refresh
-      const data = await api.getDocumentInsights(docId, role, forceRefresh);
+      if (typeof docId === 'number') {
+        data = await api.getDocumentInsights(docId, role, forceRefresh);
+      } else {
+        // Assume string ID is a UUID from Supabase
+        data = await api.getSupabaseDocumentInsights(docId, role, forceRefresh);
+      }
       
       if (role === 'engineer') {
         setEngineerInsights(data as EngineerInsights);

@@ -21,6 +21,11 @@ class Settings(BaseSettings):
     # Gemini AI
     GEMINI_API_KEY: str
     
+    # Supabase
+    SUPABASE_URL: str = ""
+    SUPABASE_KEY: str = ""
+    SUPABASE_BUCKET: str = "raw_files"
+    
     # Upload
     UPLOAD_DIR: str = "./uploads"
     MAX_FILE_SIZE: int = 52428800  # 50MB

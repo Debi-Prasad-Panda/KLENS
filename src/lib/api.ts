@@ -153,6 +153,80 @@ class ApiClient {
   async getDocumentInsights(docId: number, role: string, refresh: boolean = false) {
     return this.request(`/documents/${docId}/insights?role=${role}&refresh=${refresh}`);
   }
+
+  // ==================== SUPABASE ENDPOINTS ====================
+
+  /**
+   * Hybrid search combining semantic (AI) and keyword matching.
+   * Uses Supabase knowledge_hub with pgvector.
+   */
+  async hybridSearch(query: string, limit: number = 10) {
+    return this.request('/search/', {
+      method: 'POST',
+      body: JSON.stringify({ query, limit }),
+    });
+  }
+
+  /**
+   * Upload document to Supabase (async processing).
+   * Returns immediately, processing happens in background.
+   */
+  async uploadToSupabase(file: File) {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const response = await fetch(`${API_URL}/upload/`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${this.getToken()}`,
+      },
+      body: formData,
+    });
+
+    if (!response.ok) {
+      throw new Error(await response.text());
+    }
+
+    return response.json();
+  }
+
+  /**
+   * Upload document to Supabase (sync processing).
+   * Waits for full processing before returning.
+   * Use for smaller files when immediate search is needed.
+   */
+  async uploadToSupabaseSync(file: File) {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const response = await fetch(`${API_URL}/upload/sync`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${this.getToken()}`,
+      },
+      body: formData,
+    });
+
+    if (!response.ok) {
+      throw new Error(await response.text());
+    }
+
+    return response.json();
+  }
+
+  /**
+   * Get all documents from Supabase knowledge hub.
+   */
+  async getKnowledgeHubDocuments(limit: number = 50, offset: number = 0) {
+    return this.request(`/search/documents?limit=${limit}&offset=${offset}`);
+  }
+
+  /**
+   * Get AI insights for a Supabase document (UUID).
+   */
+  async getSupabaseDocumentInsights(docId: string, role: 'engineer' | 'manager' = 'engineer', refresh = false) {
+    return this.request(`/search/documents/${docId}/insights?role=${role}&refresh=${refresh}`);
+  }
 }
 
 export const api = new ApiClient();

@@ -7,6 +7,8 @@ import google.generativeai as genai
 from ..core.config import settings
 from ..models.user import User
 from ..api.auth import get_current_user
+from ..services.gemini_service import gemini_service
+from ..services.supabase_service import supabase_service
 
 router = APIRouter(prefix="/chat", tags=["chat"])
 
@@ -27,9 +29,23 @@ class ChatRequest(BaseModel):
 class ChatResponse(BaseModel):
     message: str
     timestamp: str
+    sources: Optional[List[dict]] = None  # RAG sources
 
 
 SYSTEM_INSTRUCTION = """You are K-LENS AI Assistant - an intelligent platform for industrial document management, IoT monitoring, and compliance tracking in railway and industrial environments.
+
+## YOUR CAPABILITIES
+
+You have access to a **Knowledge Hub** containing industrial documents, manuals, and memos. When the user asks questions, you will be provided with relevant context from these documents to help answer accurately.
+
+### When Context is Provided:
+- Use the retrieved document content to answer questions accurately
+- Always cite which document the information came from
+- If the context doesn't fully answer the question, say so and provide what you can
+
+### When No Context is Available:
+- Answer based on your general knowledge about K-LENS features
+- Suggest the user upload relevant documents to the Knowledge Hub
 
 ## K-LENS FEATURES
 
@@ -37,44 +53,64 @@ SYSTEM_INSTRUCTION = """You are K-LENS AI Assistant - an intelligent platform fo
 - **Role-Based Access Control** (Admin, Manager, Engineer, Safety Officer)
 - **Cinderella Access**: Time-bound emergency privileges that auto-expire
 - **Nuclear Keys**: Multi-signature approval system for critical actions
-- JWT authentication with bcrypt password hashing
-- Complete audit trail with version control
 
 ### 2. Document Management
 - Multi-format support: PDF, DOCX, Excel, Images
-- OCR text extraction using Tesseract
+- OCR text extraction
 - AI-powered document analysis
-- Role-specific views for different user types
 - Document versioning with instant revert
 
-### 3. AI-Powered Analysis
-- Document summarization based on user role
-- Risk detection and assessment
-- Compliance checking against regulations
-- Multilingual support
+### 3. Knowledge Hub (Supabase)
+- Semantic search using vector embeddings
+- Hybrid search (AI + keyword matching)
+- Automatic document chunking and indexing
 
-### 4. Knowledge Graph
-- Interactive visualization of Documents, Risks, and People
-- Semantic search capabilities
-- Risk propagation visualization
+## RESPONSE FORMATTING
 
-### 5. Compliance & Audit
-- Tamper-proof audit logging
-- Version control for all documents
-- Forensic trail for incident investigation
+Use proper Markdown formatting:
+- **Bold important terms**
+- Use bullet points for lists
+- Use > blockquotes for document citations
+- Keep responses well-organized and scannable"""
 
-## RESPONSE FORMATTING GUIDELINES
 
-Use proper Markdown formatting to create structured, professional responses:
+def retrieve_context(query: str, limit: int = 3) -> List[dict]:
+    """
+    Retrieve relevant documents from knowledge_hub for RAG.
+    """
+    try:
+        # Generate embedding for the query
+        query_embedding = gemini_service.generate_embedding(query)
+        
+        # Search knowledge hub
+        results = supabase_service.hybrid_search(
+            query_text=query,
+            query_embedding=query_embedding,
+            limit=limit
+        )
+        
+        return results
+    except Exception as e:
+        print(f"RAG retrieval error: {e}")
+        return []
 
-- **Use ## for main headings** and ### for subheadings
-- **Bold important terms** using double asterisks
-- Use bullet points (-) for lists
-- Use numbered lists (1. 2. 3.) for sequential steps
-- Use > blockquotes for warnings or important notes
-- Add horizontal rules (---) between major sections
-- Keep responses well-organized and scannable
-- Be concise but thorough"""
+
+def format_context_for_prompt(results: List[dict]) -> str:
+    """
+    Format retrieved documents into context for the AI prompt.
+    """
+    if not results:
+        return ""
+    
+    context_parts = ["## Retrieved Context from Knowledge Hub:\n"]
+    
+    for i, result in enumerate(results, 1):
+        context_parts.append(f"### Document {i}: {result.get('file_name', 'Unknown')}")
+        context_parts.append(f"**Match Type:** {result.get('match_type', 'unknown')}")
+        context_parts.append(f"**Content:**\n> {result.get('content_chunk', '')[:800]}")
+        context_parts.append("")
+    
+    return "\n".join(context_parts)
 
 
 @router.post("/", response_model=ChatResponse)
@@ -82,11 +118,34 @@ async def send_message(
     request: ChatRequest,
     current_user: User = Depends(get_current_user)
 ):
-    """Send a message to K-LENS AI Assistant."""
+    """
+    Send a message to K-LENS AI Assistant with RAG (Retrieval-Augmented Generation).
+    
+    The assistant will:
+    1. Search the Knowledge Hub for relevant documents
+    2. Include that context in the AI prompt
+    3. Generate an informed response citing sources
+    """
     if not request.message:
         raise HTTPException(status_code=400, detail="Message is required")
     
     try:
+        # Step 1: Retrieve relevant context from Knowledge Hub (RAG)
+        print(f"[RAG] Searching for context: '{request.message[:50]}...'")
+        rag_results = retrieve_context(request.message, limit=3)
+        context_text = format_context_for_prompt(rag_results)
+        
+        if rag_results:
+            print(f"[RAG] Found {len(rag_results)} relevant documents")
+        else:
+            print("[RAG] No relevant documents found")
+        
+        # Step 2: Build enhanced prompt with context
+        enhanced_message = request.message
+        if context_text:
+            enhanced_message = f"{context_text}\n\n---\n\n**User Question:** {request.message}"
+        
+        # Step 3: Generate response with Gemini
         model = genai.GenerativeModel(
             model_name="gemini-flash-latest",
             system_instruction=SYSTEM_INSTRUCTION
@@ -101,11 +160,24 @@ async def send_message(
             })
         
         chat = model.start_chat(history=history)
-        response = chat.send_message(request.message)
+        response = chat.send_message(enhanced_message)
+        
+        # Format sources for response
+        sources = [
+            {
+                "file_name": r.get("file_name"),
+                "s3_url": r.get("s3_url"),
+                "match_type": r.get("match_type")
+            }
+            for r in rag_results
+        ] if rag_results else None
         
         return ChatResponse(
             message=response.text,
-            timestamp=datetime.utcnow().isoformat()
+            timestamp=datetime.utcnow().isoformat(),
+            sources=sources
         )
     except Exception as e:
+        print(f"Chat error: {e}")
         raise HTTPException(status_code=500, detail=f"Failed to process message: {str(e)}")
+

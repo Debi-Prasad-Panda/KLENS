@@ -13,7 +13,7 @@ from .models.approval import Approval
 from .models.document_version import DocumentVersion
 
 # Import routers
-from .api import auth, documents, approvals, chat, websocket
+from .api import auth, documents, approvals, chat, websocket, search, upload
 
 app = FastAPI(title="K-LENS API", version="2.0.0")
 
@@ -32,6 +32,8 @@ app.include_router(documents.router, prefix="/api")
 app.include_router(approvals.router, prefix="/api")
 app.include_router(chat.router, prefix="/api")
 app.include_router(websocket.router, prefix="/api")
+app.include_router(search.router, prefix="/api")
+app.include_router(upload.router, prefix="/api")
 
 
 def create_initial_data():
@@ -62,15 +64,18 @@ def create_initial_data():
 
 @app.on_event("startup")
 async def startup():
-    # Initialize database (creates pgvector extension, then tables)
-    init_db()
-    
-    # Create initial data (admin user)
-    create_initial_data()
+    # Try to initialize local database (optional - for legacy endpoints)
+    try:
+        init_db()
+        create_initial_data()
+        print("✅ Local Database: Connected")
+    except Exception as e:
+        print(f"⚠️ Local Database: Not available ({type(e).__name__})")
+        print("   → Supabase endpoints will still work!")
     
     print("✅ K-LENS FastAPI Backend Started")
-    print(f"📊 Database: {settings.DATABASE_URL}")
     print(f"🤖 Gemini AI: {'Configured' if settings.GEMINI_API_KEY else 'Missing API Key'}")
+    print(f"☁️ Supabase: {'Configured' if settings.SUPABASE_URL else 'Not Configured'}")
 
 
 @app.get("/")
