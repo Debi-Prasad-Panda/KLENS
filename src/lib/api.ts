@@ -255,6 +255,67 @@ class ApiClient {
   async getSupabaseDocumentInsights(docId: string, role: 'engineer' | 'manager' = 'engineer', refresh = false, language: string = "English") {
     return this.request(`/search/documents/${docId}/insights?role=${role}&refresh=${refresh}&language=${encodeURIComponent(language)}`);
   }
+
+  // ==================== SILENT HANDOVER ENDPOINTS ====================
+
+  /**
+   * Generate a Legacy Pack handover report for a departing employee.
+   * Combines Neo4j graph analysis, Supabase activity/resolution data, and Gemini AI.
+   */
+  async generateHandoverReport(userEmail: string, userName?: string) {
+    return this.request('/handover/generate', {
+      method: 'POST',
+      body: JSON.stringify({ user_email: userEmail, user_name: userName }),
+    });
+  }
+
+  /**
+   * Get list of users who are sole managers of critical assets.
+   * These users should show a warning icon (⚠️) in the UI.
+   */
+  async getAtRiskUsers() {
+    return this.request('/handover/at-risk-users');
+  }
+
+  /**
+   * Simulate what happens when a user leaves.
+   * Returns impact assessment for visualization.
+   */
+  async simulateDeparture(userEmail: string) {
+    return this.request(`/handover/simulate/${encodeURIComponent(userEmail)}`, {
+      method: 'POST',
+    });
+  }
+
+  /**
+   * Get full dependency graph for a user.
+   */
+  async getUserDependencies(userEmail: string) {
+    return this.request(`/handover/user-dependencies/${encodeURIComponent(userEmail)}`);
+  }
+
+  /**
+   * Get assets that only this user manages (orphaned if they leave).
+   */
+  async getOrphanedAssets(userEmail: string) {
+    return this.request(`/handover/orphaned-assets/${encodeURIComponent(userEmail)}`);
+  }
+
+  /**
+   * Manually create a User→Asset relationship.
+   */
+  async createUserAssetLink(userEmail: string, assetName: string, assetType: string = 'Machine', isPrimary: boolean = true) {
+    return this.request('/handover/user-asset', {
+      method: 'POST',
+      body: JSON.stringify({
+        user_email: userEmail,
+        asset_name: assetName,
+        asset_type: assetType,
+        is_primary: isPrimary,
+      }),
+    });
+  }
 }
 
 export const api = new ApiClient();
+

@@ -8,6 +8,7 @@ import {
   Glasses, 
   Shield,
   User,
+  Users,
   ChevronRight,
   FileText,
   Sparkles,
@@ -18,7 +19,7 @@ import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import React from "react";
 
-type TabType = "dashboard" | "search" | "graph" | "iot" | "ar" | "compliance" | "documents" | "document-view" | "features" | "profile" | "settings";
+type TabType = "dashboard" | "search" | "graph" | "iot" | "ar" | "compliance" | "documents" | "document-view" | "features" | "profile" | "settings" | "succession";
 
 interface SidebarProps {
   activeTab: TabType;
@@ -51,6 +52,7 @@ export function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
     { id: "iot", label: t("IoT Dashboard", "IoT & UNS"), icon: Radio, badge: "Live" },
     { id: "ar", label: t("AR Visualization", "AR Preview"), icon: Glasses, badge: "Beta" },
     { id: "compliance", label: t("Compliance", "Compliance"), icon: Shield },
+    { id: "succession", label: t("Succession Planning", "Succession Planning"), icon: Users, badge: "⚠️", adminOnly: true },
   ];
 
   const handleLogout = () => {

@@ -13,7 +13,7 @@ from .models.approval import Approval
 from .models.document_version import DocumentVersion
 
 # Import routers
-from .api import auth, documents, approvals, chat, websocket, search, upload
+from .api import auth, documents, approvals, chat, websocket, search, upload, handover
 
 app = FastAPI(title="K-LENS API", version="2.0.0")
 
@@ -34,6 +34,7 @@ app.include_router(chat.router, prefix="/api")
 app.include_router(websocket.router, prefix="/api")
 app.include_router(search.router, prefix="/api")
 app.include_router(upload.router, prefix="/api")
+app.include_router(handover.router, prefix="/api")
 
 
 def create_initial_data():

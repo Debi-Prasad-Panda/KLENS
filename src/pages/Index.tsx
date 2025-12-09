@@ -16,8 +16,9 @@ import { ProfileView } from "@/components/klens/ProfileView";
 import { DocumentLibrary } from "@/components/klens/DocumentLibrary";
 import { SettingsView } from "@/components/klens/SettingsView";
 import { SearchDiscoveryView } from "@/components/klens/SearchDiscoveryView";
+import SuccessionPlanningView from "@/components/klens/SuccessionPlanningView";
 
-type TabType = "dashboard" | "search" | "graph" | "iot" | "ar" | "compliance" | "documents" | "document-view" | "features" | "profile" | "settings";
+type TabType = "dashboard" | "search" | "graph" | "iot" | "ar" | "compliance" | "documents" | "document-view" | "features" | "profile" | "settings" | "succession";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState<TabType>("dashboard");
@@ -76,11 +77,13 @@ const Index = () => {
         return <ProfileView />;
       case "settings":
         return <SettingsView />;
+      case "succession":
+        return <SuccessionPlanningView />;
       default:
         return (
           <>
             <MorningBriefing />
-            <DashboardView onOpenDocument={() => setActiveTab("document")} />
+            <DashboardView onOpenDocument={() => setActiveTab("documents")} />
           </>
         );
     }

@@ -345,7 +345,198 @@ class SupabaseService:
         combined.sort(key=lambda x: x.get("score", 0), reverse=True)
         
         return combined[:limit]
+    
+    # ==================== RESOLUTION MEMORY (Hive Mind) ====================
+    
+    def save_resolution(
+        self,
+        user_email: str,
+        problem_text: str,
+        action_taken: str,
+        outcome_status: str = "FIXED",
+        machine_id: str = None,
+        symptoms: List[str] = None,
+        problem_embedding: List[float] = None
+    ) -> Dict:
+        """
+        Save a problem resolution to the Hive Mind.
+        
+        Args:
+            user_email: Who fixed it
+            problem_text: Description of the problem
+            action_taken: How it was fixed
+            outcome_status: 'FIXED', 'FAILED', 'ESCALATED', 'PENDING'
+            machine_id: Optional machine/asset identifier
+            symptoms: Optional list of observed symptoms
+            problem_embedding: Optional 768-dim vector
+        
+        Returns:
+            Inserted row data
+        """
+        payload = {
+            "user_email": user_email,
+            "problem_text": problem_text,
+            "action_taken": action_taken,
+            "outcome_status": outcome_status
+        }
+        
+        if machine_id:
+            payload["machine_id"] = machine_id
+        if symptoms:
+            payload["symptoms"] = symptoms
+        if problem_embedding:
+            payload["problem_embedding"] = problem_embedding
+            
+        try:
+            response = self.client.table("resolution_memory").insert(payload).execute()
+            return response.data[0] if response.data else {}
+        except Exception as e:
+            print(f"Error saving resolution: {e}")
+            return {"error": str(e)}
+    
+    def get_user_resolutions(
+        self,
+        user_email: str,
+        outcome_status: str = None,
+        limit: int = 20
+    ) -> List[Dict]:
+        """
+        Get resolutions by a specific user.
+        
+        Args:
+            user_email: User to query
+            outcome_status: Optional filter (e.g., 'FIXED')
+            limit: Max results
+        
+        Returns:
+            List of resolution records
+        """
+        try:
+            query = self.client.table("resolution_memory") \
+                .select("id, problem_text, action_taken, outcome_status, machine_id, timestamp") \
+                .eq("user_email", user_email)
+            
+            if outcome_status:
+                query = query.eq("outcome_status", outcome_status)
+            
+            response = query.order("timestamp", desc=True).limit(limit).execute()
+            return response.data or []
+        except Exception as e:
+            print(f"Error getting resolutions: {e}")
+            return []
+    
+    def search_similar_resolutions(
+        self,
+        query_embedding: List[float],
+        limit: int = 5,
+        threshold: float = 0.5
+    ) -> List[Dict]:
+        """
+        Find similar past resolutions using vector search.
+        """
+        try:
+            response = self.client.rpc(
+                "match_resolutions",
+                {
+                    "query_embedding": query_embedding,
+                    "match_threshold": threshold,
+                    "match_count": limit
+                }
+            ).execute()
+            return response.data or []
+        except Exception as e:
+            print(f"Resolution search error: {e}")
+            return []
+    
+    # ==================== ACTIVITY LOGGING ====================
+    
+    def log_user_activity(
+        self,
+        user_email: str,
+        action_type: str,
+        target_id: str = None,
+        target_name: str = None,
+        metadata: Dict = None
+    ) -> Dict:
+        """
+        Log a user activity for the Attention Index.
+        
+        Args:
+            user_email: Who performed the action
+            action_type: 'VIEW_DOC', 'SEARCH', 'RESOLVE_RISK', 'UPLOAD', 'EDIT'
+            target_id: ID of the target (doc ID, machine name, etc.)
+            target_name: Human-readable name
+            metadata: Extra details as JSONB
+        
+        Returns:
+            Inserted row data
+        """
+        payload = {
+            "user_email": user_email,
+            "action_type": action_type
+        }
+        
+        if target_id:
+            payload["target_id"] = target_id
+        if target_name:
+            payload["target_name"] = target_name
+        if metadata:
+            payload["metadata"] = metadata
+            
+        try:
+            response = self.client.table("user_activity_logs").insert(payload).execute()
+            return response.data[0] if response.data else {}
+        except Exception as e:
+            print(f"Error logging activity: {e}")
+            return {"error": str(e)}
+    
+    def get_user_activity_logs(
+        self,
+        user_email: str,
+        action_type: str = None,
+        limit: int = 50
+    ) -> List[Dict]:
+        """
+        Get activity logs for a user.
+        
+        Args:
+            user_email: User to query
+            action_type: Optional filter by type
+            limit: Max results
+        
+        Returns:
+            List of activity records
+        """
+        try:
+            query = self.client.table("user_activity_logs") \
+                .select("id, action_type, target_id, target_name, metadata, timestamp") \
+                .eq("user_email", user_email)
+            
+            if action_type:
+                query = query.eq("action_type", action_type)
+            
+            response = query.order("timestamp", desc=True).limit(limit).execute()
+            return response.data or []
+        except Exception as e:
+            print(f"Error getting activity logs: {e}")
+            return []
+    
+    def get_user_expertise_summary(self, user_email: str) -> List[Dict]:
+        """
+        Get aggregated expertise summary for a user.
+        Uses the SQL function for efficient aggregation.
+        """
+        try:
+            response = self.client.rpc(
+                "get_user_expertise_summary",
+                {"target_email": user_email}
+            ).execute()
+            return response.data or []
+        except Exception as e:
+            print(f"Expertise summary error: {e}")
+            return []
 
 
 # Singleton instance
 supabase_service = SupabaseService()
+
