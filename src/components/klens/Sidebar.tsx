@@ -12,15 +12,17 @@ import {
   ChevronRight,
   FileText,
   Sparkles,
-  LogOut
+  LogOut,
+  Activity
 } from "lucide-react";
+
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { usePermissions } from "@/hooks/usePermissions";
 import React from "react";
 
-type TabType = "dashboard" | "search" | "graph" | "iot" | "ar" | "compliance" | "documents" | "document-view" | "features" | "profile" | "settings" | "succession";
+type TabType = "dashboard" | "search" | "graph" | "iot" | "ar" | "compliance" | "documents" | "document-view" | "features" | "profile" | "settings" | "succession" | "analytics";
 
 interface SidebarProps {
   activeTab: TabType;
@@ -48,6 +50,8 @@ export function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
 
   // Navigation items with permission requirements
   const navItems = [
+    { id: "analytics", label: t("Mission Control", "Mission Control"), icon: Activity, badge: "★",
+      highlight: true },
     { id: "dashboard", label: t("Dashboard", "Dashboard"), icon: LayoutDashboard },
     { id: "documents", label: t("Documents", "Documents"), icon: FileText },
     { id: "features", label: t("Features", "Advanced Features"), icon: Sparkles, badge: t("New", "New") },
@@ -61,6 +65,7 @@ export function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
     { id: "succession", label: t("Succession Planning", "Succession Planning"), icon: Users, badge: "⚠️",
       permission: 'ADMIN_TRACE' as const },
   ];
+
   
   // Filter nav items based on permissions
   const visibleNavItems = navItems.filter(item => {
