@@ -6,9 +6,14 @@ import {
   Activity, 
   Wifi,
   AlertTriangle,
-  CheckCircle2
+  CheckCircle2,
+  Settings,
+  Bell,
+  Lock
 } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, Tooltip } from "recharts";
+import { usePermissions } from "@/hooks/usePermissions";
+import { toast } from "@/hooks/use-toast";
 
 const generateData = () => {
   return Array.from({ length: 20 }, (_, i) => ({
@@ -24,6 +29,44 @@ export function IoTView() {
   const [currentTemp, setCurrentTemp] = useState(105);
   const [currentPressure, setCurrentPressure] = useState(402);
   const [currentVibration, setCurrentVibration] = useState(4.2);
+  
+  // Permission checks
+  const { can, role, roleDisplayName } = usePermissions();
+  const canCalibrate = can('IOT_CALIBRATE');
+  const canViewAlerts = can('IOT_ALERTS_VIEW');
+  const canConfigure = can('IOT_CONFIG');
+  
+  // Calibration handler
+  const handleCalibrate = (sensorId: string) => {
+    if (!canCalibrate) {
+      toast({
+        variant: "destructive",
+        title: "Permission Denied",
+        description: `Your role (${roleDisplayName}) cannot calibrate sensors.`,
+      });
+      return;
+    }
+    toast({
+      title: "Calibration Started",
+      description: `Calibrating sensor ${sensorId}...`,
+    });
+  };
+  
+  // Alert acknowledge handler
+  const handleAcknowledgeAlert = () => {
+    if (!canViewAlerts) {
+      toast({
+        variant: "destructive",
+        title: "Permission Denied",
+        description: "Only Safety Officers can acknowledge alerts.",
+      });
+      return;
+    }
+    toast({
+      title: "Alert Acknowledged",
+      description: "Alert has been logged and acknowledged.",
+    });
+  };
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -144,6 +187,37 @@ export function IoTView() {
                   )}
                 </div>
               ))}
+            </div>
+            
+            {/* Action Buttons - Permission Based */}
+            <div className="flex gap-2 mt-4 pt-4 border-t border-border/50">
+              {/* Calibrate Button - Engineers/Admins only */}
+              <button
+                onClick={() => handleCalibrate(sensor.id)}
+                className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  canCalibrate 
+                    ? 'bg-primary/20 hover:bg-primary/30 text-primary' 
+                    : 'bg-slate-800/50 text-slate-500 cursor-not-allowed'
+                }`}
+              >
+                {canCalibrate ? <Settings className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
+                Calibrate
+              </button>
+              
+              {/* Acknowledge Alert - Safety Officers only */}
+              {sensor.status === "alert" && (
+                <button
+                  onClick={handleAcknowledgeAlert}
+                  className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    canViewAlerts 
+                      ? 'bg-amber-500/20 hover:bg-amber-500/30 text-amber-400' 
+                      : 'bg-slate-800/50 text-slate-500 cursor-not-allowed'
+                  }`}
+                >
+                  {canViewAlerts ? <Bell className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
+                  Acknowledge
+                </button>
+              )}
             </div>
           </div>
         ))}

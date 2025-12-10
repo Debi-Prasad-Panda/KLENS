@@ -216,6 +216,89 @@ def require_valid_certs():
     return cert_checker
 
 
+def require_permission(*required_permissions: str):
+    """
+    Dependency factory for permission-based access control.
+    Uses the RBAC permission matrix.
+    
+    Usage:
+        @router.post("/upload")
+        def upload_doc(user: IndustrialUser = Depends(require_permission("DOC_UPLOAD"))):
+            ...
+            
+        # Multiple permissions (user needs ANY of them):
+        @router.get("/view")
+        def view_doc(user: IndustrialUser = Depends(require_permission("DOC_VIEW_ALL", "DOC_VIEW_DEPT"))):
+            ...
+    """
+    from ..core.permissions import has_permission
+    
+    async def permission_checker(user: IndustrialUser = Depends(get_current_user)) -> IndustrialUser:
+        # Check if user has ANY of the required permissions
+        for perm in required_permissions:
+            if has_permission(user.role, perm):
+                return user
+        
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"Permission denied: Requires one of [{', '.join(required_permissions)}]. "
+                   f"Your role '{user.role}' does not have this permission."
+        )
+    return permission_checker
+
+
+def require_all_permissions(*required_permissions: str):
+    """
+    Dependency factory requiring ALL specified permissions.
+    
+    Usage:
+        @router.delete("/critical")
+        def delete_critical(user: IndustrialUser = Depends(require_all_permissions("DOC_DELETE", "ADMIN_APPROVE"))):
+            ...
+    """
+    from ..core.permissions import has_permission
+    
+    async def permission_checker(user: IndustrialUser = Depends(get_current_user)) -> IndustrialUser:
+        missing = [p for p in required_permissions if not has_permission(user.role, p)]
+        
+        if missing:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"Permission denied: Missing [{', '.join(missing)}]."
+            )
+        return user
+    return permission_checker
+
+
+def require_on_shift_for_write():
+    """
+    Dependency that enforces shift restrictions only for write operations.
+    Read operations always allowed, write operations require being on-shift.
+    Uses the SHIFT_BYPASS permission to allow managers/admins through.
+    
+    Usage:
+        @router.post("/action")
+        def do_action(user: IndustrialUser = Depends(require_on_shift_for_write())):
+            ...
+    """
+    from ..core.permissions import has_permission
+    
+    async def shift_write_checker(user: IndustrialUser = Depends(get_current_user)) -> IndustrialUser:
+        # If user can bypass shift, allow
+        if has_permission(user.role, "SHIFT_BYPASS"):
+            return user
+        
+        # Operators must be on shift for write operations
+        if not user.is_on_shift:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"⛔ ACCESS DENIED: You are off-shift. "
+                       f"Write operations are restricted to your {user.shift_pattern} shift hours."
+            )
+        return user
+    return shift_write_checker
+
+
 # ==================== KIOSK MODE ====================
 
 class PinVerifyRequest(BaseModel):

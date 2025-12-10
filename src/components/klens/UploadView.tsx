@@ -8,9 +8,12 @@ import {
   FileText,
   CheckCircle2,
   Loader2,
-  X
+  X,
+  Lock
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { usePermissions } from "@/hooks/usePermissions";
+import { AccessDenied } from "./PermissionGate";
 
 const integrations = [
   { id: "sharepoint", label: "SharePoint", icon: Cloud, color: "primary" },
@@ -28,8 +31,21 @@ const recentUploads = [
 export function UploadView() {
   const [isDragging, setIsDragging] = useState(false);
   const [connectingTo, setConnectingTo] = useState<string | null>(null);
+  const { can, role, roleDisplayName } = usePermissions();
+
+  // Check if user has document upload permission
+  const canUpload = can('DOC_UPLOAD');
 
   const handleIntegrationClick = (integration: typeof integrations[0]) => {
+    if (!canUpload) {
+      toast({
+        variant: "destructive",
+        title: "Permission Denied",
+        description: `Your role (${roleDisplayName}) cannot connect enterprise integrations.`,
+      });
+      return;
+    }
+    
     setConnectingTo(integration.id);
     
     toast({
@@ -46,6 +62,38 @@ export function UploadView() {
       });
     }, 2000);
   };
+
+  // Show access denied for users without upload permission
+  if (!canUpload) {
+    return (
+      <div className="space-y-6 animate-fade-in">
+        <div>
+          <h2 className="text-2xl font-bold">Upload Documents</h2>
+          <p className="text-muted-foreground mt-1">
+            Feed documents into the K-LENS intelligence network
+          </p>
+        </div>
+        
+        <div className="glass-card p-8">
+          <div className="flex flex-col items-center justify-center py-8">
+            <div className="w-20 h-20 rounded-full bg-amber-500/10 flex items-center justify-center mb-6">
+              <Lock className="w-10 h-10 text-amber-400" />
+            </div>
+            <h3 className="text-xl font-semibold text-white mb-2">Upload Restricted</h3>
+            <p className="text-slate-400 text-center max-w-md mb-4">
+              Your role <span className="text-amber-400 font-medium">({role})</span> does not have permission to upload documents.
+            </p>
+            <p className="text-xs text-slate-500">
+              Required permission: <code className="bg-slate-800 px-2 py-1 rounded">DOC_UPLOAD</code>
+            </p>
+            <p className="text-xs text-slate-500 mt-2">
+              Allowed roles: <span className="text-blue-400">ADMIN</span>, <span className="text-purple-400">ENGINEER</span>
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -169,3 +217,4 @@ export function UploadView() {
     </div>
   );
 }
+

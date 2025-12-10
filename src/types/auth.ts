@@ -1,4 +1,4 @@
-export type UserRole = "ADMIN" | "MANAGER" | "OPERATOR" | "SAFETY_OFFICER";
+export type UserRole = "ADMIN" | "MANAGER" | "ENGINEER" | "OPERATOR" | "SAFETY_OFFICER";
 
 // For backwards compatibility with existing code
 export type LegacyUserRole = "admin" | "manager" | "engineer" | "safety_officer";

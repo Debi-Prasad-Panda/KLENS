@@ -17,6 +17,7 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { usePermissions } from "@/hooks/usePermissions";
 import React from "react";
 
 type TabType = "dashboard" | "search" | "graph" | "iot" | "ar" | "compliance" | "documents" | "document-view" | "features" | "profile" | "settings" | "succession";
@@ -41,20 +42,41 @@ export function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const { t } = useLanguage();
+  
+  // Import permission hook for RBAC
+  const { can, isAdmin, isOperator } = usePermissions();
 
-  // Navigation items with translation keys
+  // Navigation items with permission requirements
   const navItems = [
     { id: "dashboard", label: t("Dashboard", "Dashboard"), icon: LayoutDashboard },
     { id: "documents", label: t("Documents", "Documents"), icon: FileText },
     { id: "features", label: t("Features", "Advanced Features"), icon: Sparkles, badge: t("New", "New") },
     { id: "search", label: t("Search", "Search & Discovery"), icon: Search },
-    { id: "graph", label: t("Knowledge Graph", "Knowledge Graph"), icon: Share2 },
-    { id: "iot", label: t("IoT Dashboard", "IoT & UNS"), icon: Radio, badge: "Live" },
+    { id: "graph", label: t("Knowledge Graph", "Knowledge Graph"), icon: Share2, 
+      permission: 'GRAPH_VIEW_ALL' as const, altPermission: 'GRAPH_VIEW_LOCAL' as const },
+    { id: "iot", label: t("IoT Dashboard", "IoT & UNS"), icon: Radio, badge: "Live",
+      permission: 'IOT_VIEW_ALL' as const, altPermission: 'IOT_MONITOR' as const },
     { id: "ar", label: t("AR Visualization", "AR Preview"), icon: Glasses, badge: "Beta" },
     { id: "compliance", label: t("Compliance", "Compliance"), icon: Shield },
-    { id: "succession", label: t("Succession Planning", "Succession Planning"), icon: Users, badge: "⚠️", adminOnly: true },
+    { id: "succession", label: t("Succession Planning", "Succession Planning"), icon: Users, badge: "⚠️",
+      permission: 'ADMIN_TRACE' as const },
   ];
+  
+  // Filter nav items based on permissions
+  const visibleNavItems = navItems.filter(item => {
+    // If no permission required, show to everyone
+    if (!item.permission) return true;
+    
+    // Check primary permission or alternative
+    return can(item.permission) || (item.altPermission && can(item.altPermission));
+  });
 
+  // Check if user is admin for showing admin-only items
+  // Check both user?.role AND isAdmin from usePermissions for robustness
+  const isAdminOrManager = user?.role === 'ADMIN' || user?.role === 'MANAGER' || isAdmin;
+  
+  // Debug: Log role info
+  console.log('[Sidebar] Role check:', { userRole: user?.role, isAdmin, isAdminOrManager });
   const handleLogout = () => {
     logout();
     navigate('/login');
@@ -84,7 +106,7 @@ export function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
 
       {/* Navigation */}
       <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
-        {navItems.map((item) => (
+        {visibleNavItems.map((item) => (
           <button
             key={item.id}
             onClick={() => setActiveTab(item.id as TabType)}
@@ -108,6 +130,20 @@ export function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
             )}
           </button>
         ))}
+        
+        {/* Admin-only: Workforce Command Center */}
+        {isAdminOrManager && (
+          <button
+            onClick={() => navigate('/users')}
+            className="w-full nav-item mt-2 border-t border-border/50 pt-3"
+          >
+            <Users className="w-5 h-5 text-amber-400" />
+            <span className="flex-1 text-left text-sm font-medium">Workforce</span>
+            <span className="text-[10px] px-2 py-0.5 rounded-full font-mono font-semibold bg-amber-500/20 text-amber-400">
+              Admin
+            </span>
+          </button>
+        )}
       </nav>
 
       {/* User Profile */}

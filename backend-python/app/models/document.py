@@ -20,7 +20,8 @@ class Document(Base):
     original_name = Column(String, nullable=False)
     file_type = Column(String, nullable=False)
     file_size = Column(Integer, nullable=False)
-    uploaded_by = Column(Integer, ForeignKey("users.id"))
+    # Changed from Integer FK to String to support Supabase UUID user IDs
+    uploaded_by = Column(String, nullable=True, index=True)
     status = Column(Enum(DocumentStatus), default=DocumentStatus.uploading)
     ocr_text = Column(Text)
     ai_summary = Column(Text)
@@ -30,4 +31,5 @@ class Document(Base):
     manager_insights = Column(Text, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
 

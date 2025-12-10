@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
-import { FileText, Folder, Clock, User, Filter, Search, Upload, X } from "lucide-react";
+import { FileText, Folder, Clock, User, Filter, Search, Upload, X, Lock } from "lucide-react";
 import { api } from "@/lib/api";
 import { DocumentProcessor } from "./DocumentProcessor";
 import { EnterpriseConnectors } from "./EnterpriseConnectors";
+import { usePermissions } from "@/hooks/usePermissions";
+import { toast } from "@/hooks/use-toast";
 
 interface Document {
   id: number;
@@ -24,6 +26,25 @@ export function DocumentLibrary({ onOpenDocument }: DocumentLibraryProps) {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [showUploadModal, setShowUploadModal] = useState(false);
+  
+  // Permission checks
+  const { can, roleDisplayName } = usePermissions();
+  const canUpload = can('DOC_UPLOAD');
+  const canDelete = can('DOC_DELETE');
+  const canViewAll = can('DOC_VIEW_ALL');
+  
+  // Handle unauthorized upload attempt
+  const handleUploadClick = () => {
+    if (!canUpload) {
+      toast({
+        variant: "destructive",
+        title: "Permission Denied",
+        description: `Your role (${roleDisplayName}) cannot upload documents.`,
+      });
+      return;
+    }
+    setShowUploadModal(true);
+  };
 
   useEffect(() => {
     loadDocuments();
@@ -141,10 +162,14 @@ export function DocumentLibrary({ onOpenDocument }: DocumentLibraryProps) {
           <p className="text-muted-foreground">Browse and manage your documents</p>
         </div>
         <button
-          onClick={() => setShowUploadModal(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+          onClick={handleUploadClick}
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+            canUpload 
+              ? 'bg-primary text-primary-foreground hover:bg-primary/90' 
+              : 'bg-slate-700 text-slate-400 cursor-not-allowed'
+          }`}
         >
-          <Upload className="w-4 h-4" />
+          {canUpload ? <Upload className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
           Upload
         </button>
       </div>
