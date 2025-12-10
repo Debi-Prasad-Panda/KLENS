@@ -1,0 +1,406 @@
+/* 
+ * Digital Badge CSS - K-LENS Digital Identity Hub
+ * Cyber-Industrial aesthetic with holographic effects
+ */
+
+/* ==================== HOLOGRAPHIC EFFECTS ==================== */
+
+@keyframes holographic-shimmer {
+     0% {
+          background-position: -200% 0;
+     }
+
+     100% {
+          background-position: 200% 0;
+     }
+}
+
+@keyframes pulse-glow {
+
+     0%,
+     100% {
+          box-shadow: 0 0 5px currentColor, 0 0 10px currentColor;
+     }
+
+     50% {
+          box-shadow: 0 0 15px currentColor, 0 0 30px currentColor;
+     }
+}
+
+@keyframes emergency-pulse {
+
+     0%,
+     100% {
+          transform: scale(1);
+          box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+     }
+
+     50% {
+          transform: scale(1.02);
+          box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+     }
+}
+
+@keyframes scan-line {
+     0% {
+          transform: translateY(-100%);
+     }
+
+     100% {
+          transform: translateY(100%);
+     }
+}
+
+/* ==================== HOLOGRAPHIC ID CARD ==================== */
+
+.holographic-card {
+     position: relative;
+     background: linear-gradient(135deg,
+               rgba(15, 23, 42, 0.95) 0%,
+               rgba(30, 41, 59, 0.95) 50%,
+               rgba(15, 23, 42, 0.95) 100%);
+     border: 1px solid rgba(59, 130, 246, 0.3);
+     border-radius: 16px;
+     overflow: hidden;
+}
+
+.holographic-card::before {
+     content: '';
+     position: absolute;
+     top: 0;
+     left: 0;
+     right: 0;
+     bottom: 0;
+     background: linear-gradient(90deg,
+               transparent 0%,
+               rgba(59, 130, 246, 0.1) 25%,
+               rgba(147, 51, 234, 0.1) 50%,
+               rgba(236, 72, 153, 0.1) 75%,
+               transparent 100%);
+     background-size: 200% 100%;
+     animation: holographic-shimmer 3s linear infinite;
+     pointer-events: none;
+}
+
+.holographic-card::after {
+     content: '';
+     position: absolute;
+     top: 0;
+     left: 0;
+     right: 0;
+     height: 2px;
+     background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.5), transparent);
+     animation: scan-line 2s linear infinite;
+     pointer-events: none;
+}
+
+/* ==================== HEXAGON AVATAR ==================== */
+
+.hexagon-avatar {
+     width: 80px;
+     height: 92px;
+     clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+     background: linear-gradient(135deg, #3b82f6, #8b5cf6, #ec4899);
+     display: flex;
+     align-items: center;
+     justify-content: center;
+     position: relative;
+}
+
+.hexagon-avatar::after {
+     content: '';
+     position: absolute;
+     inset: 2px;
+     clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+     background: #0f172a;
+}
+
+.hexagon-avatar-inner {
+     position: relative;
+     z-index: 1;
+     width: 72px;
+     height: 84px;
+     clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+     background: linear-gradient(135deg, #1e293b, #334155);
+     display: flex;
+     align-items: center;
+     justify-content: center;
+     overflow: hidden;
+}
+
+.hexagon-avatar-inner img {
+     width: 100%;
+     height: 100%;
+     object-fit: cover;
+}
+
+/* ==================== STATUS INDICATORS ==================== */
+
+.status-indicator {
+     display: inline-flex;
+     align-items: center;
+     gap: 0.5rem;
+     padding: 0.25rem 0.75rem;
+     border-radius: 9999px;
+     font-size: 0.75rem;
+     font-weight: 600;
+     text-transform: uppercase;
+     letter-spacing: 0.05em;
+}
+
+.status-on-shift {
+     background: rgba(34, 197, 94, 0.15);
+     color: #22c55e;
+     border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.status-on-shift::before {
+     content: '';
+     width: 8px;
+     height: 8px;
+     border-radius: 50%;
+     background: #22c55e;
+     animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.status-on-break {
+     background: rgba(234, 179, 8, 0.15);
+     color: #eab308;
+     border: 1px solid rgba(234, 179, 8, 0.3);
+}
+
+.status-on-break::before {
+     content: '';
+     width: 8px;
+     height: 8px;
+     border-radius: 50%;
+     background: #eab308;
+     animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.status-off-shift {
+     background: rgba(100, 116, 139, 0.15);
+     color: #64748b;
+     border: 1px solid rgba(100, 116, 139, 0.3);
+}
+
+.status-off-shift::before {
+     content: '';
+     width: 8px;
+     height: 8px;
+     border-radius: 50%;
+     background: #64748b;
+}
+
+/* ==================== CLEARANCE LEVEL BADGES ==================== */
+
+.clearance-badge {
+     padding: 0.25rem 0.75rem;
+     border-radius: 4px;
+     font-size: 0.65rem;
+     font-weight: 700;
+     text-transform: uppercase;
+     letter-spacing: 0.1em;
+     font-family: 'JetBrains Mono', monospace;
+}
+
+.clearance-1 {
+     background: rgba(100, 116, 139, 0.2);
+     color: #94a3b8;
+     border: 1px solid rgba(100, 116, 139, 0.4);
+}
+
+.clearance-2 {
+     background: rgba(59, 130, 246, 0.2);
+     color: #60a5fa;
+     border: 1px solid rgba(59, 130, 246, 0.4);
+}
+
+.clearance-3 {
+     background: rgba(168, 85, 247, 0.2);
+     color: #a78bfa;
+     border: 1px solid rgba(168, 85, 247, 0.4);
+}
+
+.clearance-4 {
+     background: rgba(249, 115, 22, 0.2);
+     color: #fb923c;
+     border: 1px solid rgba(249, 115, 22, 0.4);
+}
+
+.clearance-5 {
+     background: rgba(239, 68, 68, 0.2);
+     color: #f87171;
+     border: 1px solid rgba(239, 68, 68, 0.4);
+     animation: pulse-glow 3s ease-in-out infinite;
+}
+
+/* ==================== SAFETY SCORE METER ==================== */
+
+.safety-score-meter {
+     position: relative;
+     width: 80px;
+     height: 80px;
+}
+
+.safety-score-ring {
+     transform: rotate(-90deg);
+}
+
+.safety-score-ring circle {
+     fill: none;
+     stroke-width: 6;
+     stroke-linecap: round;
+}
+
+.safety-score-ring .bg {
+     stroke: rgba(100, 116, 139, 0.2);
+}
+
+.safety-score-ring .progress {
+     stroke: currentColor;
+     stroke-dasharray: 251.2;
+     transition: stroke-dashoffset 0.5s ease;
+}
+
+.safety-score-value {
+     position: absolute;
+     inset: 0;
+     display: flex;
+     flex-direction: column;
+     align-items: center;
+     justify-content: center;
+}
+
+.safety-high {
+     color: #22c55e;
+}
+
+.safety-medium {
+     color: #eab308;
+}
+
+.safety-low {
+     color: #ef4444;
+}
+
+/* ==================== QUICK ACTION BUTTONS ==================== */
+
+.btn-emergency-sos {
+     background: linear-gradient(135deg, #dc2626, #b91c1c);
+     color: white;
+     border: none;
+     padding: 0.75rem 1.5rem;
+     border-radius: 8px;
+     font-weight: 600;
+     display: flex;
+     align-items: center;
+     gap: 0.5rem;
+     cursor: pointer;
+     transition: all 0.2s;
+     box-shadow: 0 0 20px rgba(220, 38, 38, 0.3);
+}
+
+.btn-emergency-sos:hover {
+     animation: emergency-pulse 1s ease-in-out infinite;
+     transform: translateY(-1px);
+}
+
+.btn-emergency-sos:active {
+     transform: translateY(0);
+}
+
+.btn-handover {
+     background: linear-gradient(135deg, #3b82f6, #2563eb);
+     color: white;
+     border: none;
+     padding: 0.75rem 1.5rem;
+     border-radius: 8px;
+     font-weight: 600;
+     display: flex;
+     align-items: center;
+     gap: 0.5rem;
+     cursor: pointer;
+     transition: all 0.2s;
+}
+
+.btn-handover:hover {
+     box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
+     transform: translateY(-1px);
+}
+
+/* ==================== QR CODE CONTAINER ==================== */
+
+.qr-code-container {
+     background: white;
+     padding: 8px;
+     border-radius: 8px;
+     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+/* ==================== VITAL STATUS GRID ==================== */
+
+.vital-status-grid {
+     display: grid;
+     grid-template-columns: repeat(3, 1fr);
+     gap: 1rem;
+}
+
+.vital-stat {
+     display: flex;
+     flex-direction: column;
+     gap: 0.25rem;
+}
+
+.vital-stat-label {
+     font-size: 0.7rem;
+     color: #64748b;
+     text-transform: uppercase;
+     letter-spacing: 0.1em;
+}
+
+.vital-stat-value {
+     font-size: 0.9rem;
+     font-weight: 600;
+     color: #f1f5f9;
+}
+
+/* ==================== EXPERTISE TAGS ==================== */
+
+.expertise-tag {
+     display: inline-flex;
+     align-items: center;
+     padding: 0.25rem 0.5rem;
+     background: rgba(59, 130, 246, 0.1);
+     color: #60a5fa;
+     border: 1px solid rgba(59, 130, 246, 0.2);
+     border-radius: 4px;
+     font-size: 0.7rem;
+     font-weight: 500;
+}
+
+/* ==================== CINDERELLA ACTIVE MODE ==================== */
+
+.cinderella-active .holographic-card {
+     border-color: rgba(234, 179, 8, 0.5);
+     box-shadow: 0 0 30px rgba(234, 179, 8, 0.2);
+}
+
+.cinderella-active .holographic-card::before {
+     background: linear-gradient(90deg,
+               transparent 0%,
+               rgba(234, 179, 8, 0.2) 25%,
+               rgba(249, 115, 22, 0.2) 50%,
+               rgba(234, 179, 8, 0.2) 75%,
+               transparent 100%);
+}
+
+.cinderella-timer {
+     font-family: 'JetBrains Mono', monospace;
+     font-size: 0.875rem;
+     color: #eab308;
+     background: rgba(234, 179, 8, 0.1);
+     padding: 0.25rem 0.75rem;
+     border-radius: 4px;
+     border: 1px solid rgba(234, 179, 8, 0.3);
+}

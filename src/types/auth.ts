@@ -61,3 +61,68 @@ export interface AuthResponse {
     has_expired_certs: boolean;
   };
 }
+
+// ==================== DIGITAL IDENTITY HUB ====================
+
+export type ShiftStatus = "ON_SHIFT" | "ON_BREAK" | "OFF_SHIFT";
+
+export enum ClearanceLevel {
+  LEVEL_1 = 1, // Basic Access
+  LEVEL_2 = 2, // Standard Access
+  LEVEL_3 = 3, // Elevated Access
+  LEVEL_4 = 4, // Restricted Access
+  LEVEL_5 = 5, // Maximum Clearance
+}
+
+export const ClearanceLevelLabels: Record<number, string> = {
+  1: "LEVEL 1: BASIC ACCESS",
+  2: "LEVEL 2: STANDARD ACCESS",
+  3: "LEVEL 3: ELEVATED ACCESS",
+  4: "LEVEL 4: RESTRICTED ACCESS",
+  5: "LEVEL 5: MAXIMUM CLEARANCE",
+};
+
+export interface UserProfile {
+  id: number;
+  user_id: string;
+
+  // Identity
+  employeeId: string;
+  clearanceLevel: number;  // 1-5
+
+  // Health & Safety
+  emergencyContactName?: string;
+  emergencyContactPhone?: string;
+  bloodType?: string;
+  medicalTags?: string[];
+  safetyScore: number;  // 0-100
+
+  // Shift Context
+  shiftStatus: ShiftStatus;
+  currentShiftStart?: Date | string;
+  currentShiftEnd?: Date | string;
+  currentLocation?: string;
+  shiftTimeRemaining?: string;  // "2h 30m"
+
+  // Skills / AI Persona
+  expertiseTags: string[];
+  voiceSettings?: {
+    speed: number;
+    autoListen: boolean;
+    wakeWord?: string;
+  };
+}
+
+export interface EmergencySOSResponse {
+  success: boolean;
+  sos_id: number;
+  message: string;
+  notified_supervisors: string[];
+}
+
+export interface HandoverResponse {
+  handover_id: number;
+  status: string;
+  from_user_id: string;
+  to_user_id?: string;
+}

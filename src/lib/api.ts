@@ -20,7 +20,7 @@ class ApiClient {
 
   private async request(endpoint: string, options: RequestInit = {}) {
     const token = await this.getToken();
-    
+
     const headers: HeadersInit = {
       'Content-Type': 'application/json',
       ...options.headers,
@@ -57,16 +57,16 @@ class ApiClient {
 
     // Fetch profile from backend
     const profile = await this.request('/auth/me');
-    
-    return { 
+
+    return {
       user: {
         id: profile.id,
         email: profile.email,
         name: profile.full_name,
         role: profile.role,
         department: profile.department,
-      }, 
-      token: data.session?.access_token 
+      },
+      token: data.session?.access_token
     };
   }
 
@@ -347,6 +347,132 @@ class ApiClient {
         is_primary: isPrimary,
       }),
     });
+  }
+
+  // ==================== DIGITAL IDENTITY HUB ====================
+
+  /**
+   * Get current user's full profile for Digital Badge display.
+   */
+  async getProfile() {
+    return this.request('/profile/me');
+  }
+
+  /**
+   * Update current user's profile fields.
+   */
+  async updateProfile(data: {
+    emergency_contact_name?: string;
+    emergency_contact_phone?: string;
+    blood_type?: string;
+    medical_tags?: string[];
+    current_location?: string;
+    expertise_tags?: string[];
+    voice_settings?: Record<string, any>;
+  }) {
+    return this.request('/profile/me', {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  /**
+   * Update shift status (ON_SHIFT, ON_BREAK, OFF_SHIFT).
+   */
+  async updateShiftStatus(status: 'ON_SHIFT' | 'ON_BREAK' | 'OFF_SHIFT', shiftEndHours: number = 8) {
+    return this.request('/profile/shift-status', {
+      method: 'POST',
+      body: JSON.stringify({ status, shift_end_hours: shiftEndHours }),
+    });
+  }
+
+  /**
+   * 🆘 Trigger Emergency SOS - alerts supervisors.
+   */
+  async triggerEmergencySOS(message?: string, location?: string) {
+    return this.request('/profile/emergency-sos', {
+      method: 'POST',
+      body: JSON.stringify({ message, location }),
+    });
+  }
+
+  /**
+   * 🔄 Initiate shift handover workflow.
+   */
+  async initiateHandover(targetUserId?: string, notes?: string, pendingTasks?: string[]) {
+    return this.request('/profile/handover', {
+      method: 'POST',
+      body: JSON.stringify({
+        target_user_id: targetUserId,
+        notes,
+        pending_tasks: pendingTasks,
+      }),
+    });
+  }
+
+  /**
+   * Get status of a shift handover.
+   */
+  async getHandoverStatus(handoverId: number) {
+    return this.request(`/profile/handover/${handoverId}`);
+  }
+
+  /**
+   * Complete a shift handover.
+   */
+  async completeHandover(handoverId: number) {
+    return this.request(`/profile/handover/${handoverId}/complete`, {
+      method: 'POST',
+    });
+  }
+
+  /**
+   * Get another user's profile (manager view).
+   */
+  async getUserProfile(userId: string) {
+    return this.request(`/profile/${userId}`);
+  }
+
+  // ==================== PREFERENCES ====================
+
+  /**
+   * Get user preferences (voice, notifications, display).
+   */
+  async getPreferences() {
+    return this.request('/profile/preferences');
+  }
+
+  /**
+   * Update user preferences.
+   */
+  async updatePreferences(data: {
+    voice_settings?: Record<string, any>;
+    notification_prefs?: Record<string, any>;
+    display_prefs?: Record<string, any>;
+    quiet_hours_enabled?: boolean;
+    quiet_hours_start?: string;
+    quiet_hours_end?: string;
+  }) {
+    return this.request('/profile/preferences', {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  // ==================== ANALYTICS ====================
+
+  /**
+   * Get user's personal analytics data.
+   */
+  async getAnalytics() {
+    return this.request('/profile/analytics');
+  }
+
+  /**
+   * Get activity summary for charts.
+   */
+  async getActivitySummary(period: 'week' | 'month' | 'year' = 'month') {
+    return this.request(`/profile/activity-summary?period=${period}`);
   }
 }
 

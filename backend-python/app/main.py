@@ -1,10 +1,12 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
+from datetime import datetime, timedelta
 from .core.config import settings
 from .core.database import init_db, SessionLocal
 from .core.security import get_password_hash
 from .models.user import User, UserRole
+from .models.user_profile import UserProfile, ShiftStatus
 
 # Import all models to ensure they are registered with SQLAlchemy
 from .models import user, document as doc_model
@@ -16,6 +18,7 @@ from .models.document_version import DocumentVersion
 from .api import auth, documents, approvals, chat, websocket, search, upload, handover, notifications
 from .api import supabase_auth  # New Supabase Auth router
 from .api import user_management  # User Management (Admin) router
+from .api import profile  # Digital Identity Hub
 
 app = FastAPI(title="K-LENS API", version="2.0.0")
 
@@ -46,6 +49,7 @@ app.include_router(search.router, prefix="/api")
 app.include_router(upload.router, prefix="/api")
 app.include_router(handover.router, prefix="/api")
 app.include_router(notifications.router, prefix="/api")
+app.include_router(profile.router, prefix="/api")  # Digital Identity Hub
 
 
 
@@ -69,10 +73,60 @@ def create_initial_data():
             print("✅ Default admin created: admin@example.com / Admin@123")
         else:
             print("✅ Admin user already exists")
+        
+        # Create mock UserProfile for testing Digital Identity Hub
+        create_mock_profiles(db)
+        
     except Exception as e:
         print(f"⚠️ Failed to create initial data: {e}")
     finally:
         db.close()
+
+
+def create_mock_profiles(db: Session):
+    """Create mock UserProfile data for testing the Digital Identity Hub"""
+    try:
+        # Check if mock profile already exists
+        existing = db.query(UserProfile).filter(UserProfile.employee_id == "EMP-8821").first()
+        if existing:
+            print("✅ Mock UserProfile already exists")
+            return
+        
+        print("🪪 Creating mock UserProfile for Digital Identity Hub...")
+        
+        # Mock profile for testing - simulating an industrial worker
+        mock_profile = UserProfile(
+            user_id="mock-admin-user-id",  # Will be updated when real user logs in
+            employee_id="EMP-8821",
+            clearance_level=4,  # LEVEL 4: RESTRICTED ACCESS
+            
+            # Health & Safety
+            emergency_contact_name="Jane Doe (Wife)",
+            emergency_contact_phone="555-0199",
+            blood_type="O+",
+            medical_tags=["Diabetic"],
+            safety_score=98,
+            
+            # Shift Context - Currently on shift
+            shift_status=ShiftStatus.ON_SHIFT.value,
+            current_shift_start=datetime.utcnow() - timedelta(hours=5, minutes=30),
+            current_shift_end=datetime.utcnow() + timedelta(hours=2, minutes=30),
+            current_location="Zone B - Boiler Room",
+            
+            # AI Persona / Skills
+            expertise_tags=["Python", "SCADA Systems", "Technical Writing", "Industrial Safety"],
+            voice_settings={"speed": 1.2, "auto_listen": False, "wake_word": "Hey K-LENS"}
+        )
+        db.add(mock_profile)
+        db.commit()
+        print("✅ Mock UserProfile created: EMP-8821 (Clearance Level 4)")
+        print("   📍 Location: Zone B - Boiler Room")
+        print("   🟢 Status: ON SHIFT (2h 30m remaining)")
+        print("   🛡️ Safety Score: 98/100")
+        
+    except Exception as e:
+        print(f"⚠️ Failed to create mock profile: {e}")
+        db.rollback()
 
 
 @app.on_event("startup")
