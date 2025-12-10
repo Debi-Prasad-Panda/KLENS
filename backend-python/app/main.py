@@ -15,6 +15,7 @@ from .models.document_version import DocumentVersion
 # Import routers
 from .api import auth, documents, approvals, chat, websocket, search, upload, handover
 from .api import supabase_auth  # New Supabase Auth router
+from .api import user_management  # User Management (Admin) router
 
 app = FastAPI(title="K-LENS API", version="2.0.0")
 
@@ -30,6 +31,9 @@ app.add_middleware(
 # Include routers
 # NEW: Supabase Auth (primary) - handles /api/auth/* endpoints
 app.include_router(supabase_auth.router, prefix="/api")
+
+# User Management (Admin Panel)
+app.include_router(user_management.router, prefix="/api")
 
 # Legacy routers (still available for local-only deployments)
 # Note: Legacy auth is at /api/auth-legacy to avoid conflicts
