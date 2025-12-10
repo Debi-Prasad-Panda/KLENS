@@ -14,6 +14,7 @@ import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { api } from '@/lib/api';
+import { useNavigate } from 'react-router-dom';
 
 interface Notification {
   id: string;
@@ -31,6 +32,7 @@ interface Notification {
 
 export function NotificationBell() {
   const { user, token } = useAuth();
+  const navigate = useNavigate();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
@@ -405,7 +407,7 @@ export function NotificationBell() {
               <button
                 onClick={() => {
                   setIsOpen(false);
-                  // Navigate to full notifications page if exists
+                  navigate('/notifications');
                 }}
                 className="w-full py-2 text-sm text-primary hover:bg-primary/10 rounded-lg transition-colors font-medium"
               >
