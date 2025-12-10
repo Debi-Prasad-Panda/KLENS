@@ -14,6 +14,7 @@ from .models.document_version import DocumentVersion
 
 # Import routers
 from .api import auth, documents, approvals, chat, websocket, search, upload, handover
+from .api import supabase_auth  # New Supabase Auth router
 
 app = FastAPI(title="K-LENS API", version="2.0.0")
 
@@ -27,7 +28,12 @@ app.add_middleware(
 )
 
 # Include routers
-app.include_router(auth.router, prefix="/api")
+# NEW: Supabase Auth (primary) - handles /api/auth/* endpoints
+app.include_router(supabase_auth.router, prefix="/api")
+
+# Legacy routers (still available for local-only deployments)
+# Note: Legacy auth is at /api/auth-legacy to avoid conflicts
+app.include_router(auth.router, prefix="/api/auth-legacy", tags=["auth-legacy"])
 app.include_router(documents.router, prefix="/api")
 app.include_router(approvals.router, prefix="/api")
 app.include_router(chat.router, prefix="/api")
@@ -35,6 +41,7 @@ app.include_router(websocket.router, prefix="/api")
 app.include_router(search.router, prefix="/api")
 app.include_router(upload.router, prefix="/api")
 app.include_router(handover.router, prefix="/api")
+
 
 
 def create_initial_data():

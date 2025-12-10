@@ -535,6 +535,245 @@ class SupabaseService:
         except Exception as e:
             print(f"Expertise summary error: {e}")
             return []
+    
+    # ==================== AUTH & USER PROFILE OPERATIONS ====================
+    
+    def get_user_profile(self, user_id: str) -> Optional[Dict]:
+        """
+        Get user profile with industrial context.
+        
+        Args:
+            user_id: UUID of the user
+            
+        Returns:
+            User profile dict or None
+        """
+        try:
+            response = self.client.table("user_profiles") \
+                .select("*") \
+                .eq("id", user_id) \
+                .single() \
+                .execute()
+            return response.data
+        except Exception as e:
+            print(f"Get user profile error: {e}")
+            return None
+    
+    def get_user_profile_by_email(self, email: str) -> Optional[Dict]:
+        """Get user profile by email."""
+        try:
+            response = self.client.table("user_profiles") \
+                .select("*") \
+                .eq("email", email) \
+                .single() \
+                .execute()
+            return response.data
+        except Exception as e:
+            print(f"Get user profile by email error: {e}")
+            return None
+    
+    def update_user_profile(
+        self,
+        user_id: str,
+        updates: Dict[str, Any]
+    ) -> Optional[Dict]:
+        """
+        Update user profile fields.
+        
+        Args:
+            user_id: UUID of the user
+            updates: Dict of fields to update
+            
+        Returns:
+            Updated profile or None
+        """
+        try:
+            # Add updated_at timestamp
+            updates["updated_at"] = "now()"
+            
+            response = self.client.table("user_profiles") \
+                .update(updates) \
+                .eq("id", user_id) \
+                .execute()
+            return response.data[0] if response.data else None
+        except Exception as e:
+            print(f"Update user profile error: {e}")
+            return None
+    
+    def update_shift_status(
+        self,
+        user_id: str,
+        status: str
+    ) -> bool:
+        """
+        Update user's shift status.
+        
+        Args:
+            user_id: UUID of the user
+            status: 'ON_SHIFT', 'ON_BREAK', 'OFF_SHIFT'
+            
+        Returns:
+            True if successful
+        """
+        valid_statuses = ["ON_SHIFT", "ON_BREAK", "OFF_SHIFT"]
+        if status not in valid_statuses:
+            print(f"Invalid status: {status}. Must be one of {valid_statuses}")
+            return False
+        
+        try:
+            self.client.table("user_profiles") \
+                .update({"current_status": status, "updated_at": "now()"}) \
+                .eq("id", user_id) \
+                .execute()
+            return True
+        except Exception as e:
+            print(f"Update shift status error: {e}")
+            return False
+    
+    # ==================== CERTIFICATION OPERATIONS ====================
+    
+    def get_user_certifications(
+        self,
+        user_id: str,
+        include_expired: bool = False
+    ) -> List[Dict]:
+        """
+        Get all certifications for a user.
+        
+        Args:
+            user_id: UUID of the user
+            include_expired: Whether to include expired certs
+            
+        Returns:
+            List of certification records
+        """
+        try:
+            query = self.client.table("user_certifications") \
+                .select("*") \
+                .eq("user_id", user_id)
+            
+            if not include_expired:
+                query = query.neq("status", "EXPIRED")
+            
+            response = query.order("expiry_date", desc=False).execute()
+            return response.data or []
+        except Exception as e:
+            print(f"Get certifications error: {e}")
+            return []
+    
+    def add_user_certification(
+        self,
+        user_id: str,
+        cert_name: str,
+        expiry_date: str,
+        cert_issuer: str = None,
+        issue_date: str = None,
+        document_url: str = None
+    ) -> Optional[Dict]:
+        """
+        Add a new certification for a user.
+        
+        Args:
+            user_id: UUID of the user
+            cert_name: Name of the certification
+            expiry_date: Expiry date (YYYY-MM-DD)
+            cert_issuer: Optional issuing authority
+            issue_date: Optional issue date
+            document_url: Optional link to certificate scan
+            
+        Returns:
+            Created certification record or None
+        """
+        try:
+            payload = {
+                "user_id": user_id,
+                "cert_name": cert_name,
+                "expiry_date": expiry_date,
+                "status": "VALID"
+            }
+            
+            if cert_issuer:
+                payload["cert_issuer"] = cert_issuer
+            if issue_date:
+                payload["issue_date"] = issue_date
+            if document_url:
+                payload["document_url"] = document_url
+            
+            response = self.client.table("user_certifications") \
+                .insert(payload) \
+                .execute()
+            return response.data[0] if response.data else None
+        except Exception as e:
+            print(f"Add certification error: {e}")
+            return None
+    
+    def get_expiring_certifications(
+        self,
+        days_ahead: int = 30
+    ) -> List[Dict]:
+        """
+        Get certifications expiring within the next N days.
+        Useful for sending renewal reminders.
+        
+        Args:
+            days_ahead: Number of days to look ahead
+            
+        Returns:
+            List of expiring certifications with user info
+        """
+        try:
+            response = self.client.table("user_certifications") \
+                .select("*, user_profiles(email, full_name)") \
+                .eq("status", "VALID") \
+                .lte("expiry_date", f"now() + interval '{days_ahead} days'") \
+                .gte("expiry_date", "now()") \
+                .execute()
+            return response.data or []
+        except Exception as e:
+            print(f"Get expiring certs error: {e}")
+            return []
+    
+    # ==================== SHIFT SCHEDULE OPERATIONS ====================
+    
+    def get_shift_schedules(self) -> List[Dict]:
+        """Get all defined shift schedules."""
+        try:
+            response = self.client.table("shift_schedules") \
+                .select("*") \
+                .execute()
+            return response.data or []
+        except Exception as e:
+            print(f"Get shift schedules error: {e}")
+            return []
+    
+    def get_users_by_shift(
+        self,
+        shift_name: str,
+        status: str = None
+    ) -> List[Dict]:
+        """
+        Get all users assigned to a specific shift.
+        
+        Args:
+            shift_name: 'MORNING', 'AFTERNOON', 'NIGHT'
+            status: Optional status filter
+            
+        Returns:
+            List of user profiles
+        """
+        try:
+            query = self.client.table("user_profiles") \
+                .select("id, email, full_name, role, department, current_status") \
+                .eq("shift_pattern", shift_name)
+            
+            if status:
+                query = query.eq("current_status", status)
+            
+            response = query.execute()
+            return response.data or []
+        except Exception as e:
+            print(f"Get users by shift error: {e}")
+            return []
 
 
 # Singleton instance

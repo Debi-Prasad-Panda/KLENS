@@ -13,8 +13,10 @@ from ..core.config import settings
 from ..models.document import Document, DocumentStatus
 from ..models.document_version import DocumentVersion
 from ..models.audit_log import AuditLog
+# Use new Supabase Auth dependency
+from ..dependencies.auth import get_current_user, IndustrialUser
+# SQLAlchemy User model for database queries
 from ..models.user import User
-from ..api.auth import get_current_user
 from ..services.gemini_service import gemini_service
 from ..services.neo4j_service import neo4j_service
 from pypdf import PdfReader
@@ -151,7 +153,7 @@ def process_document(doc_id: int, file_path: str, user_id: int):
 def upload_document(
     background_tasks: BackgroundTasks,
     file: UploadFile = File(...),
-    current_user: User = Depends(get_current_user),
+    current_user: IndustrialUser = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Upload a new document for processing."""
@@ -190,7 +192,7 @@ def get_documents(
     status: Optional[str] = None,
     limit: int = 50,
     offset: int = 0,
-    current_user: User = Depends(get_current_user),
+    current_user: IndustrialUser = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """List all documents for current user."""
@@ -206,7 +208,7 @@ def get_documents(
 @router.get("/{doc_id}", response_model=DocumentResponse)
 def get_document(
     doc_id: int,
-    current_user: User = Depends(get_current_user),
+    current_user: IndustrialUser = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Get a specific document by ID."""
@@ -224,7 +226,7 @@ def get_document(
 def update_document(
     doc_id: int,
     update_data: DocumentUpdateRequest,
-    current_user: User = Depends(get_current_user),
+    current_user: IndustrialUser = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Update document content with versioning."""
@@ -263,7 +265,7 @@ def update_document(
 def revert_document(
     doc_id: int,
     version: int,
-    current_user: User = Depends(get_current_user),
+    current_user: IndustrialUser = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Revert document to a previous version."""
@@ -297,7 +299,7 @@ def revert_document(
 @router.get("/{doc_id}/versions", response_model=List[dict])
 def get_document_versions(
     doc_id: int,
-    current_user: User = Depends(get_current_user),
+    current_user: IndustrialUser = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Get all versions of a document."""
@@ -319,7 +321,7 @@ def get_document_versions(
 
 @router.get("/stats/dashboard", response_model=dict)
 def get_dashboard_stats(
-    current_user: User = Depends(get_current_user),
+    current_user: IndustrialUser = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Get dashboard statistics."""
@@ -389,7 +391,7 @@ def get_document_insights(
     doc_id: int,
     role: str = "engineer",
     refresh: bool = False,
-    current_user: User = Depends(get_current_user),
+    current_user: IndustrialUser = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Get AI-generated role-based insights for a document.

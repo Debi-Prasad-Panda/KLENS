@@ -12,9 +12,9 @@ import tempfile
 import os
 import json
 
-from ..models.user import User
 from ..models.access_rules import AccessRules, AccessLevel
-from ..api.auth import get_current_user
+# Use new Supabase Auth dependency
+from ..dependencies.auth import get_current_user, IndustrialUser
 from ..services.gemini_service import gemini_service
 from ..services.supabase_service import supabase_service
 from pypdf import PdfReader
@@ -178,7 +178,7 @@ async def upload_document(
     background_tasks: BackgroundTasks,
     file: UploadFile = File(...),
     access_rules: Optional[str] = Form(None),
-    current_user: User = Depends(get_current_user)
+    current_user: IndustrialUser = Depends(get_current_user)
 ):
     """
     Upload a document to the K-LENS Knowledge Hub with Granular Access Control.
@@ -267,7 +267,7 @@ async def upload_document(
 async def upload_document_sync(
     file: UploadFile = File(...),
     access_rules: Optional[str] = Form(None),
-    current_user: User = Depends(get_current_user)
+    current_user: IndustrialUser = Depends(get_current_user)
 ):
     """
     Synchronous upload with Granular Access Control.

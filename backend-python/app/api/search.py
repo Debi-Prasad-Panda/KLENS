@@ -7,8 +7,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from typing import List, Optional, Dict, Any
 
-from ..models.user import User
-from ..api.auth import get_current_user
+# Use new Supabase Auth dependency
+from ..dependencies.auth import get_current_user, IndustrialUser
 from ..services.gemini_service import gemini_service
 from ..services.supabase_service import supabase_service
 
@@ -40,7 +40,7 @@ class SearchResponse(BaseModel):
 @router.post("/", response_model=SearchResponse)
 async def hybrid_search(
     request: SearchRequest,
-    current_user: User = Depends(get_current_user)
+    current_user: IndustrialUser = Depends(get_current_user)
 ):
     """
     Perform hybrid search (semantic + keyword) on the knowledge hub.
@@ -94,7 +94,7 @@ async def hybrid_search(
 async def get_all_documents(
     limit: int = 50,
     offset: int = 0,
-    current_user: User = Depends(get_current_user)
+    current_user: IndustrialUser = Depends(get_current_user)
 ):
     """
     Get all documents from knowledge hub with pagination.
@@ -109,7 +109,7 @@ async def get_all_documents(
 @router.get("/documents/{doc_id}")
 async def get_document(
     doc_id: str,
-    current_user: User = Depends(get_current_user)
+    current_user: IndustrialUser = Depends(get_current_user)
 ):
     """
     Get a specific document by ID from knowledge hub.
@@ -126,7 +126,7 @@ async def get_document_insights(
     role: str = "engineer",
     language: str = "English",
     refresh: bool = False,
-    current_user: User = Depends(get_current_user)
+    current_user: IndustrialUser = Depends(get_current_user)
 ):
     """
     Get AI-generated role-based insights for a Knowledge Hub document (UUID).

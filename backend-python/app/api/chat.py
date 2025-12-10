@@ -5,8 +5,8 @@ from datetime import datetime
 import google.generativeai as genai
 
 from ..core.config import settings
-from ..models.user import User
-from ..api.auth import get_current_user
+# Use new Supabase Auth dependency
+from ..dependencies.auth import get_current_user, IndustrialUser
 from ..services.gemini_service import gemini_service
 from ..services.supabase_service import supabase_service
 
@@ -116,7 +116,7 @@ def format_context_for_prompt(results: List[dict]) -> str:
 @router.post("/", response_model=ChatResponse)
 async def send_message(
     request: ChatRequest,
-    current_user: User = Depends(get_current_user)
+    current_user: IndustrialUser = Depends(get_current_user)
 ):
     """
     Send a message to K-LENS AI Assistant with RAG (Retrieval-Augmented Generation).

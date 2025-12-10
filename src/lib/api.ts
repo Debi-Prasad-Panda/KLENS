@@ -1,3 +1,5 @@
+import { supabase, getAccessToken } from './supabase';
+
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
 
 class ApiClient {
@@ -5,24 +7,27 @@ class ApiClient {
 
   setToken(token: string) {
     this.token = token;
-    localStorage.setItem('token', token);
   }
 
-  getToken() {
-    if (!this.token) {
-      this.token = localStorage.getItem('token');
+  async getToken(): Promise<string | null> {
+    // If we have a manually set token, use it
+    if (this.token) {
+      return this.token;
     }
-    return this.token;
+    // Otherwise, get from Supabase session
+    return await getAccessToken();
   }
 
   private async request(endpoint: string, options: RequestInit = {}) {
+    const token = await this.getToken();
+    
     const headers: HeadersInit = {
       'Content-Type': 'application/json',
       ...options.headers,
     };
 
-    if (this.getToken()) {
-      headers['Authorization'] = `Bearer ${this.getToken()}`;
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
     }
 
     const response = await fetch(`${API_URL}${endpoint}`, {
@@ -38,33 +43,61 @@ class ApiClient {
   }
 
   async login(email: string, password: string) {
-    const formData = new URLSearchParams();
-    formData.append('username', email);
-    formData.append('password', password);
-
-    const response = await fetch(`${API_URL}/auth/login`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: formData,
+    // Use Supabase auth instead of backend endpoint
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
     });
 
-    if (!response.ok) {
-      throw new Error('Invalid credentials');
+    if (error) throw new Error(error.message);
+
+    if (data.session?.access_token) {
+      this.setToken(data.session.access_token);
     }
 
-    const data = await response.json();
-    this.setToken(data.access_token);
-    return { user: data.user, token: data.access_token };
+    // Fetch profile from backend
+    const profile = await this.request('/auth/me');
+    
+    return { 
+      user: {
+        id: profile.id,
+        email: profile.email,
+        name: profile.full_name,
+        role: profile.role,
+        department: profile.department,
+      }, 
+      token: data.session?.access_token 
+    };
   }
 
-  async register(userData: any) {
-    return this.request('/auth/register', {
-      method: 'POST',
-      body: JSON.stringify(userData),
+  async register(userData: { email: string; password: string; full_name: string; role?: string; department?: string }) {
+    // Use Supabase auth
+    const { data, error } = await supabase.auth.signUp({
+      email: userData.email,
+      password: userData.password,
+      options: {
+        data: {
+          full_name: userData.full_name,
+          role: userData.role || 'OPERATOR',
+          department: userData.department,
+        },
+      },
     });
+
+    if (error) throw new Error(error.message);
+
+    if (data.session?.access_token) {
+      this.setToken(data.session.access_token);
+    }
+
+    return { user: data.user, token: data.session?.access_token };
   }
+
+  async logout() {
+    await supabase.auth.signOut();
+    this.token = null;
+  }
+
 
   async uploadDocument(file: File) {
     const formData = new FormData();

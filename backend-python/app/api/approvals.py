@@ -7,8 +7,8 @@ import json
 
 from ..core.database import get_db
 from ..models.approval import Approval, ApprovalStatus
-from ..models.user import User
-from ..api.auth import get_current_user
+# Use new Supabase Auth dependency
+from ..dependencies.auth import get_current_user, IndustrialUser
 
 router = APIRouter(prefix="/approvals", tags=["approvals"])
 
@@ -46,7 +46,7 @@ class ApprovalResponse(BaseModel):
 @router.post("/", response_model=dict)
 def create_approval(
     approval_data: ApprovalCreate,
-    current_user: User = Depends(get_current_user),
+    current_user: IndustrialUser = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Create a new approval request (Nuclear Keys)."""
@@ -70,7 +70,7 @@ def create_approval(
 def approve_action(
     approval_id: int,
     vote: ApprovalVote,
-    current_user: User = Depends(get_current_user),
+    current_user: IndustrialUser = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Vote on an approval request."""
@@ -121,7 +121,7 @@ def approve_action(
 
 @router.get("/", response_model=List[dict])
 def get_approvals(
-    current_user: User = Depends(get_current_user),
+    current_user: IndustrialUser = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Get all pending approvals."""
