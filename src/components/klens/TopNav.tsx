@@ -1,8 +1,9 @@
-import { Search, Bell, Moon, User, Sparkles, LogOut, Settings, Shield, FileText, Loader2 } from "lucide-react";
+import { Search, Moon, User, Sparkles, LogOut, Settings, Shield, FileText, Loader2 } from "lucide-react";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { AIChatSidebar } from "./AIChatSidebar";
+import { NotificationBell } from "@/components/Notifications/NotificationBell";
 
 import { api } from "@/lib/api";
 import { useLanguage, SUPPORTED_LANGUAGES } from "@/contexts/LanguageContext";
@@ -31,7 +32,6 @@ interface TopNavProps {
 
 export function TopNav({ onAIChatToggle }: TopNavProps = {}) {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
-  const [showNotifications, setShowNotifications] = useState(false);
   const [showAIChat, setShowAIChat] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
@@ -234,44 +234,8 @@ export function TopNav({ onAIChatToggle }: TopNavProps = {}) {
           </span>
         </div>
 
-        {/* Notifications */}
-        <div className="relative">
-          <button 
-            onClick={() => setShowNotifications(!showNotifications)}
-            className="relative w-10 h-10 rounded-xl bg-secondary/50 border border-border flex items-center justify-center hover:bg-secondary transition-colors"
-          >
-            <Bell className="w-5 h-5 text-muted-foreground" />
-            <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-destructive flex items-center justify-center">
-              <span className="text-[10px] font-bold text-destructive-foreground">3</span>
-            </span>
-          </button>
-          
-          {showNotifications && (
-            <div className="absolute right-0 mt-2 w-80 glass-card p-4 animate-fade-in">
-              <h3 className="font-semibold mb-3">Notifications</h3>
-              <div className="space-y-2">
-                <div className="p-3 bg-destructive/10 border border-destructive/30 rounded-lg">
-                  <p className="text-sm font-medium text-destructive">Critical Alert</p>
-                  <p className="text-xs text-muted-foreground mt-1">Boiler B7 pressure exceeds threshold</p>
-                  <p className="text-xs text-muted-foreground mt-1">2 min ago</p>
-                </div>
-                <div className="p-3 bg-warning/10 border border-warning/30 rounded-lg">
-                  <p className="text-sm font-medium text-warning">Compliance Alert</p>
-                  <p className="text-xs text-muted-foreground mt-1">Station 12 audit pending</p>
-                  <p className="text-xs text-muted-foreground mt-1">1 hour ago</p>
-                </div>
-                <div className="p-3 bg-primary/10 border border-primary/30 rounded-lg">
-                  <p className="text-sm font-medium text-primary">New Document</p>
-                  <p className="text-xs text-muted-foreground mt-1">Safety manual updated</p>
-                  <p className="text-xs text-muted-foreground mt-1">3 hours ago</p>
-                </div>
-              </div>
-              <button className="w-full mt-3 py-2 text-sm text-primary hover:bg-primary/10 rounded-lg transition-colors">
-                View All Notifications
-              </button>
-            </div>
-          )}
-        </div>
+        {/* Notifications - Real-time Industrial Bell */}
+        <NotificationBell />
 
         {/* Dark Mode */}
         <button className="w-10 h-10 rounded-xl bg-secondary/50 border border-border flex items-center justify-center hover:bg-secondary transition-colors">

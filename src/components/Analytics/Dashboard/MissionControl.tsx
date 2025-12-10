@@ -1,9 +1,12 @@
+import { useState } from 'react';
 import { KpiGrid } from './KpiGrid';
 import { EfficiencyChart } from './EfficiencyChart';
 import { RiskPulse } from './RiskPulse';
 import { LiveAnomalyFeed } from './LiveAnomalyFeed';
 import { getMissionControlData } from '../shared/MockDataGenerator';
-import { Activity, Zap } from 'lucide-react';
+import { Activity, Zap, Flame, Loader2 } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
 
 interface MissionControlProps {
   data?: ReturnType<typeof getMissionControlData>;
@@ -13,6 +16,47 @@ interface MissionControlProps {
 export function MissionControl({ data, onNavigateToRisks }: MissionControlProps) {
   // Use mock data if no real data provided
   const controlData = data ?? getMissionControlData();
+  const { token } = useAuth();
+  const [isSimulating, setIsSimulating] = useState(false);
+
+  // 🔥 DEMO: Simulate a critical meltdown alert
+  const simulateMeltdown = async () => {
+    if (!token) {
+      toast.error('Please login to simulate meltdown');
+      return;
+    }
+
+    setIsSimulating(true);
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL || 'http://localhost:8000/api'}/notifications/simulate-meltdown`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            severity: 'CRITICAL',
+            message: 'Boiler B7 pressure exceeds 500 PSI. Immediate action required!'
+          }),
+        }
+      );
+
+      if (response.ok) {
+        // Toast will be triggered by the real-time notification
+        console.log('🔥 Meltdown simulation triggered!');
+      } else {
+        const error = await response.json();
+        toast.error('Simulation failed', { description: error.detail || 'Try again' });
+      }
+    } catch (error) {
+      console.error('Simulation error:', error);
+      toast.error('Network error', { description: 'Could not reach server' });
+    } finally {
+      setIsSimulating(false);
+    }
+  };
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -31,6 +75,21 @@ export function MissionControl({ data, onNavigateToRisks }: MissionControlProps)
         </div>
         
         <div className="flex items-center gap-3">
+          {/* 🔥 DEMO: Simulate Meltdown Button */}
+          <button
+            onClick={simulateMeltdown}
+            disabled={isSimulating}
+            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-destructive/20 to-warning/20 text-destructive border border-destructive/30 rounded-xl hover:from-destructive/30 hover:to-warning/30 transition-all font-medium text-sm disabled:opacity-50"
+            title="Demo: Simulate a critical alert"
+          >
+            {isSimulating ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <Flame className="w-4 h-4" />
+            )}
+            <span className="hidden sm:inline">Simulate Meltdown</span>
+          </button>
+          
           <div className="flex items-center gap-2 px-4 py-2 glass-card">
             <Zap className="w-4 h-4 text-success" />
             <span className="text-sm font-mono">
