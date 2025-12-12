@@ -25,6 +25,7 @@ const Index = () => {
   const [activeTab, setActiveTab] = useState<TabType>("dashboard");
   const [selectedDocument, setSelectedDocument] = useState<any>(null);
   const [isAIChatOpen, setIsAIChatOpen] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
   // Listen for navigation events from TopNav
   useEffect(() => {
@@ -95,13 +96,23 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Sidebar */}
-      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+      <Sidebar 
+        activeTab={activeTab} 
+        setActiveTab={setActiveTab}
+        isCollapsed={isSidebarCollapsed}
+        setIsCollapsed={setIsSidebarCollapsed}
+      />
 
       {/* Main Content */}
-      <div className={`pl-64 transition-all duration-300 ${
+      <div className={`transition-all duration-300 ${
+        isSidebarCollapsed ? 'pl-0' : 'pl-0 lg:pl-64'
+      } ${
         isAIChatOpen ? "pr-[480px]" : "pr-0"
       }`}>
-        <TopNav onAIChatToggle={setIsAIChatOpen} />
+        <TopNav 
+          onAIChatToggle={setIsAIChatOpen}
+          onMenuToggle={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+        />
         <main className="p-6">
           {renderView()}
         </main>

@@ -1,4 +1,4 @@
-import { Search, Moon, User, Sparkles, LogOut, Settings, Shield, FileText, Loader2 } from "lucide-react";
+import { Search, Moon, User, Sparkles, LogOut, Settings, Shield, FileText, Loader2, Menu } from "lucide-react";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
@@ -28,9 +28,10 @@ interface SearchResult {
 
 interface TopNavProps {
   onAIChatToggle?: (isOpen: boolean) => void;
+  onMenuToggle?: () => void;
 }
 
-export function TopNav({ onAIChatToggle }: TopNavProps = {}) {
+export function TopNav({ onAIChatToggle, onMenuToggle }: TopNavProps = {}) {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showAIChat, setShowAIChat] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -116,6 +117,14 @@ export function TopNav({ onAIChatToggle }: TopNavProps = {}) {
   return (
     <>
       <header className="h-16 border-b border-border bg-card/30 backdrop-blur-xl flex items-center justify-between px-6 sticky top-0 z-40">
+        {/* Hamburger Menu */}
+        <button
+          onClick={onMenuToggle}
+          className="w-10 h-10 rounded-xl bg-secondary/50 border border-border flex items-center justify-center hover:bg-secondary transition-colors mr-4"
+        >
+          <Menu className="w-5 h-5 text-muted-foreground" />
+        </button>
+        
         {/* Search Bar with Hybrid Search */}
         <div className="flex-1 max-w-2xl" ref={searchRef}>
           <div className="relative flex gap-2">

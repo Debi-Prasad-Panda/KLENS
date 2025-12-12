@@ -13,7 +13,9 @@ import {
   FileText,
   Sparkles,
   LogOut,
-  Activity
+  Activity,
+  Menu,
+  X
 } from "lucide-react";
 
 import { useAuth } from "@/contexts/AuthContext";
@@ -27,6 +29,8 @@ type TabType = "dashboard" | "search" | "graph" | "iot" | "ar" | "compliance" | 
 interface SidebarProps {
   activeTab: TabType;
   setActiveTab: (tab: TabType) => void;
+  isCollapsed: boolean;
+  setIsCollapsed: (collapsed: boolean) => void;
 }
 
 const navItems: Array<{ id: string; label: string; icon: typeof LayoutDashboard; badge?: string }> = [
@@ -40,7 +44,7 @@ const navItems: Array<{ id: string; label: string; icon: typeof LayoutDashboard;
   { id: "compliance", label: "Compliance", icon: Shield },
 ];
 
-export function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
+export function Sidebar({ activeTab, setActiveTab, isCollapsed, setIsCollapsed }: SidebarProps) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const { t } = useLanguage();
@@ -95,7 +99,18 @@ export function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
   }, [setActiveTab]);
 
   return (
-    <aside className="fixed left-0 top-0 h-screen w-64 bg-card/30 backdrop-blur-xl border-r border-border flex flex-col z-50">
+    <>
+    {/* Overlay */}
+    {!isCollapsed && (
+      <div 
+        className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+        onClick={() => setIsCollapsed(true)}
+      />
+    )}
+    
+    <aside className={`fixed left-0 top-0 h-screen w-64 bg-card/30 backdrop-blur-xl border-r border-border flex flex-col z-50 transition-transform duration-300 ${
+      isCollapsed ? '-translate-x-full' : 'translate-x-0'
+    }`}>
       {/* Logo */}
       <div className="p-6 border-b border-border">
         <div className="flex items-center gap-3">
@@ -153,5 +168,6 @@ export function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
 
 
     </aside>
+    </>
   );
 }
