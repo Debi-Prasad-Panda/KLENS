@@ -20,6 +20,7 @@ from .api import supabase_auth  # New Supabase Auth router
 from .api import user_management  # User Management (Admin) router
 from .api import profile  # Digital Identity Hub
 from .api import roles  # Role Management API
+from .api import audit  # Audit Trail API
 
 app = FastAPI(title="K-LENS API", version="2.0.0")
 
@@ -52,6 +53,7 @@ app.include_router(handover.router, prefix="/api")
 app.include_router(notifications.router, prefix="/api")
 app.include_router(profile.router, prefix="/api")  # Digital Identity Hub
 app.include_router(roles.router, prefix="/api")  # Role Management API
+app.include_router(audit.router, prefix="/api")  # Audit Trail API
 
 
 def create_initial_data():
