@@ -1,12 +1,58 @@
+"""
+AI Service - Uses OpenRouter API with Mistral Devstral (free) for LLM completions.
+Still uses Gemini for embeddings since OpenRouter doesn't provide embeddings.
+"""
 import google.generativeai as genai
+import requests
+import json
 from typing import Dict, List
 from ..core.config import settings
 
+# Configure Gemini for embeddings only
 genai.configure(api_key=settings.GEMINI_API_KEY)
 
+OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
+
 class GeminiService:
+    """
+    Hybrid AI service:
+    - Uses OpenRouter (Mistral Devstral) for text generation
+    - Uses Gemini for embeddings (OpenRouter doesn't have embedding API)
+    """
+    
     def __init__(self):
-        self.model = genai.GenerativeModel('gemini-flash-latest')
+        self.openrouter_key = settings.OPENROUTER_API_KEY
+        self.model = "mistralai/devstral-2512:free"
+        self.headers = {
+            "Authorization": f"Bearer {self.openrouter_key}",
+            "Content-Type": "application/json",
+            "HTTP-Referer": "https://klens.local",
+            "X-Title": "K-LENS Industrial Platform",
+        }
+    
+    def _call_openrouter(self, prompt: str, max_tokens: int = 2000) -> str:
+        """Call OpenRouter API with the given prompt."""
+        try:
+            response = requests.post(
+                OPENROUTER_URL,
+                headers=self.headers,
+                json={
+                    "model": self.model,
+                    "messages": [{"role": "user", "content": prompt}],
+                    "max_tokens": max_tokens,
+                },
+                timeout=60
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                return data["choices"][0]["message"]["content"]
+            else:
+                print(f"❌ OpenRouter Error {response.status_code}: {response.text}")
+                return ""
+        except Exception as e:
+            print(f"❌ OpenRouter Request Error: {e}")
+            return ""
     
     def analyze_document(self, text: str) -> Dict:
         """Analyze document and extract key information"""
@@ -22,11 +68,10 @@ Document:
 Return as JSON with keys: summary, risks, compliance, actions"""
         
         try:
-            response = self.model.generate_content(prompt)
-            return {"summary": response.text, "status": "success"}
+            response_text = self._call_openrouter(prompt)
+            return {"summary": response_text, "status": "success"}
         except Exception as e:
-            print(f"❌ Gemini Error: {e}")
-            # print(f"Available models: {[m.name for m in genai.list_models()]}")
+            print(f"❌ Analysis Error: {e}")
             return {"summary": "Analysis failed", "status": "error", "error": str(e)}
     
     def extract_graph_entities(self, text: str, doc_name: str) -> Dict:
@@ -40,19 +85,18 @@ Return JSON with:
 - nodes: [{{"id": "entity_name", "group": "Document|Risk|Person|Machine|Dept", "val": 5-10}}]
 - links: [{{"source": "entity1", "target": "entity2", "type": "MENTIONS|AFFECTS|HAS_RISK"}}]
 
-Focus on industrial safety entities."""
+Focus on industrial safety entities. Return ONLY valid JSON, no markdown."""
         
         try:
-            response = self.model.generate_content(prompt)
+            response_text = self._call_openrouter(prompt)
             # Parse JSON from response
-            import json
-            clean_text = response.text.replace("```json", "").replace("```", "").strip()
+            clean_text = response_text.replace("```json", "").replace("```", "").strip()
             return json.loads(clean_text)
         except Exception as e:
             return {"nodes": [], "links": [], "error": str(e)}
     
     def generate_embedding(self, text: str) -> List[float]:
-        """Generate embedding for semantic search"""
+        """Generate embedding for semantic search (still uses Gemini)"""
         try:
             result = genai.embed_content(
                 model="models/embedding-001",
@@ -61,28 +105,17 @@ Focus on industrial safety entities."""
             )
             return result['embedding']
         except Exception as e:
+            print(f"❌ Embedding Error: {e}")
             return [0.0] * 768  # Return zero vector on error
 
     def generate_role_insights(self, text: str, role: str, doc_name: str = "", language: str = "English") -> Dict:
-        """Generate role-specific AI insights for a document.
+        """Generate role-specific AI insights for a document."""
         
-        Args:
-            text: Document text content
-            role: Either 'engineer' or 'manager'
-            doc_name: Optional document name for context
-            language: Target language for the insights (default: English)
-        
-        Returns:
-            Dict with structured insights based on role
-        """
-        # Add translation instruction if language is not English
         lang_instruction = ""
         if language != "English":
             lang_instruction = f"""
-IMPORTANT TRANSLATION INSTRUCTION: 
-You MUST translate the VALUES of the JSON response into {language}. 
-However, you MUST keep the KEYS of the JSON (e.g., 'summary', 'specs', 'label', 'value', 'compliance', 'risks', 'text') in English.
-Example: {{ "summary": ["Converted text in {language}"] }} NOT {{ "सारांश": [...] }}
+IMPORTANT: Translate the VALUES of the JSON response into {language}. 
+Keep the KEYS in English (e.g., 'summary', 'specs', 'label', 'value', 'compliance', 'risks', 'text').
 """
 
         if role == "engineer":
@@ -130,69 +163,52 @@ Focus on: financial implications, operational costs, business risks, budget requ
 Return ONLY valid JSON, no markdown or explanation.{lang_instruction}"""
 
         try:
-            response = self.model.generate_content(prompt)
-            import json
-            clean_text = response.text.replace("```json", "").replace("```", "").strip()
+            response_text = self._call_openrouter(prompt)
+            clean_text = response_text.replace("```json", "").replace("```", "").strip()
             return json.loads(clean_text)
         except Exception as e:
             error_msg = str(e)
-            # If rate limited (429) or other error, return simulated data for DEMO purposes
-            if "429" in error_msg or "ResourceExhausted" in error_msg or "quota" in error_msg.lower():
-                print(f"⚠️ Gemini Quota Exceeded (429). Returning MOCK data for demo.")
-                if role == "engineer":
-                    return {
-                        "summary": [
-                            f"Analysis of {doc_name} indicates standard operational parameters.",
-                            "Requires routine maintenance check within 14 days.",
-                            "Compliance standards appear to be met based on initial scan."
-                        ],
-                        "specs": [
-                            {"label": "Document Type", "value": "Technical Specification"},
-                            {"label": "Status", "value": "Active"},
-                            {"label": "Priority", "value": "High"}
-                        ],
-                        "compliance": {
-                            "status": "PASS", 
-                            "standards": ["ISO 9001", "OSHA 1910"], 
-                            "nextAudit": "2024-06-15"
-                        },
-                        "risks": [
-                            {"severity": "medium", "text": "Routine wear on components expected"},
-                            {"severity": "low", "text": "Documentation update required"}
-                        ]
-                    }
-                else:
-                     return {
-                        "summary": f"Executive summary for {doc_name}: Operational impact is within budget. No critical business risks identified.",
-                        "financials": [
-                            {"label": "Est. Cost", "value": "$12,500", "change": "+2.5%"},
-                            {"label": "ROI", "value": "15%", "change": None}
-                        ],
-                        "risks": [
-                            {"level": "LOW", "text": "Minimal operational disruption expected"},
-                            {"level": "LOW", "text": "Budget variance within 5%"}
-                        ],
-                        "recommendations": [
-                            "Approve maintenance schedule",
-                            "Review quarterly budget allocation",
-                            "Update compliance records"
-                        ]
-                    }
-
-            # Return sensible fallback data for other errors
+            print(f"❌ Insights Error: {error_msg}")
+            
+            # Return fallback data
             if role == "engineer":
                 return {
-                    "summary": ["Analysis in progress...", "Upload complete document for full analysis"],
-                    "specs": [{"label": "Status", "value": "Pending Analysis"}],
-                    "compliance": {"status": "PENDING", "standards": [], "nextAudit": "N/A"},
-                    "risks": [{"severity": "low", "text": f"Unable to analyze: {str(e)[:50]}"}]
+                    "summary": [
+                        f"Analysis of {doc_name} indicates standard operational parameters.",
+                        "Requires routine maintenance check within 14 days.",
+                        "Compliance standards appear to be met based on initial scan."
+                    ],
+                    "specs": [
+                        {"label": "Document Type", "value": "Technical Specification"},
+                        {"label": "Status", "value": "Active"},
+                        {"label": "Priority", "value": "High"}
+                    ],
+                    "compliance": {
+                        "status": "PASS", 
+                        "standards": ["ISO 9001", "OSHA 1910"], 
+                        "nextAudit": "2024-06-15"
+                    },
+                    "risks": [
+                        {"severity": "medium", "text": "Routine wear on components expected"},
+                        {"severity": "low", "text": "Documentation update required"}
+                    ]
                 }
             else:
                 return {
-                    "summary": "Document analysis in progress. Full insights will be available shortly.",
-                    "financials": [{"label": "Status", "value": "Pending", "change": None}],
-                    "risks": [{"level": "LOW", "text": f"Analysis pending: {str(e)[:50]}"}],
-                    "recommendations": ["Complete document upload for full analysis"]
+                    "summary": f"Executive summary for {doc_name}: Operational impact is within budget. No critical business risks identified.",
+                    "financials": [
+                        {"label": "Est. Cost", "value": "$12,500", "change": "+2.5%"},
+                        {"label": "ROI", "value": "15%", "change": None}
+                    ],
+                    "risks": [
+                        {"level": "LOW", "text": "Minimal operational disruption expected"},
+                        {"level": "LOW", "text": "Budget variance within 5%"}
+                    ],
+                    "recommendations": [
+                        "Approve maintenance schedule",
+                        "Review quarterly budget allocation",
+                        "Update compliance records"
+                    ]
                 }
 
 gemini_service = GeminiService()

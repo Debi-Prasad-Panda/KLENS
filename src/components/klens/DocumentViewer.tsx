@@ -26,12 +26,12 @@ import { toast } from "@/hooks/use-toast";
 import { useDocumentInsights } from "@/hooks/useDocumentInsights";
 
 import { useLanguage } from "@/contexts/LanguageContext";
-import { 
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue, 
+  SelectValue,
 } from "@/components/ui/select";
 import { Languages } from "lucide-react";
 
@@ -105,18 +105,18 @@ export function DocumentViewer({ onBack, document }: DocumentViewerProps) {
 
           {/* Local Content Language Selector (Restored) */}
           <div className="glass-card">
-            <Select 
-              value={contentLanguage} 
+            <Select
+              value={contentLanguage}
               onValueChange={(value) => {
                 setContentLanguage(value);
                 toast({ title: "Summarizing in " + value, description: "Regenerating AI insights..." });
               }}
             >
               <SelectTrigger className="w-[180px] bg-transparent border-none focus:ring-0 text-foreground">
-                 <div className="flex items-center gap-2">
-                    <Languages className="w-4 h-4 text-primary" />
-                    <SelectValue placeholder="Content Language" />
-                 </div>
+                <div className="flex items-center gap-2">
+                  <Languages className="w-4 h-4 text-primary" />
+                  <SelectValue placeholder="Content Language" />
+                </div>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="English">English</SelectItem>
@@ -200,18 +200,75 @@ export function DocumentViewer({ onBack, document }: DocumentViewerProps) {
                   <p className="text-sm text-muted-foreground mt-4">Document ID: {docId || 'N/A'}</p>
                 </div>
 
-                {document?.ocr_text ? (
+                {/* Show document content - supports both legacy (ocr_text) and Knowledge Hub (content_chunk) */}
+                {(document?.ocr_text || document?.content_chunk) ? (
                   <div className="space-y-4">
                     <h3 className="text-lg font-semibold">Extracted Content</h3>
                     <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
-                      {document.ocr_text.substring(0, 1500)}
-                      {document.ocr_text.length > 1500 && "..."}
+                      {(() => {
+                        const text = document.ocr_text || document.content_chunk || "";
+                        return text.length > 1500 ? text.substring(0, 1500) + "..." : text;
+                      })()}
                     </p>
                   </div>
                 ) : (
-                  <div className="space-y-4 text-center py-8">
-                    <Loader2 className="w-8 h-8 animate-spin text-primary mx-auto" />
-                    <p className="text-muted-foreground">Processing document...</p>
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold flex items-center gap-2">
+                      <Sparkles className="w-5 h-5 text-primary" />
+                      AI-Generated Summary
+                    </h3>
+                    {loading ? (
+                      <div className="text-center py-8">
+                        <Loader2 className="w-8 h-8 animate-spin text-primary mx-auto" />
+                        <p className="text-muted-foreground mt-4">Generating AI insights...</p>
+                      </div>
+                    ) : viewMode === "engineer" && engineerInsights ? (
+                      <div className="space-y-3">
+                        <p className="text-sm text-muted-foreground italic mb-4">
+                          Original document content not available. Showing AI analysis:
+                        </p>
+                        {engineerInsights.summary.map((item, i) => (
+                          <p key={i} className="text-sm text-foreground leading-relaxed border-l-2 border-primary/50 pl-4">
+                            • {item}
+                          </p>
+                        ))}
+                        {engineerInsights.specs.length > 0 && (
+                          <div className="mt-4 p-4 bg-secondary/30 rounded-lg">
+                            <p className="text-xs font-semibold text-muted-foreground mb-2">KEY SPECIFICATIONS</p>
+                            {engineerInsights.specs.map((spec, i) => (
+                              <p key={i} className="text-sm">
+                                <span className="font-medium">{spec.label}:</span> {spec.value}
+                              </p>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ) : viewMode === "manager" && managerInsights ? (
+                      <div className="space-y-3">
+                        <p className="text-sm text-muted-foreground italic mb-4">
+                          Original document content not available. Showing AI analysis:
+                        </p>
+                        <p className="text-sm text-foreground leading-relaxed border-l-2 border-primary/50 pl-4">
+                          {managerInsights.summary}
+                        </p>
+                        {managerInsights.financials.length > 0 && (
+                          <div className="mt-4 p-4 bg-secondary/30 rounded-lg">
+                            <p className="text-xs font-semibold text-muted-foreground mb-2">FINANCIAL OVERVIEW</p>
+                            {managerInsights.financials.map((item, i) => (
+                              <p key={i} className="text-sm">
+                                <span className="font-medium">{item.label}:</span> {item.value}
+                                {item.change && <span className="text-xs ml-2">({item.change})</span>}
+                              </p>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="text-center py-8">
+                        <Sparkles className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                        <p className="text-muted-foreground">Click "Regenerate" to generate AI insights</p>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
@@ -235,22 +292,20 @@ export function DocumentViewer({ onBack, document }: DocumentViewerProps) {
             <div className="flex items-center p-1 bg-secondary/50 rounded-xl">
               <button
                 onClick={() => setViewMode("engineer")}
-                className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg transition-all ${
-                  viewMode === "engineer"
-                    ? "bg-primary text-primary-foreground shadow-lg"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
+                className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg transition-all ${viewMode === "engineer"
+                  ? "bg-primary text-primary-foreground shadow-lg"
+                  : "text-muted-foreground hover:text-foreground"
+                  }`}
               >
                 <Wrench className="w-4 h-4" />
                 <span className="text-sm font-medium">{t("Engineer View", "Engineer View")}</span>
               </button>
               <button
                 onClick={() => setViewMode("manager")}
-                className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg transition-all ${
-                  viewMode === "manager"
-                    ? "bg-primary text-primary-foreground shadow-lg"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
+                className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg transition-all ${viewMode === "manager"
+                  ? "bg-primary text-primary-foreground shadow-lg"
+                  : "text-muted-foreground hover:text-foreground"
+                  }`}
               >
                 <Briefcase className="w-4 h-4" />
                 <span className="text-sm font-medium">{t("Manager View", "Manager View")}</span>
@@ -322,18 +377,16 @@ export function DocumentViewer({ onBack, document }: DocumentViewerProps) {
                     <CheckCircle2 className="w-4 h-4" />
                     Compliance Status
                   </h4>
-                  <div className={`p-4 border rounded-lg ${
-                    engineerInsights.compliance.status === "PASS" 
-                      ? "bg-success/10 border-success/30" 
-                      : engineerInsights.compliance.status === "FAIL"
+                  <div className={`p-4 border rounded-lg ${engineerInsights.compliance.status === "PASS"
+                    ? "bg-success/10 border-success/30"
+                    : engineerInsights.compliance.status === "FAIL"
                       ? "bg-destructive/10 border-destructive/30"
                       : "bg-warning/10 border-warning/30"
-                  }`}>
+                    }`}>
                     <div className="flex items-center justify-between mb-3">
-                      <span className={`font-semibold flex items-center gap-2 ${
-                        engineerInsights.compliance.status === "PASS" ? "text-success" :
+                      <span className={`font-semibold flex items-center gap-2 ${engineerInsights.compliance.status === "PASS" ? "text-success" :
                         engineerInsights.compliance.status === "FAIL" ? "text-destructive" : "text-warning"
-                      }`}>
+                        }`}>
                         <CheckCircle2 className="w-5 h-5" />
                         {engineerInsights.compliance.status}
                       </span>
@@ -363,19 +416,17 @@ export function DocumentViewer({ onBack, document }: DocumentViewerProps) {
                     {engineerInsights.risks.map((risk, i) => (
                       <div
                         key={i}
-                        className={`p-3 rounded-lg border ${
-                          risk.severity === "high"
-                            ? "bg-destructive/10 border-destructive/30"
-                            : risk.severity === "medium"
+                        className={`p-3 rounded-lg border ${risk.severity === "high"
+                          ? "bg-destructive/10 border-destructive/30"
+                          : risk.severity === "medium"
                             ? "bg-warning/10 border-warning/30"
                             : "bg-success/10 border-success/30"
-                        }`}
+                          }`}
                       >
                         <div className="flex items-center gap-2 mb-1">
-                          <span className={`text-xs font-semibold uppercase ${
-                            risk.severity === "high" ? "text-destructive" :
+                          <span className={`text-xs font-semibold uppercase ${risk.severity === "high" ? "text-destructive" :
                             risk.severity === "medium" ? "text-warning" : "text-success"
-                          }`}>
+                            }`}>
                             {risk.severity}
                           </span>
                         </div>
@@ -414,9 +465,8 @@ export function DocumentViewer({ onBack, document }: DocumentViewerProps) {
                           </div>
                           <p className="font-mono font-semibold text-lg">{item.value}</p>
                           {item.change && (
-                            <span className={`text-xs ${
-                              item.change.startsWith("+") ? "text-destructive" : "text-success"
-                            }`}>
+                            <span className={`text-xs ${item.change.startsWith("+") ? "text-destructive" : "text-success"
+                              }`}>
                               {item.change}
                             </span>
                           )}
@@ -436,18 +486,16 @@ export function DocumentViewer({ onBack, document }: DocumentViewerProps) {
                     {managerInsights.risks.map((risk, i) => (
                       <div
                         key={i}
-                        className={`p-3 rounded-lg border ${
-                          risk.level === "HIGH"
-                            ? "bg-destructive/10 border-destructive/30"
-                            : risk.level === "MEDIUM"
+                        className={`p-3 rounded-lg border ${risk.level === "HIGH"
+                          ? "bg-destructive/10 border-destructive/30"
+                          : risk.level === "MEDIUM"
                             ? "bg-warning/10 border-warning/30"
                             : "bg-success/10 border-success/30"
-                        }`}
+                          }`}
                       >
-                        <span className={`text-xs font-semibold ${
-                          risk.level === "HIGH" ? "text-destructive" :
+                        <span className={`text-xs font-semibold ${risk.level === "HIGH" ? "text-destructive" :
                           risk.level === "MEDIUM" ? "text-warning" : "text-success"
-                        }`}>
+                          }`}>
                           {risk.level} RISK
                         </span>
                         <p className="text-sm mt-1">{risk.text}</p>

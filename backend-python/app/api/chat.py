@@ -145,22 +145,39 @@ async def send_message(
         if context_text:
             enhanced_message = f"{context_text}\n\n---\n\n**User Question:** {request.message}"
         
-        # Step 3: Generate response with Gemini
-        model = genai.GenerativeModel(
-            model_name="gemini-flash-latest",
-            system_instruction=SYSTEM_INSTRUCTION
+        # Step 3: Generate response with OpenRouter (Mistral Devstral)
+        import requests as http_requests
+        
+        # Build conversation history for OpenRouter format
+        messages = [{"role": "system", "content": SYSTEM_INSTRUCTION}]
+        for msg in request.conversationHistory or []:
+            messages.append({
+                "role": msg.role,
+                "content": msg.content
+            })
+        messages.append({"role": "user", "content": enhanced_message})
+        
+        openrouter_response = http_requests.post(
+            "https://openrouter.ai/api/v1/chat/completions",
+            headers={
+                "Authorization": f"Bearer {settings.OPENROUTER_API_KEY}",
+                "Content-Type": "application/json",
+                "HTTP-Referer": "https://klens.local",
+                "X-Title": "K-LENS Industrial Platform",
+            },
+            json={
+                "model": "mistralai/devstral-2512:free",
+                "messages": messages,
+                "max_tokens": 2000,
+            },
+            timeout=60
         )
         
-        # Build conversation history
-        history = []
-        for msg in request.conversationHistory or []:
-            history.append({
-                "role": "user" if msg.role == "user" else "model",
-                "parts": [msg.content]
-            })
+        if openrouter_response.status_code != 200:
+            print(f"OpenRouter Error: {openrouter_response.text}")
+            raise HTTPException(status_code=500, detail="AI service unavailable")
         
-        chat = model.start_chat(history=history)
-        response = chat.send_message(enhanced_message)
+        ai_response = openrouter_response.json()["choices"][0]["message"]["content"]
         
         # Format sources for response
         sources = [
@@ -173,7 +190,7 @@ async def send_message(
         ] if rag_results else None
         
         return ChatResponse(
-            message=response.text,
+            message=ai_response,
             timestamp=datetime.utcnow().isoformat(),
             sources=sources
         )

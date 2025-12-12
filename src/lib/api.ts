@@ -102,11 +102,12 @@ class ApiClient {
   async uploadDocument(file: File) {
     const formData = new FormData();
     formData.append('file', file);
+    const token = await this.getToken();
 
     const response = await fetch(`${API_URL}/documents/`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${this.getToken()}`,
+        'Authorization': `Bearer ${token}`,
       },
       body: formData,
     });
@@ -207,11 +208,12 @@ class ApiClient {
   async uploadToSupabase(file: File) {
     const formData = new FormData();
     formData.append('file', file);
+    const token = await this.getToken();
 
     const response = await fetch(`${API_URL}/upload/`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${this.getToken()}`,
+        'Authorization': `Bearer ${token}`,
       },
       body: formData,
     });
@@ -235,11 +237,12 @@ class ApiClient {
     const formData = new FormData();
     formData.append('file', file);
     formData.append('access_rules', JSON.stringify(accessRules));
+    const token = await this.getToken();
 
     const response = await fetch(`${API_URL}/upload/`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${this.getToken()}`,
+        'Authorization': `Bearer ${token}`,
       },
       body: formData,
     });
@@ -259,11 +262,12 @@ class ApiClient {
   async uploadToSupabaseSync(file: File) {
     const formData = new FormData();
     formData.append('file', file);
+    const token = await this.getToken();
 
     const response = await fetch(`${API_URL}/upload/sync`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${this.getToken()}`,
+        'Authorization': `Bearer ${token}`,
       },
       body: formData,
     });

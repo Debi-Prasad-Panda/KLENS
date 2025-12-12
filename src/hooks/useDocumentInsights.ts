@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { api } from '@/lib/api';
 
 interface EngineerSpec {
@@ -57,17 +57,19 @@ export function useDocumentInsights(docId: number | string | undefined, language
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Track previous language to detect language changes
+  const prevLanguageRef = useRef(language);
+  const hasFetchedRef = useRef<Record<string, boolean>>({});
+
   const fetchInsights = useCallback(async (role: 'engineer' | 'manager', forceRefresh = false) => {
     if (!docId) return;
 
-    // Check cache first (unless forcing refresh)
-    if (!forceRefresh) {
-      // NOTE: We should ideally cache by language too, but for now we'll just refetch if language changes 
-      // (which triggers forceRefresh effectively due to dependency change if we wired it right, or we just rely on explicit refresh)
-      // Actually, simplest is to just fetch if we don't have insights. 
-      // If language changes, we probably want to force refresh? 
-      // Current logic: if I have English insights, and switch to Hindi, 'engineerInsights' is not null, so it returns early.
-      // WE NEED TO FIX THIS: invalidate cache if language changes.
+    // Create cache key for this docId + role + language combination
+    const cacheKey = `${docId}_${role}_${language}`;
+
+    // Skip if already fetched for this combination (unless forcing refresh)
+    if (!forceRefresh && hasFetchedRef.current[cacheKey]) {
+      return;
     }
 
     setLoading(true);
@@ -75,36 +77,45 @@ export function useDocumentInsights(docId: number | string | undefined, language
 
     try {
       let data;
-      // Pass proper params to API
+      // Pass proper params to API - forceRefresh=false lets backend cache work
       if (typeof docId === 'number') {
         data = await api.getDocumentInsights(docId, role, forceRefresh, language);
       } else {
         data = await api.getSupabaseDocumentInsights(docId, role, forceRefresh, language);
       }
-      
+
       if (role === 'engineer') {
         setEngineerInsights(data as EngineerInsights);
       } else {
         setManagerInsights(data as ManagerInsights);
       }
+
+      // Mark as fetched
+      hasFetchedRef.current[cacheKey] = true;
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch insights');
     } finally {
       setLoading(false);
     }
-  }, [docId, language]); // Added language dep
+  }, [docId, language]);
 
   const regenerate = useCallback(async (role: 'engineer' | 'manager') => {
+    // Force refresh bypasses both frontend and backend cache
     await fetchInsights(role, true);
   }, [fetchInsights]);
 
-  // Fetch engineer insights on mount or when docId/language changes
+  // Fetch engineer insights on mount or when docId changes
   useEffect(() => {
     if (docId) {
-      // Always fetch when ID or Language changes
-      fetchInsights('engineer', true); // Force refresh to get new language
+      // Check if language changed - if so, we need to refetch
+      const languageChanged = prevLanguageRef.current !== language;
+      prevLanguageRef.current = language;
+
+      // Fetch with forceRefresh only if language changed
+      fetchInsights('engineer', languageChanged);
     }
-  }, [docId, language]);
+  }, [docId, language, fetchInsights]);
 
   return { engineerInsights, managerInsights, loading, error, fetchInsights, regenerate };
 }
+

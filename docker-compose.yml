@@ -58,6 +58,7 @@ services:
       NEO4J_USER: neo4j
       NEO4J_PASSWORD: klens_neo4j_2024
       GEMINI_API_KEY: ${GEMINI_API_KEY}
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY}
       # Supabase Auth
       SUPABASE_URL: ${SUPABASE_URL}
       SUPABASE_KEY: ${SUPABASE_KEY}

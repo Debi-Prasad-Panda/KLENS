@@ -26,13 +26,13 @@ export function DocumentLibrary({ onOpenDocument }: DocumentLibraryProps) {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [showUploadModal, setShowUploadModal] = useState(false);
-  
+
   // Permission checks
   const { can, roleDisplayName } = usePermissions();
   const canUpload = can('DOC_UPLOAD');
   const canDelete = can('DOC_DELETE');
   const canViewAll = can('DOC_VIEW_ALL');
-  
+
   // Handle unauthorized upload attempt
   const handleUploadClick = () => {
     if (!canUpload) {
@@ -52,8 +52,37 @@ export function DocumentLibrary({ onOpenDocument }: DocumentLibraryProps) {
 
   const loadDocuments = async () => {
     try {
-      const docs = await api.getDocuments({ limit: 50 });
-      if (docs.length === 0) {
+      // Fetch from Knowledge Hub (Supabase) instead of old documents table
+      const knowledgeHubDocs = await api.getKnowledgeHubDocuments(50, 0);
+
+      if (knowledgeHubDocs && knowledgeHubDocs.length > 0) {
+        // Transform Knowledge Hub response to match Document interface
+        // Knowledge Hub returns: id mod, file_name, s3_url, content_chunk, metadata
+        // Group by file_name to get unique documents (since chunks share the same file_name)
+        const uniqueDocsMap = new Map<string, Document>();
+
+        for (const doc of knowledgeHubDocs) {
+          const fileName = doc.file_name || doc.filename || "Unknown";
+          if (!uniqueDocsMap.has(fileName)) {
+            uniqueDocsMap.set(fileName, {
+              id: doc.id,
+              filename: fileName,
+              original_name: fileName,
+              file_type: "application/pdf",
+              status: "complete",
+              created_at: doc.metadata?.upload_time || doc.created_at || new Date().toISOString(),
+              uploaded_by: 1,
+              // Pass additional fields for document viewer
+              ...doc,
+              // Ensure content_chunk is explicitly available for DocumentViewer
+              content_chunk: doc.content_chunk || "",
+              ocr_text: doc.content_chunk || doc.ocr_text || ""
+            });
+          }
+        }
+
+        setDocuments(Array.from(uniqueDocsMap.values()));
+      } else {
         // Show demo documents if no documents exist
         setDocuments([
           {
@@ -84,8 +113,6 @@ export function DocumentLibrary({ onOpenDocument }: DocumentLibraryProps) {
             uploaded_by: 1
           }
         ]);
-      } else {
-        setDocuments(docs);
       }
     } catch (error) {
       console.error("Failed to load documents:", error);
@@ -163,11 +190,10 @@ export function DocumentLibrary({ onOpenDocument }: DocumentLibraryProps) {
         </div>
         <button
           onClick={handleUploadClick}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
-            canUpload 
-              ? 'bg-primary text-primary-foreground hover:bg-primary/90' 
-              : 'bg-slate-700 text-slate-400 cursor-not-allowed'
-          }`}
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${canUpload
+            ? 'bg-primary text-primary-foreground hover:bg-primary/90'
+            : 'bg-slate-700 text-slate-400 cursor-not-allowed'
+            }`}
         >
           {canUpload ? <Upload className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
           Upload
@@ -190,7 +216,7 @@ export function DocumentLibrary({ onOpenDocument }: DocumentLibraryProps) {
             className="w-full pl-10 pr-4 py-2 bg-secondary border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50"
           />
         </div>
-        <button 
+        <button
           onClick={searchKnowledgeHub}
           disabled={isSearchingKnowledge || search.trim().length < 2}
           className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50"
@@ -213,7 +239,7 @@ export function DocumentLibrary({ onOpenDocument }: DocumentLibraryProps) {
         <div className="glass-card p-4">
           <div className="flex items-center justify-between mb-3">
             <h3 className="font-semibold text-sm">📚 Knowledge Hub Results ({knowledgeResults.length})</h3>
-            <button 
+            <button
               onClick={() => setShowKnowledgeResults(false)}
               className="text-xs text-muted-foreground hover:text-foreground"
             >
@@ -236,6 +262,7 @@ export function DocumentLibrary({ onOpenDocument }: DocumentLibraryProps) {
                     created_at: result.metadata?.upload_time || new Date().toISOString(),
                     uploaded_by: 1,
                     ocr_text: result.content_chunk,
+                    content_chunk: result.content_chunk, // Also pass as content_chunk for DocumentViewer compatibility
                     s3_url: result.s3_url, // Pass S3 URL for original view
                   };
                   onOpenDocument(docForViewer as any);
@@ -246,11 +273,10 @@ export function DocumentLibrary({ onOpenDocument }: DocumentLibraryProps) {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between">
                       <p className="text-sm font-medium truncate">{result.file_name}</p>
-                      <span className={`text-xs px-2 py-0.5 rounded-full ml-2 ${
-                        result.match_type === "vector" 
-                          ? "bg-primary/20 text-primary" 
-                          : "bg-success/20 text-success"
-                      }`}>
+                      <span className={`text-xs px-2 py-0.5 rounded-full ml-2 ${result.match_type === "vector"
+                        ? "bg-primary/20 text-primary"
+                        : "bg-success/20 text-success"
+                        }`}>
                         {result.match_type === "vector" ? "Semantic" : "Keyword"}
                       </span>
                     </div>
@@ -276,11 +302,10 @@ export function DocumentLibrary({ onOpenDocument }: DocumentLibraryProps) {
           <button
             key={cat.id}
             onClick={() => setFilter(cat.id as any)}
-            className={`p-4 rounded-lg border transition-all ${
-              filter === cat.id
-                ? "bg-primary/10 border-primary/50"
-                : "bg-secondary/50 border-border hover:bg-secondary"
-            }`}
+            className={`p-4 rounded-lg border transition-all ${filter === cat.id
+              ? "bg-primary/10 border-primary/50"
+              : "bg-secondary/50 border-border hover:bg-secondary"
+              }`}
           >
             <div className="flex items-center gap-3">
               <Folder className={`w-5 h-5 ${filter === cat.id ? "text-primary" : "text-muted-foreground"}`} />
@@ -323,11 +348,10 @@ export function DocumentLibrary({ onOpenDocument }: DocumentLibraryProps) {
                 <div className="flex-1 min-w-0">
                   <p className="font-medium text-sm truncate">{doc.original_name}</p>
                   <div className="flex items-center gap-2 mt-2">
-                    <span className={`text-xs px-2 py-0.5 rounded-full ${
-                      doc.status === "complete" ? "bg-success/20 text-success" :
+                    <span className={`text-xs px-2 py-0.5 rounded-full ${doc.status === "complete" ? "bg-success/20 text-success" :
                       doc.status === "processing" ? "bg-warning/20 text-warning" :
-                      "bg-muted text-muted-foreground"
-                    }`}>
+                        "bg-muted text-muted-foreground"
+                      }`}>
                       {doc.status}
                     </span>
                   </div>
