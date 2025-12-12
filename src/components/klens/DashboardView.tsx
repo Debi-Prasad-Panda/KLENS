@@ -1,7 +1,7 @@
-import { 
-  FileText, 
-  CheckCircle2, 
-  Clock, 
+import {
+  FileText,
+  CheckCircle2,
+  Clock,
   AlertTriangle,
   TrendingUp,
   ArrowUpRight,
@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { useDashboardStats } from "@/hooks/useDashboardStats";
+import { ActivityFeed, TeamStatus, PendingTasks } from "./dashboard";
 
 interface DashboardViewProps {
   onOpenDocument?: () => void;
@@ -43,7 +44,7 @@ const getTaskIcon = (status: string) => {
 const getTaskType = (status: string): "critical" | "warning" | "info" => {
   switch (status) {
     case "failed": return "critical";
-    case "processing": 
+    case "processing":
     case "ocr":
     case "analyzing": return "warning";
     default: return "info";
@@ -56,7 +57,7 @@ const formatTimeAgo = (isoTime: string | null) => {
   const now = new Date();
   const diffMs = now.getTime() - date.getTime();
   const diffMins = Math.floor(diffMs / 60000);
-  
+
   if (diffMins < 1) return "Just now";
   if (diffMins < 60) return `${diffMins} min ago`;
   if (diffMins < 1440) return `${Math.floor(diffMins / 60)} hours ago`;
@@ -134,26 +135,22 @@ export function DashboardView({ onOpenDocument }: DashboardViewProps) {
           {tasks.map((task, index) => (
             <div
               key={task.id}
-              className={`task-card ${
-                task.type === "critical" ? "task-card-critical" :
-                task.type === "warning" ? "task-card-warning" : "task-card-info"
-              }`}
+              className={`task-card ${task.type === "critical" ? "task-card-critical" :
+                  task.type === "warning" ? "task-card-warning" : "task-card-info"
+                }`}
               style={{ animationDelay: `${index * 100}ms` }}
             >
               <div className="flex items-start justify-between mb-3">
-                <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                  task.type === "critical" ? "bg-destructive/20" :
-                  task.type === "warning" ? "bg-warning/20" : "bg-primary/20"
-                }`}>
-                  <task.icon className={`w-5 h-5 ${
-                    task.type === "critical" ? "text-destructive" :
-                    task.type === "warning" ? "text-warning" : "text-primary"
-                  }`} />
+                <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${task.type === "critical" ? "bg-destructive/20" :
+                    task.type === "warning" ? "bg-warning/20" : "bg-primary/20"
+                  }`}>
+                  <task.icon className={`w-5 h-5 ${task.type === "critical" ? "text-destructive" :
+                      task.type === "warning" ? "text-warning" : "text-primary"
+                    }`} />
                 </div>
-                <span className={`text-[10px] font-semibold uppercase px-2 py-1 rounded-full ${
-                  task.type === "critical" ? "bg-destructive/20 text-destructive" :
-                  task.type === "warning" ? "bg-warning/20 text-warning" : "bg-primary/20 text-primary"
-                }`}>
+                <span className={`text-[10px] font-semibold uppercase px-2 py-1 rounded-full ${task.type === "critical" ? "bg-destructive/20 text-destructive" :
+                    task.type === "warning" ? "bg-warning/20 text-warning" : "bg-primary/20 text-primary"
+                  }`}>
                   {task.type}
                 </span>
               </div>
@@ -161,7 +158,7 @@ export function DashboardView({ onOpenDocument }: DashboardViewProps) {
               <p className="text-sm text-muted-foreground mb-3">{task.subtitle}</p>
               <div className="flex items-center justify-between">
                 <span className="text-xs text-muted-foreground">{task.time}</span>
-                <button 
+                <button
                   onClick={() => onOpenDocument?.()}
                   className="flex items-center gap-1 text-xs font-medium text-primary hover:text-primary/80 transition-colors"
                 >
@@ -182,9 +179,8 @@ export function DashboardView({ onOpenDocument }: DashboardViewProps) {
                 <div className={`w-10 h-10 rounded-lg flex items-center justify-center bg-${stat.color}/20`}>
                   <stat.icon className={`w-5 h-5 text-${stat.color}`} />
                 </div>
-                <span className={`text-xs font-mono ${
-                  stat.change.startsWith("+") ? "text-success" : "text-destructive"
-                }`}>
+                <span className={`text-xs font-mono ${stat.change.startsWith("+") ? "text-success" : "text-destructive"
+                  }`}>
                   {stat.change}
                 </span>
               </div>
@@ -218,14 +214,14 @@ export function DashboardView({ onOpenDocument }: DashboardViewProps) {
                     <stop offset="95%" stopColor="#22d3ee" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <XAxis 
-                  dataKey="name" 
-                  axisLine={false} 
+                <XAxis
+                  dataKey="name"
+                  axisLine={false}
                   tickLine={false}
                   tick={{ fill: '#64748b', fontSize: 12 }}
                 />
-                <YAxis 
-                  axisLine={false} 
+                <YAxis
+                  axisLine={false}
                   tickLine={false}
                   tick={{ fill: '#64748b', fontSize: 12 }}
                 />
@@ -281,6 +277,18 @@ export function DashboardView({ onOpenDocument }: DashboardViewProps) {
           </div>
         </div>
       </div>
+
+      {/* New Dashboard Sections */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Activity Feed */}
+        <ActivityFeed />
+
+        {/* Team Status */}
+        <TeamStatus />
+      </div>
+
+      {/* Pending Tasks - Full Width */}
+      <PendingTasks />
     </div>
   );
 }
