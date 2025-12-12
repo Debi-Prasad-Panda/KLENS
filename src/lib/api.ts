@@ -289,7 +289,7 @@ class ApiClient {
   /**
    * Get AI insights for a Supabase document (UUID).
    */
-  async getSupabaseDocumentInsights(docId: string, role: 'engineer' | 'manager' = 'engineer', refresh = false, language: string = "English") {
+  async getSupabaseDocumentInsights(docId: string, role: string = 'engineer', refresh = false, language: string = "English") {
     return this.request(`/search/documents/${docId}/insights?role=${role}&refresh=${refresh}&language=${encodeURIComponent(language)}`);
   }
 

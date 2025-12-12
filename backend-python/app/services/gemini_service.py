@@ -142,7 +142,7 @@ Return a JSON object with exactly this structure:
 Focus on: technical specifications, operating parameters, maintenance requirements, safety protocols, compliance standards.
 Return ONLY valid JSON, no markdown or explanation.{lang_instruction}"""
 
-        else:  # manager
+        elif role == "manager":
             prompt = f"""Analyze this industrial document from a MANAGER's perspective.
 Document: {doc_name}
 Content: {text[:6000]}
@@ -162,6 +162,89 @@ Return a JSON object with exactly this structure:
 Focus on: financial implications, operational costs, business risks, budget requirements, strategic recommendations.
 Return ONLY valid JSON, no markdown or explanation.{lang_instruction}"""
 
+        elif role == "operator":
+            prompt = f"""Analyze this industrial document from an OPERATOR's perspective.
+Document: {doc_name}
+Content: {text[:6000]}
+
+Return a JSON object with exactly this structure:
+{{
+  "summary": ["key operational point 1", "key operational point 2", "key operational point 3"],
+  "key_points": ["operational instruction 1", "operational instruction 2", "operational instruction 3"],
+  "safety_steps": ["safety step 1", "safety step 2"],
+  "warnings": ["warning 1", "warning 2"],
+  "recommendations": ["action 1", "action 2"]
+}}
+
+Focus on: step-by-step procedures, operating instructions, safety warnings, emergency procedures, daily tasks.
+Return ONLY valid JSON, no markdown or explanation.{lang_instruction}"""
+
+        elif role == "safety_officer":
+            prompt = f"""Analyze this industrial document from a SAFETY OFFICER's perspective.
+Document: {doc_name}
+Content: {text[:6000]}
+
+Return a JSON object with exactly this structure:
+{{
+  "summary": ["safety finding 1", "safety finding 2", "safety finding 3"],
+  "key_points": ["safety requirement 1", "safety requirement 2"],
+  "hazards": [
+    {{"type": "hazard type", "severity": "HIGH/MEDIUM/LOW", "mitigation": "action to mitigate"}}
+  ],
+  "compliance": ["standard 1", "regulation 2"],
+  "risks": [
+    {{"severity": "high or medium or low", "text": "risk description"}}
+  ],
+  "recommendations": ["safety improvement 1", "safety improvement 2"]
+}}
+
+Focus on: safety hazards, PPE requirements, emergency procedures, compliance with OSHA/ISO/local regulations, incident prevention.
+Return ONLY valid JSON, no markdown or explanation.{lang_instruction}"""
+
+        elif role == "maintenance":
+            prompt = f"""Analyze this industrial document from a MAINTENANCE TECHNICIAN's perspective.
+Document: {doc_name}
+Content: {text[:6000]}
+
+Return a JSON object with exactly this structure:
+{{
+  "summary": ["maintenance point 1", "maintenance point 2", "maintenance point 3"],
+  "key_points": ["maintenance task 1", "maintenance task 2"],
+  "schedule": [
+    {{"task": "task name", "frequency": "daily/weekly/monthly", "priority": "HIGH/MEDIUM/LOW"}}
+  ],
+  "parts": ["part 1", "part 2"],
+  "risks": [
+    {{"severity": "high or medium or low", "text": "equipment risk description"}}
+  ],
+  "recommendations": ["maintenance recommendation 1", "maintenance recommendation 2"]
+}}
+
+Focus on: preventive maintenance, repair procedures, spare parts, equipment lifecycle, downtime prevention.
+Return ONLY valid JSON, no markdown or explanation.{lang_instruction}"""
+
+        else:  # quality
+            prompt = f"""Analyze this industrial document from a QUALITY INSPECTOR's perspective.
+Document: {doc_name}
+Content: {text[:6000]}
+
+Return a JSON object with exactly this structure:
+{{
+  "summary": ["quality finding 1", "quality finding 2", "quality finding 3"],
+  "key_points": ["quality requirement 1", "quality requirement 2"],
+  "standards": ["quality standard 1", "quality standard 2"],
+  "defects": [
+    {{"type": "defect type", "severity": "CRITICAL/MAJOR/MINOR", "action": "corrective action"}}
+  ],
+  "risks": [
+    {{"severity": "high or medium or low", "text": "quality risk description"}}
+  ],
+  "recommendations": ["quality improvement 1", "quality improvement 2"]
+}}
+
+Focus on: quality control, inspection criteria, defect analysis, compliance with quality standards (ISO 9001), continuous improvement.
+Return ONLY valid JSON, no markdown or explanation.{lang_instruction}"""
+
         try:
             response_text = self._call_openrouter(prompt)
             clean_text = response_text.replace("```json", "").replace("```", "").strip()
@@ -170,7 +253,7 @@ Return ONLY valid JSON, no markdown or explanation.{lang_instruction}"""
             error_msg = str(e)
             print(f"❌ Insights Error: {error_msg}")
             
-            # Return fallback data
+            # Return fallback data based on role
             if role == "engineer":
                 return {
                     "summary": [
@@ -193,7 +276,7 @@ Return ONLY valid JSON, no markdown or explanation.{lang_instruction}"""
                         {"severity": "low", "text": "Documentation update required"}
                     ]
                 }
-            else:
+            elif role == "manager":
                 return {
                     "summary": f"Executive summary for {doc_name}: Operational impact is within budget. No critical business risks identified.",
                     "financials": [
@@ -208,6 +291,27 @@ Return ONLY valid JSON, no markdown or explanation.{lang_instruction}"""
                         "Approve maintenance schedule",
                         "Review quarterly budget allocation",
                         "Update compliance records"
+                    ]
+                }
+            else:
+                # Generic fallback for operator, safety_officer, maintenance, quality
+                return {
+                    "summary": [
+                        f"Analysis of {doc_name} from {role.replace('_', ' ')} perspective.",
+                        "Key points have been identified for review.",
+                        "Follow standard procedures as outlined."
+                    ],
+                    "key_points": [
+                        "Standard procedures apply",
+                        "Review documentation regularly",
+                        "Report any anomalies"
+                    ],
+                    "risks": [
+                        {"severity": "low", "text": "Standard operational risks identified"}
+                    ],
+                    "recommendations": [
+                        "Follow established protocols",
+                        "Document any deviations"
                     ]
                 }
 

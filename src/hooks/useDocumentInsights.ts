@@ -42,18 +42,23 @@ interface ManagerInsights {
   recommendations: string[];
 }
 
+// Define the role type globally
+export type RoleType = 'engineer' | 'manager' | 'operator' | 'safety_officer' | 'maintenance' | 'quality';
+
 interface UseDocumentInsightsReturn {
   engineerInsights: EngineerInsights | null;
   managerInsights: ManagerInsights | null;
+  otherInsights: any | null; // For other roles (operator, safety, etc.)
   loading: boolean;
   error: string | null;
-  fetchInsights: (role: 'engineer' | 'manager') => Promise<void>;
-  regenerate: (role: 'engineer' | 'manager') => Promise<void>;
+  fetchInsights: (role: RoleType) => Promise<void>;
+  regenerate: (role: RoleType) => Promise<void>;
 }
 
 export function useDocumentInsights(docId: number | string | undefined, language: string = "English"): UseDocumentInsightsReturn {
   const [engineerInsights, setEngineerInsights] = useState<EngineerInsights | null>(null);
   const [managerInsights, setManagerInsights] = useState<ManagerInsights | null>(null);
+  const [otherInsights, setOtherInsights] = useState<any | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -61,7 +66,7 @@ export function useDocumentInsights(docId: number | string | undefined, language
   const prevLanguageRef = useRef(language);
   const hasFetchedRef = useRef<Record<string, boolean>>({});
 
-  const fetchInsights = useCallback(async (role: 'engineer' | 'manager', forceRefresh = false) => {
+  const fetchInsights = useCallback(async (role: RoleType, forceRefresh = false) => {
     if (!docId) return;
 
     // Create cache key for this docId + role + language combination
@@ -86,8 +91,11 @@ export function useDocumentInsights(docId: number | string | undefined, language
 
       if (role === 'engineer') {
         setEngineerInsights(data as EngineerInsights);
-      } else {
+      } else if (role === 'manager') {
         setManagerInsights(data as ManagerInsights);
+      } else {
+        // For other roles (operator, safety_officer, maintenance, quality)
+        setOtherInsights(data);
       }
 
       // Mark as fetched
@@ -99,7 +107,7 @@ export function useDocumentInsights(docId: number | string | undefined, language
     }
   }, [docId, language]);
 
-  const regenerate = useCallback(async (role: 'engineer' | 'manager') => {
+  const regenerate = useCallback(async (role: RoleType) => {
     // Force refresh bypasses both frontend and backend cache
     await fetchInsights(role, true);
   }, [fetchInsights]);
@@ -116,6 +124,6 @@ export function useDocumentInsights(docId: number | string | undefined, language
     }
   }, [docId, language, fetchInsights]);
 
-  return { engineerInsights, managerInsights, loading, error, fetchInsights, regenerate };
+  return { engineerInsights, managerInsights, otherInsights, loading, error, fetchInsights, regenerate };
 }
 

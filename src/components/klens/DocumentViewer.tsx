@@ -52,12 +52,12 @@ const getSpecIcon = (label: string) => {
 export function DocumentViewer({ onBack, document }: DocumentViewerProps) {
   const docTitle = document?.original_name || "Document";
   const docId = document?.id;
-  const [viewMode, setViewMode] = useState<"engineer" | "manager">("engineer");
+  const [viewMode, setViewMode] = useState<"engineer" | "manager" | "operator" | "safety_officer" | "maintenance" | "quality">("engineer");
   const [zoom, setZoom] = useState(100);
   const [contentLanguage, setContentLanguage] = useState("English");
   const { t } = useLanguage();
 
-  const { engineerInsights, managerInsights, loading, error, fetchInsights, regenerate } = useDocumentInsights(docId, contentLanguage);
+  const { engineerInsights, managerInsights, otherInsights, loading, error, fetchInsights, regenerate } = useDocumentInsights(docId, contentLanguage);
 
   // Fetch insights when switching roles
   useEffect(() => {
@@ -218,9 +218,21 @@ export function DocumentViewer({ onBack, document }: DocumentViewerProps) {
                       AI-Generated Summary
                     </h3>
                     {loading ? (
-                      <div className="text-center py-8">
-                        <Loader2 className="w-8 h-8 animate-spin text-primary mx-auto" />
-                        <p className="text-muted-foreground mt-4">Generating AI insights...</p>
+                      <div className="space-y-4 py-4">
+                        <div className="flex items-center gap-3 mb-4">
+                          <Loader2 className="w-5 h-5 animate-spin text-primary" />
+                          <p className="text-sm font-medium text-primary">Generating AI insights...</p>
+                        </div>
+                        {/* Skeleton loader */}
+                        <div className="space-y-3">
+                          <div className="h-4 bg-secondary/50 rounded animate-pulse w-full"></div>
+                          <div className="h-4 bg-secondary/50 rounded animate-pulse w-5/6"></div>
+                          <div className="h-4 bg-secondary/50 rounded animate-pulse w-4/6"></div>
+                        </div>
+                        <div className="mt-4 p-4 bg-secondary/30 rounded-lg">
+                          <div className="h-3 bg-secondary/50 rounded animate-pulse w-1/3 mb-2"></div>
+                          <div className="h-3 bg-secondary/50 rounded animate-pulse w-1/2"></div>
+                        </div>
                       </div>
                     ) : viewMode === "engineer" && engineerInsights ? (
                       <div className="space-y-3">
@@ -263,6 +275,37 @@ export function DocumentViewer({ onBack, document }: DocumentViewerProps) {
                           </div>
                         )}
                       </div>
+                    ) : otherInsights && ["operator", "safety_officer", "maintenance", "quality"].includes(viewMode) ? (
+                      <div className="space-y-3">
+                        <p className="text-sm text-muted-foreground italic mb-4">
+                          Original document content not available. Showing AI analysis:
+                        </p>
+                        {/* Display summary */}
+                        {otherInsights.summary && (
+                          <div className="space-y-2">
+                            {Array.isArray(otherInsights.summary) ? (
+                              otherInsights.summary.map((item: string, i: number) => (
+                                <p key={i} className="text-sm text-foreground leading-relaxed border-l-2 border-primary/50 pl-4">
+                                  • {item}
+                                </p>
+                              ))
+                            ) : (
+                              <p className="text-sm text-foreground leading-relaxed border-l-2 border-primary/50 pl-4">
+                                {otherInsights.summary}
+                              </p>
+                            )}
+                          </div>
+                        )}
+                        {/* Display key points if available */}
+                        {otherInsights.key_points && otherInsights.key_points.length > 0 && (
+                          <div className="mt-4 p-4 bg-secondary/30 rounded-lg">
+                            <p className="text-xs font-semibold text-muted-foreground mb-2">KEY POINTS</p>
+                            {otherInsights.key_points.map((point: string, i: number) => (
+                              <p key={i} className="text-sm">• {point}</p>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                     ) : (
                       <div className="text-center py-8">
                         <Sparkles className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
@@ -288,37 +331,84 @@ export function DocumentViewer({ onBack, document }: DocumentViewerProps) {
               <span className="text-xs text-muted-foreground">Powered by Gemini</span>
             </div>
 
-            {/* Toggle Switch */}
-            <div className="flex items-center p-1 bg-secondary/50 rounded-xl">
-              <button
-                onClick={() => setViewMode("engineer")}
-                className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg transition-all ${viewMode === "engineer"
-                  ? "bg-primary text-primary-foreground shadow-lg"
-                  : "text-muted-foreground hover:text-foreground"
-                  }`}
-              >
-                <Wrench className="w-4 h-4" />
-                <span className="text-sm font-medium">{t("Engineer View", "Engineer View")}</span>
-              </button>
-              <button
-                onClick={() => setViewMode("manager")}
-                className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg transition-all ${viewMode === "manager"
-                  ? "bg-primary text-primary-foreground shadow-lg"
-                  : "text-muted-foreground hover:text-foreground"
-                  }`}
-              >
-                <Briefcase className="w-4 h-4" />
-                <span className="text-sm font-medium">{t("Manager View", "Manager View")}</span>
-              </button>
-            </div>
+            {/* Role Dropdown */}
+            <Select value={viewMode} onValueChange={(value) => setViewMode(value as any)}>
+              <SelectTrigger className="w-full bg-secondary/50 border-border">
+                <div className="flex items-center gap-2">
+                  {viewMode === "engineer" && <Wrench className="w-4 h-4 text-primary" />}
+                  {viewMode === "manager" && <Briefcase className="w-4 h-4 text-primary" />}
+                  {viewMode === "operator" && <Gauge className="w-4 h-4 text-primary" />}
+                  {viewMode === "safety_officer" && <AlertTriangle className="w-4 h-4 text-primary" />}
+                  {viewMode === "maintenance" && <Wrench className="w-4 h-4 text-primary" />}
+                  {viewMode === "quality" && <CheckCircle2 className="w-4 h-4 text-primary" />}
+                  <SelectValue placeholder="Select Role View" />
+                </div>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="engineer">
+                  <div className="flex items-center gap-2">
+                    <Wrench className="w-4 h-4" />
+                    <span>Engineer View</span>
+                  </div>
+                </SelectItem>
+                <SelectItem value="manager">
+                  <div className="flex items-center gap-2">
+                    <Briefcase className="w-4 h-4" />
+                    <span>Manager View</span>
+                  </div>
+                </SelectItem>
+                <SelectItem value="operator">
+                  <div className="flex items-center gap-2">
+                    <Gauge className="w-4 h-4" />
+                    <span>Operator View</span>
+                  </div>
+                </SelectItem>
+                <SelectItem value="safety_officer">
+                  <div className="flex items-center gap-2">
+                    <AlertTriangle className="w-4 h-4" />
+                    <span>Safety Officer View</span>
+                  </div>
+                </SelectItem>
+                <SelectItem value="maintenance">
+                  <div className="flex items-center gap-2">
+                    <Wrench className="w-4 h-4" />
+                    <span>Maintenance Tech View</span>
+                  </div>
+                </SelectItem>
+                <SelectItem value="quality">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4" />
+                    <span>Quality Inspector View</span>
+                  </div>
+                </SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Insights Content */}
           <div className="flex-1 overflow-auto p-4 space-y-4">
             {loading ? (
-              <div className="flex flex-col items-center justify-center h-64 gap-4">
-                <Loader2 className="w-8 h-8 animate-spin text-primary" />
-                <p className="text-muted-foreground">Generating AI insights...</p>
+              <div className="space-y-4 p-4">
+                <div className="flex items-center gap-3 mb-4">
+                  <Loader2 className="w-5 h-5 animate-spin text-primary" />
+                  <p className="text-sm font-medium text-primary">Generating AI insights...</p>
+                </div>
+                {/* Skeleton loader */}
+                <div className="space-y-3">
+                  <div className="h-4 bg-secondary/50 rounded animate-pulse w-full"></div>
+                  <div className="h-4 bg-secondary/50 rounded animate-pulse w-5/6"></div>
+                  <div className="h-4 bg-secondary/50 rounded animate-pulse w-4/6"></div>
+                </div>
+                <div className="grid grid-cols-2 gap-3 mt-4">
+                  <div className="p-3 bg-secondary/30 rounded-lg">
+                    <div className="h-3 bg-secondary/50 rounded animate-pulse w-2/3 mb-2"></div>
+                    <div className="h-4 bg-secondary/50 rounded animate-pulse w-1/2"></div>
+                  </div>
+                  <div className="p-3 bg-secondary/30 rounded-lg">
+                    <div className="h-3 bg-secondary/50 rounded animate-pulse w-2/3 mb-2"></div>
+                    <div className="h-4 bg-secondary/50 rounded animate-pulse w-1/2"></div>
+                  </div>
+                </div>
               </div>
             ) : error ? (
               <div className="p-4 bg-destructive/10 border border-destructive/30 rounded-lg">
@@ -544,6 +634,76 @@ export function DocumentViewer({ onBack, document }: DocumentViewerProps) {
                       <ExternalLink className="w-4 h-4" />
                       <span className="text-sm font-medium">Share Insights</span>
                     </button>
+                  </div>
+                </div>
+              </>
+            ) : otherInsights && ["operator", "safety_officer", "maintenance", "quality"].includes(viewMode) ? (
+              <>
+                {/* Generic Role Insights Display */}
+                <div className="space-y-4">
+                  <div className="p-4 bg-secondary/30 rounded-lg">
+                    <h4 className="text-sm font-semibold text-primary flex items-center gap-2 mb-3">
+                      <Sparkles className="w-4 h-4" />
+                      {viewMode.replace("_", " ").replace(/\b\w/g, (c) => c.toUpperCase())} Analysis
+                    </h4>
+
+                    {/* Summary Section */}
+                    {otherInsights.summary && (
+                      <div className="space-y-2 mb-4">
+                        {Array.isArray(otherInsights.summary) ? (
+                          otherInsights.summary.map((item: string, i: number) => (
+                            <p key={i} className="text-sm flex items-start gap-2">
+                              <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2 flex-shrink-0" />
+                              {item}
+                            </p>
+                          ))
+                        ) : (
+                          <p className="text-sm">{otherInsights.summary}</p>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Key Points */}
+                    {otherInsights.key_points && (
+                      <div className="mt-4">
+                        <h5 className="text-xs font-semibold text-muted-foreground mb-2">KEY POINTS</h5>
+                        <ul className="space-y-1">
+                          {otherInsights.key_points.map((point: string, i: number) => (
+                            <li key={i} className="text-sm text-foreground">• {point}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
+                    {/* Recommendations */}
+                    {otherInsights.recommendations && otherInsights.recommendations.length > 0 && (
+                      <div className="mt-4">
+                        <h5 className="text-xs font-semibold text-success mb-2">RECOMMENDATIONS</h5>
+                        <ul className="space-y-1">
+                          {otherInsights.recommendations.map((rec: string, i: number) => (
+                            <li key={i} className="text-sm text-foreground flex items-center gap-2">
+                              <CheckCircle2 className="w-3 h-3 text-success" />
+                              {rec}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
+                    {/* Risks/Warnings */}
+                    {otherInsights.risks && otherInsights.risks.length > 0 && (
+                      <div className="mt-4">
+                        <h5 className="text-xs font-semibold text-warning mb-2">RISKS & WARNINGS</h5>
+                        <ul className="space-y-1">
+                          {otherInsights.risks.map((risk: any, i: number) => (
+                            <li key={i} className="text-sm text-foreground flex items-center gap-2">
+                              <AlertTriangle className="w-3 h-3 text-warning" />
+                              {typeof risk === 'string' ? risk : risk.text || risk.description}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
                   </div>
                 </div>
               </>
