@@ -66,7 +66,7 @@ export function Sidebar({ activeTab, setActiveTab, isCollapsed, setIsCollapsed }
       permission: 'IOT_VIEW_ALL' as const, altPermission: 'IOT_MONITOR' as const },
     { id: "ar", label: t("AR Visualization", "AR Preview"), icon: Glasses, badge: "Beta" },
     { id: "compliance", label: t("Compliance", "Compliance"), icon: Shield },
-    { id: "succession", label: t("Succession Planning", "Succession Planning"), icon: Users, badge: "⚠️",
+    { id: "succession", label: t("Workforce", "Workforce"), icon: Users, badge: "★",
       permission: 'ADMIN_TRACE' as const },
   ];
 
@@ -151,19 +151,7 @@ export function Sidebar({ activeTab, setActiveTab, isCollapsed, setIsCollapsed }
           </button>
         ))}
         
-        {/* Admin-only: Workforce Command Center */}
-        {isAdminOrManager && (
-          <button
-            onClick={() => navigate('/users')}
-            className="w-full nav-item mt-2 border-t border-border/50 pt-3"
-          >
-            <Users className="w-5 h-5 text-amber-400" />
-            <span className="flex-1 text-left text-sm font-medium">Workforce</span>
-            <span className="text-[10px] px-2 py-0.5 rounded-full font-mono font-semibold bg-amber-500/20 text-amber-400">
-              Admin
-            </span>
-          </button>
-        )}
+
       </nav>
 
 
