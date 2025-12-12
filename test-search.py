@@ -21,13 +21,13 @@ def test_search():
     login_response = requests.post(
         f"{API_URL}/auth/login",
         json={
-            "email": "admin@klens.local",
+            "email": "admin@example.com",
             "password": "Admin@123"
         }
     )
     
     if login_response.status_code != 200:
-        print(f"❌ Login failed: {login_response.text}")
+        print(f"[ERROR] Login failed: {login_response.text}")
         return
     
     token = login_response.json().get("access_token")
@@ -43,7 +43,7 @@ def test_search():
     )
     
     if docs_response.status_code != 200:
-        print(f"❌ Failed to fetch documents: {docs_response.text}")
+        print(f"[ERROR] Failed to fetch documents: {docs_response.text}")
         return
     
     docs = docs_response.json()
@@ -71,7 +71,7 @@ def test_search():
         )
         
         if search_response.status_code != 200:
-            print(f"   ❌ Search failed: {search_response.text}")
+            print(f"   [ERROR] Search failed: {search_response.text}")
             continue
         
         results = search_response.json()
@@ -91,7 +91,7 @@ def test_search():
         print(f"[OK] Embedding generated: {len(embedding)} dimensions")
         print(f"   First 5 values: {embedding[:5]}")
     except Exception as e:
-        print(f"❌ Embedding generation failed: {e}")
+        print(f"[ERROR] Embedding generation failed: {e}")
     
     print("\n" + "=" * 60)
     print("[SUCCESS] SEMANTIC SEARCH TEST COMPLETE")

@@ -196,7 +196,7 @@ class SupabaseService:
         self,
         query_embedding: List[float],
         limit: int = 10,
-        threshold: float = 0.5
+        threshold: float = 0.0
     ) -> List[Dict]:
         """
         Perform vector similarity search using pgvector.

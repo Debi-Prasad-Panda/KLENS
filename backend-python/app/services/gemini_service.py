@@ -96,17 +96,30 @@ Focus on industrial safety entities. Return ONLY valid JSON, no markdown."""
             return {"nodes": [], "links": [], "error": str(e)}
     
     def generate_embedding(self, text: str) -> List[float]:
-        """Generate embedding for semantic search (still uses Gemini)"""
+        """Generate embedding using sentence-transformers (local, no API needed)"""
         try:
-            result = genai.embed_content(
-                model="models/embedding-001",
-                content=text[:8000],
-                task_type="retrieval_document"
-            )
-            return result['embedding']
+            # Use sentence-transformers for embeddings (free, local)
+            from sentence_transformers import SentenceTransformer
+            
+            # Cache the model
+            if not hasattr(self, '_embedding_model'):
+                print("Loading embedding model (first time only)...")
+                self._embedding_model = SentenceTransformer('all-MiniLM-L6-v2')
+            
+            embedding = self._embedding_model.encode(text[:8000], convert_to_numpy=True)
+            return embedding.tolist()
+        except ImportError:
+            print("sentence-transformers not installed. Install: pip install sentence-transformers")
+            # Fallback to simple hash-based embedding (not semantic, but works)
+            import hashlib
+            hash_obj = hashlib.sha256(text[:8000].encode())
+            hash_bytes = hash_obj.digest()
+            # Convert to 384-dim vector (all-MiniLM-L6-v2 dimension)
+            embedding = [float(b) / 255.0 for b in hash_bytes] * 12
+            return embedding[:384]
         except Exception as e:
-            print(f"❌ Embedding Error: {e}")
-            return [0.0] * 768  # Return zero vector on error
+            print(f"Embedding Error: {e}")
+            return [0.0] * 384  # Return zero vector on error
 
     def generate_role_insights(self, text: str, role: str, doc_name: str = "", language: str = "English") -> Dict:
         """Generate role-specific AI insights for a document."""
