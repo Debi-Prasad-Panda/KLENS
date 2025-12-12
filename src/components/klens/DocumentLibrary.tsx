@@ -151,15 +151,29 @@ export function DocumentLibrary({ onOpenDocument }: DocumentLibraryProps) {
     }
   };
 
+  // Get current user ID (for now using 1, but should come from auth context)
+  const currentUserId = 1;
+
+  // Filter documents based on selected category
   const filteredDocs = documents.filter(doc => {
-    const matchesSearch = doc.original_name.toLowerCase().includes(search.toLowerCase());
-    return matchesSearch;
+    // First apply search filter
+    if (search && !doc.original_name.toLowerCase().includes(search.toLowerCase())) {
+      return false;
+    }
+
+    // Then apply category filter
+    if (filter === "uploaded") {
+      return doc.uploaded_by === currentUserId;
+    } else if (filter === "shared") {
+      return doc.uploaded_by !== currentUserId;
+    }
+    return true; // "all" shows everything
   });
 
   const categories = [
     { id: "all", label: "All Documents", count: documents.length },
-    { id: "uploaded", label: "Uploaded by Me", count: documents.filter(d => d.uploaded_by === 1).length },
-    { id: "shared", label: "Shared with Me", count: 0 }
+    { id: "uploaded", label: "Uploaded by Me", count: documents.filter(d => d.uploaded_by === currentUserId).length },
+    { id: "shared", label: "Shared with Me", count: documents.filter(d => d.uploaded_by !== currentUserId).length }
   ];
 
   // Knowledge Hub search
