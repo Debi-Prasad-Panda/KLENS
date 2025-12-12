@@ -1,8 +1,8 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { RoleBasedView } from "./RoleBasedView";
+import { RoleManagementView } from "./RoleManagementView";
 import { NuclearKeys } from "./NuclearKeys";
 import { AuditTrail } from "./AuditTrail";
-import { Shield, GitBranch, Eye } from "lucide-react";
+import { Shield, GitBranch, Eye, Users } from "lucide-react";
 
 export function FeaturesShowcase() {
   return (
@@ -15,8 +15,8 @@ export function FeaturesShowcase() {
       <Tabs defaultValue="roles" className="w-full">
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="roles" className="flex items-center gap-2">
-            <Eye className="w-4 h-4" />
-            Role Views
+            <Users className="w-4 h-4" />
+            Role Management
           </TabsTrigger>
           <TabsTrigger value="nuclear" className="flex items-center gap-2">
             <Shield className="w-4 h-4" />
@@ -29,7 +29,7 @@ export function FeaturesShowcase() {
         </TabsList>
 
         <TabsContent value="roles" className="mt-6">
-          <RoleBasedView />
+          <RoleManagementView />
         </TabsContent>
 
         <TabsContent value="nuclear" className="mt-6">
