@@ -13,9 +13,9 @@ COPY components.json ./
 # Install dependencies
 RUN npm install
 
-# Copy the entrypoint script
+# Copy the entrypoint script and fix Windows line endings (CRLF -> LF)
 COPY docker-entrypoint.sh /docker-entrypoint.sh
-RUN chmod +x /docker-entrypoint.sh
+RUN sed -i 's/\r$//' /docker-entrypoint.sh && chmod +x /docker-entrypoint.sh
 
 # Copy source (will be overridden by volume mount in dev)
 COPY . .
