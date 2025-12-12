@@ -267,22 +267,24 @@ export function DigitalBadgeHeader() {
                                    </div>
 
                                    {/* Safety Score */}
-                                   <div className="vital-stat items-center">
+                                   <div className="vital-stat">
                                         <span className="vital-stat-label">Safety Score</span>
-                                        <div className={`safety-score-meter ${getSafetyScoreClass(profile.safety_score)}`}>
-                                             <svg className="safety-score-ring w-16 h-16" viewBox="0 0 100 100">
-                                                  <circle className="bg" cx="50" cy="50" r="40" />
-                                                  <circle
-                                                       className="progress"
-                                                       cx="50"
-                                                       cy="50"
-                                                       r="40"
-                                                       style={{ strokeDashoffset: getSafetyStrokeOffset(profile.safety_score) }}
-                                                  />
-                                             </svg>
-                                             <div className="safety-score-value">
-                                                  <span className="text-lg font-bold">{profile.safety_score}</span>
-                                                  <span className="text-[10px] text-slate-500">/100</span>
+                                        <div className="flex justify-center">
+                                             <div className={`safety-score-meter ${getSafetyScoreClass(profile.safety_score)}`}>
+                                                  <svg className="safety-score-ring w-16 h-16" viewBox="0 0 100 100">
+                                                       <circle className="bg" cx="50" cy="50" r="40" />
+                                                       <circle
+                                                            className="progress"
+                                                            cx="50"
+                                                            cy="50"
+                                                            r="40"
+                                                            style={{ strokeDashoffset: getSafetyStrokeOffset(profile.safety_score) }}
+                                                       />
+                                                  </svg>
+                                                  <div className="safety-score-value">
+                                                       <span className="text-lg font-bold">{profile.safety_score}</span>
+                                                       <span className="text-[10px] text-slate-500">/100</span>
+                                                  </div>
                                              </div>
                                         </div>
                                    </div>

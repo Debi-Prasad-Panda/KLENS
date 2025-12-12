@@ -7,7 +7,7 @@ $body = @{
 } | ConvertTo-Json
 
 try {
-    $response = Invoke-RestMethod -Uri "http://localhost:3000/api/auth/register" -Method Post -Body $body -ContentType "application/json"
+    $response = Invoke-RestMethod -Uri "http://localhost:8000/api/auth/register" -Method Post -Body $body -ContentType "application/json"
     Write-Host "✅ Admin account created successfully!" -ForegroundColor Green
     Write-Host "Email: admin@klens.local" -ForegroundColor Cyan
     Write-Host "Password: Admin@123" -ForegroundColor Cyan
