@@ -1,18 +1,19 @@
-import { Search, Moon, User, Sparkles, LogOut, Settings, Shield, FileText, Loader2, Menu } from "lucide-react";
+import { Search, Moon, Sun, User, Sparkles, LogOut, Settings, Shield, FileText, Loader2, Menu } from "lucide-react";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useTheme } from "@/contexts/ThemeContext";
 import { useNavigate } from "react-router-dom";
 import { AIChatSidebar } from "./AIChatSidebar";
 import { NotificationBell } from "@/components/Notifications/NotificationBell";
 
 import { api } from "@/lib/api";
 import { useLanguage, SUPPORTED_LANGUAGES } from "@/contexts/LanguageContext";
-import { 
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue, 
+  SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Languages } from "lucide-react";
@@ -43,11 +44,12 @@ export function TopNav({ onAIChatToggle, onMenuToggle }: TopNavProps = {}) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const { t } = useLanguage();
+  const { theme, resolvedTheme, toggleTheme } = useTheme();
 
   // Manual search function
   const performSearch = useCallback(async () => {
     if (searchQuery.trim().length < 2) return;
-    
+
     setIsSearching(true);
     setHasSearched(true);
     try {
@@ -68,11 +70,11 @@ export function TopNav({ onAIChatToggle, onMenuToggle }: TopNavProps = {}) {
       // Don't clear results immediately - keep them visible
       return;
     }
-    
+
     const timer = setTimeout(() => {
       performSearch();
     }, 500);
-    
+
     return () => clearTimeout(timer);
   }, [searchQuery, performSearch]);
 
@@ -124,7 +126,7 @@ export function TopNav({ onAIChatToggle, onMenuToggle }: TopNavProps = {}) {
         >
           <Menu className="w-5 h-5 text-muted-foreground" />
         </button>
-        
+
         {/* Search Bar with Hybrid Search */}
         <div className="flex-1 max-w-2xl" ref={searchRef}>
           <div className="relative flex gap-2">
@@ -148,7 +150,7 @@ export function TopNav({ onAIChatToggle, onMenuToggle }: TopNavProps = {}) {
                 </button>
               )}
             </div>
-            
+
             {/* Search Button */}
             <button
               onClick={performSearch}
@@ -162,7 +164,7 @@ export function TopNav({ onAIChatToggle, onMenuToggle }: TopNavProps = {}) {
               )}
               <span className="text-sm font-medium hidden sm:inline">Search</span>
             </button>
-            
+
             {/* Search Results Dropdown */}
             {showSearchResults && (
               <div className="absolute top-full left-0 right-0 mt-2 bg-card border border-border rounded-xl shadow-2xl overflow-hidden z-50">
@@ -188,11 +190,10 @@ export function TopNav({ onAIChatToggle, onMenuToggle }: TopNavProps = {}) {
                                 {result.content_chunk.substring(0, 100)}...
                               </p>
                               <div className="flex items-center gap-2 mt-2">
-                                <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                                  result.match_type === "vector" 
-                                    ? "bg-primary/20 text-primary" 
-                                    : "bg-success/20 text-success"
-                                }`}>
+                                <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${result.match_type === "vector"
+                                  ? "bg-primary/20 text-primary"
+                                  : "bg-success/20 text-success"
+                                  }`}>
                                   {result.match_type === "vector" ? "Semantic" : "Keyword"}
                                 </span>
                                 <span className="text-xs text-muted-foreground">
@@ -217,108 +218,115 @@ export function TopNav({ onAIChatToggle, onMenuToggle }: TopNavProps = {}) {
           </div>
         </div>
 
-      {/* Actions */}
-      <div className="flex items-center gap-2 ml-6">
-        {/* AI Assistant Button */}
-        <button
-          onClick={toggleAIChat}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl border transition-all ${
-            showAIChat
+        {/* Actions */}
+        <div className="flex items-center gap-2 ml-6">
+          {/* AI Assistant Button */}
+          <button
+            onClick={toggleAIChat}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl border transition-all ${showAIChat
               ? "bg-primary text-primary-foreground border-primary"
               : "bg-gradient-to-r from-primary/20 to-success/20 border-primary/30 hover:from-primary/30 hover:to-success/30"
-          }`}
-        >
-          <Sparkles className={`w-4 h-4 ${showAIChat ? "text-primary-foreground" : "text-primary"}`} />
-          <span className={`text-sm font-medium ${showAIChat ? "text-primary-foreground" : "text-primary"}`}>AI Assistant</span>
-        </button>
-        {/* Live Status */}
-        <div className="hidden md:flex items-center gap-2 px-4 py-2 glass-card mr-4">
-          <div className="w-2 h-2 rounded-full bg-success animate-pulse" />
-          <span className="text-xs font-mono text-muted-foreground">
-            SYSTEM <span className="text-success">ONLINE</span>
-          </span>
-          <span className="text-xs text-muted-foreground">|</span>
-          <span className="text-xs font-mono text-muted-foreground">
-            Nodes: <span className="text-primary">1,240</span>
-          </span>
-        </div>
-
-        {/* Notifications - Real-time Industrial Bell */}
-        <NotificationBell />
-
-        {/* Dark Mode */}
-        <button className="w-10 h-10 rounded-xl bg-secondary/50 border border-border flex items-center justify-center hover:bg-secondary transition-colors">
-          <Moon className="w-5 h-5 text-muted-foreground" />
-        </button>
-
-        {/* Global Language Selector (Moved to Settings) */}
-
-
-        {/* Profile */}
-        <div className="relative">
-          <button 
-            onClick={() => setShowProfileMenu(!showProfileMenu)}
-            className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-success flex items-center justify-center hover:scale-105 transition-transform"
+              }`}
           >
-            <User className="w-5 h-5 text-background" />
+            <Sparkles className={`w-4 h-4 ${showAIChat ? "text-primary-foreground" : "text-primary"}`} />
+            <span className={`text-sm font-medium ${showAIChat ? "text-primary-foreground" : "text-primary"}`}>AI Assistant</span>
           </button>
-          
-          {showProfileMenu && (
-            <div className="absolute right-0 mt-2 w-64 glass-card p-2 animate-fade-in">
-              <div className="px-3 py-2 border-b border-border mb-2">
-                <p className="font-semibold text-sm">{user?.name}</p>
-                <p className="text-xs text-muted-foreground">{user?.email}</p>
-              </div>
-              
-              <button
-                onClick={() => {
-                  setShowProfileMenu(false);
-                  navigate('/dashboard');
-                  window.dispatchEvent(new CustomEvent('navigate-profile'));
-                }}
-                className="w-full flex items-center gap-3 px-3 py-2 hover:bg-secondary rounded-lg transition-colors text-left"
-              >
-                <User className="w-4 h-4 text-muted-foreground" />
-                <span className="text-sm">{t("Profile", "Profile")}</span>
-              </button>
-              
-              <button
-                onClick={() => {
-                  setShowProfileMenu(false);
-                  navigate('/settings');
-                }}
-                className="w-full flex items-center gap-3 px-3 py-2 hover:bg-secondary rounded-lg transition-colors text-left"
-              >
-                <Settings className="w-4 h-4 text-muted-foreground" />
-                <span className="text-sm">{t("Settings", "Settings")}</span>
-              </button>
-              
-              {user?.role === 'admin' && (
+          {/* Live Status */}
+          <div className="hidden md:flex items-center gap-2 px-4 py-2 glass-card mr-4">
+            <div className="w-2 h-2 rounded-full bg-success animate-pulse" />
+            <span className="text-xs font-mono text-muted-foreground">
+              SYSTEM <span className="text-success">ONLINE</span>
+            </span>
+            <span className="text-xs text-muted-foreground">|</span>
+            <span className="text-xs font-mono text-muted-foreground">
+              Nodes: <span className="text-primary">1,240</span>
+            </span>
+          </div>
+
+          {/* Notifications - Real-time Industrial Bell */}
+          <NotificationBell />
+
+          {/* Theme Toggle */}
+          <button
+            onClick={toggleTheme}
+            className="w-10 h-10 rounded-xl bg-secondary/50 border border-border flex items-center justify-center hover:bg-secondary transition-colors group"
+            title={`Switch to ${resolvedTheme === 'dark' ? 'light' : 'dark'} mode`}
+          >
+            {resolvedTheme === 'dark' ? (
+              <Sun className="w-5 h-5 text-warning group-hover:text-warning/80 transition-colors" />
+            ) : (
+              <Moon className="w-5 h-5 text-primary group-hover:text-primary/80 transition-colors" />
+            )}
+          </button>
+
+          {/* Global Language Selector (Moved to Settings) */}
+
+
+          {/* Profile */}
+          <div className="relative">
+            <button
+              onClick={() => setShowProfileMenu(!showProfileMenu)}
+              className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-success flex items-center justify-center hover:scale-105 transition-transform"
+            >
+              <User className="w-5 h-5 text-background" />
+            </button>
+
+            {showProfileMenu && (
+              <div className="absolute right-0 mt-2 w-64 glass-card p-2 animate-fade-in">
+                <div className="px-3 py-2 border-b border-border mb-2">
+                  <p className="font-semibold text-sm">{user?.name}</p>
+                  <p className="text-xs text-muted-foreground">{user?.email}</p>
+                </div>
+
                 <button
-                  onClick={() => setShowProfileMenu(false)}
+                  onClick={() => {
+                    setShowProfileMenu(false);
+                    navigate('/dashboard');
+                    window.dispatchEvent(new CustomEvent('navigate-profile'));
+                  }}
                   className="w-full flex items-center gap-3 px-3 py-2 hover:bg-secondary rounded-lg transition-colors text-left"
                 >
-                  <Shield className="w-4 h-4 text-warning" />
-                  <span className="text-sm">{t("Admin Panel", "Admin Panel")}</span>
+                  <User className="w-4 h-4 text-muted-foreground" />
+                  <span className="text-sm">{t("Profile", "Profile")}</span>
                 </button>
-              )}
-              
-              <div className="border-t border-border my-2" />
-              
-              <button
-                onClick={() => {
-                  logout();
-                  navigate('/login');
-                }}
-                className="w-full flex items-center gap-3 px-3 py-2 hover:bg-destructive/20 text-destructive rounded-lg transition-colors text-left"
-              >
-                <LogOut className="w-4 h-4" />
-                <span className="text-sm">{t("Logout", "Logout")}</span>
-              </button>
-            </div>
-          )}
+
+                <button
+                  onClick={() => {
+                    setShowProfileMenu(false);
+                    navigate('/settings');
+                  }}
+                  className="w-full flex items-center gap-3 px-3 py-2 hover:bg-secondary rounded-lg transition-colors text-left"
+                >
+                  <Settings className="w-4 h-4 text-muted-foreground" />
+                  <span className="text-sm">{t("Settings", "Settings")}</span>
+                </button>
+
+                {user?.role === 'admin' && (
+                  <button
+                    onClick={() => setShowProfileMenu(false)}
+                    className="w-full flex items-center gap-3 px-3 py-2 hover:bg-secondary rounded-lg transition-colors text-left"
+                  >
+                    <Shield className="w-4 h-4 text-warning" />
+                    <span className="text-sm">{t("Admin Panel", "Admin Panel")}</span>
+                  </button>
+                )}
+
+                <div className="border-t border-border my-2" />
+
+                <button
+                  onClick={() => {
+                    logout();
+                    navigate('/login');
+                  }}
+                  className="w-full flex items-center gap-3 px-3 py-2 hover:bg-destructive/20 text-destructive rounded-lg transition-colors text-left"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span className="text-sm">{t("Logout", "Logout")}</span>
+                </button>
+              </div>
+            )}
+          </div>
         </div>
-      </div>
       </header>
 
       {/* AI Chat Sidebar */}
