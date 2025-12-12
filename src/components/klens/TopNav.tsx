@@ -1,4 +1,4 @@
-import { Search, Moon, Sun, User, Sparkles, LogOut, Settings, Shield, FileText, Loader2, Menu } from "lucide-react";
+import { Search, Moon, Sun, User, Sparkles, LogOut, Settings, Shield, FileText, Loader2, Menu, Globe, Check } from "lucide-react";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -7,7 +7,7 @@ import { AIChatSidebar } from "./AIChatSidebar";
 import { NotificationBell } from "@/components/Notifications/NotificationBell";
 
 import { api } from "@/lib/api";
-import { useLanguage, SUPPORTED_LANGUAGES } from "@/contexts/LanguageContext";
+import { useLanguage, SUPPORTED_LANGUAGES, Language } from "@/contexts/LanguageContext";
 import {
   Select,
   SelectContent,
@@ -15,8 +15,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 import { Languages } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface SearchResult {
   id: string;
@@ -30,6 +37,76 @@ interface SearchResult {
 interface TopNavProps {
   onAIChatToggle?: (isOpen: boolean) => void;
   onMenuToggle?: () => void;
+}
+
+// Language Dropdown Component
+function LanguageDropdown() {
+  const { language, setLanguage } = useLanguage();
+  const [isChanging, setIsChanging] = useState(false);
+
+  const handleLanguageChange = (newLang: Language) => {
+    if (newLang === language) return;
+
+    // Smooth transition animation
+    setIsChanging(true);
+    document.body.style.transition = 'opacity 0.15s ease';
+    document.body.style.opacity = '0.7';
+
+    setTimeout(() => {
+      setLanguage(newLang);
+      document.body.style.opacity = '1';
+      setIsChanging(false);
+
+      // Toast notification
+      const langLabel = SUPPORTED_LANGUAGES.find(l => l.value === newLang)?.label || newLang;
+      toast.success("Language Updated", {
+        description: `Interface language changed to ${langLabel}`,
+        duration: 2000,
+      });
+    }, 150);
+  };
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button
+          className="w-10 h-10 rounded-xl bg-secondary/50 border border-border flex items-center justify-center hover:bg-secondary transition-colors group relative"
+          title="Change Language"
+        >
+          <Globe className={cn(
+            "w-5 h-5 text-muted-foreground group-hover:text-foreground transition-colors",
+            isChanging && "animate-spin"
+          )} />
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-64">
+        <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground border-b border-border mb-1">
+          Select Language
+        </div>
+        {SUPPORTED_LANGUAGES.map((lang) => (
+          <DropdownMenuItem
+            key={lang.value}
+            onClick={() => handleLanguageChange(lang.value)}
+            className={cn(
+              "cursor-pointer flex items-center gap-2",
+              language === lang.value && "bg-primary/10"
+            )}
+          >
+            <Check
+              className={cn(
+                "w-4 h-4 text-primary",
+                language === lang.value ? "opacity-100" : "opacity-0"
+              )}
+            />
+            <span className="flex-1">{lang.label}</span>
+            {language === lang.value && (
+              <span className="text-xs text-primary font-medium">Current</span>
+            )}
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
 }
 
 export function TopNav({ onAIChatToggle, onMenuToggle }: TopNavProps = {}) {
@@ -259,8 +336,8 @@ export function TopNav({ onAIChatToggle, onMenuToggle }: TopNavProps = {}) {
             )}
           </button>
 
-          {/* Global Language Selector (Moved to Settings) */}
-
+          {/* Language Selector Dropdown */}
+          <LanguageDropdown />
 
           {/* Profile */}
           <div className="relative">
