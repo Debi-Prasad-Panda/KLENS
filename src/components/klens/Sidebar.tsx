@@ -151,31 +151,7 @@ export function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
         )}
       </nav>
 
-      {/* User Profile */}
-      <div className="p-4 border-t border-border">
-        <div className="glass-card p-3">
-          <button
-            onClick={() => setActiveTab('profile')}
-            className="flex items-center gap-3 mb-3 w-full hover:bg-secondary/50 p-2 rounded-lg transition-colors"
-          >
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-success flex items-center justify-center">
-              <User className="w-5 h-5 text-background" />
-            </div>
-            <div className="flex-1 min-w-0 text-left">
-              <p className="text-sm font-semibold truncate">{user?.name || 'User'}</p>
-              <p className="text-xs text-muted-foreground truncate">{user?.department || 'Department'}</p>
-            </div>
-            <div className="w-2 h-2 rounded-full bg-success animate-pulse" />
-          </button>
-          <button
-            onClick={handleLogout}
-            className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-destructive/20 hover:bg-destructive/30 text-destructive rounded-lg text-sm font-medium transition-colors"
-          >
-            <LogOut className="w-4 h-4" />
-            {t("Logout", "Logout")}
-          </button>
-        </div>
-      </div>
+
     </aside>
   );
 }
