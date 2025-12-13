@@ -15,7 +15,7 @@ import {
   Search, Loader2, FileText, ArrowRight, Clock, Sparkles, Filter, X,
   History, Star, StarOff, TrendingUp, BarChart3, Calendar, FolderOpen,
   FileType, CheckCircle, AlertCircle, Download, Eye, Bookmark, BookmarkCheck,
-  Zap, Brain, Settings2, ChevronDown, ChevronRight, RefreshCw
+  Zap, Brain, Settings2, ChevronDown, ChevronRight, RefreshCw, Mic, MicOff
 } from "lucide-react";
 import { api } from "@/lib/api";
 import { useAuth } from "@/contexts/AuthContext";
@@ -26,6 +26,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { useVoiceToText } from "@/hooks/useVoiceToText";
 
 interface SearchResult {
   id: string;
@@ -121,6 +122,27 @@ export function SearchDiscoveryView({ onOpenDocument }: SearchDiscoveryViewProps
   useEffect(() => {
     setRecentSearches(generateRecentSearches());
   }, []);
+
+  // Voice-to-text integration
+  const { isListening, transcript, isSupported, startListening, stopListening } = useVoiceToText({
+    onResult: (text) => {
+      toast({ title: "Voice captured", description: "Searching for your query..." });
+      // Auto-trigger search when voice input completes
+      if (text.trim()) {
+        performSearch(text.trim());
+      }
+    },
+    onError: (error) => {
+      toast({ title: "Voice error", description: error, variant: "destructive" });
+    }
+  });
+
+  // Update query when voice transcript changes (for real-time feedback)
+  useEffect(() => {
+    if (transcript) {
+      setQuery(transcript);
+    }
+  }, [transcript]);
 
   const performSearch = async (searchQuery: string) => {
     if (!searchQuery.trim()) return;
@@ -327,8 +349,9 @@ export function SearchDiscoveryView({ onOpenDocument }: SearchDiscoveryViewProps
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="Ask anything about your documents..."
-                className="w-full bg-transparent p-5 text-lg outline-none placeholder:text-muted-foreground/50"
+                placeholder={isListening ? "Listening... Speak now" : "Ask anything about your documents..."}
+                className={`w-full bg-transparent p-5 text-lg outline-none placeholder:text-muted-foreground/50 transition-all ${isListening ? "placeholder:text-primary placeholder:animate-pulse" : ""
+                  }`}
                 autoFocus
               />
               {query && (
@@ -337,6 +360,20 @@ export function SearchDiscoveryView({ onOpenDocument }: SearchDiscoveryViewProps
                   className="p-2 mr-2 text-muted-foreground hover:text-foreground hover:bg-secondary rounded-full transition-colors"
                 >
                   <X className="w-5 h-5" />
+                </button>
+              )}
+              {/* Voice Input Button */}
+              {isSupported && (
+                <button
+                  onClick={isListening ? stopListening : startListening}
+                  disabled={isSearching}
+                  className={`p-3 mr-2 rounded-xl transition-all disabled:opacity-50 ${isListening
+                      ? "bg-destructive text-destructive-foreground animate-pulse shadow-lg shadow-destructive/30"
+                      : "text-muted-foreground hover:bg-secondary hover:text-foreground"
+                    }`}
+                  title={isListening ? "Stop listening" : "Voice search"}
+                >
+                  {isListening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
                 </button>
               )}
               <button
@@ -359,6 +396,18 @@ export function SearchDiscoveryView({ onOpenDocument }: SearchDiscoveryViewProps
                 Search
               </button>
             </div>
+            {/* Voice listening indicator */}
+            {isListening && (
+              <div className="absolute -bottom-6 left-5 flex items-center gap-2 text-sm text-primary animate-pulse">
+                <div className="flex gap-0.5">
+                  <div className="w-1 h-3 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                  <div className="w-1 h-4 bg-primary rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                  <div className="w-1 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                  <div className="w-1 h-5 bg-primary rounded-full animate-bounce" style={{ animationDelay: '450ms' }} />
+                </div>
+                <span>Listening...</span>
+              </div>
+            )}
           </div>
 
           {/* Filters Panel */}

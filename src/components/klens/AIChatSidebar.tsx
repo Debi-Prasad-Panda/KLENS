@@ -1,8 +1,10 @@
-import { X, Send, Sparkles, FileText, AlertCircle, CheckCircle, Loader2, ExternalLink } from "lucide-react";
-import { useState } from "react";
+import { X, Send, Sparkles, FileText, AlertCircle, CheckCircle, Loader2, ExternalLink, Mic, MicOff } from "lucide-react";
+import { useState, useEffect } from "react";
 import { api } from "@/lib/api";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { useVoiceToText } from "@/hooks/useVoiceToText";
+import { useToast } from "@/hooks/use-toast";
 
 interface Source {
   file_name: string;
@@ -23,6 +25,7 @@ interface AIChatSidebarProps {
 }
 
 export function AIChatSidebar({ isOpen, onClose }: AIChatSidebarProps) {
+  const { toast } = useToast();
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
@@ -32,6 +35,23 @@ export function AIChatSidebar({ isOpen, onClose }: AIChatSidebarProps) {
   ]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+
+  // Voice-to-text integration
+  const { isListening, transcript, isSupported, error: voiceError, startListening, stopListening } = useVoiceToText({
+    onResult: (text) => {
+      toast({ title: "Voice captured", description: "Your message is ready to send." });
+    },
+    onError: (error) => {
+      toast({ title: "Voice error", description: error, variant: "destructive" });
+    }
+  });
+
+  // Update input when voice transcript changes
+  useEffect(() => {
+    if (transcript) {
+      setInput(transcript);
+    }
+  }, [transcript]);
 
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
@@ -133,7 +153,7 @@ export function AIChatSidebar({ isOpen, onClose }: AIChatSidebarProps) {
               ) : (
                 <p className="text-sm">{msg.content}</p>
               )}
-              
+
               {/* RAG Sources */}
               {msg.sources && msg.sources.length > 0 && (
                 <div className="mt-3 pt-2 border-t border-border/50">
@@ -155,7 +175,7 @@ export function AIChatSidebar({ isOpen, onClose }: AIChatSidebarProps) {
                   </div>
                 </div>
               )}
-              
+
               <p className="text-xs opacity-70 mt-1">
                 {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
               </p>
@@ -172,9 +192,24 @@ export function AIChatSidebar({ isOpen, onClose }: AIChatSidebarProps) {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyPress={(e) => e.key === "Enter" && handleSend()}
-            placeholder="Ask me anything..."
-            className="flex-1 px-4 py-3 bg-secondary border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
+            placeholder={isListening ? "Listening..." : "Ask me anything..."}
+            className={`flex-1 px-4 py-3 bg-secondary border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all ${isListening ? "border-primary/50 bg-primary/5" : "border-border"
+              }`}
           />
+          {/* Voice Input Button */}
+          {isSupported && (
+            <button
+              onClick={isListening ? stopListening : startListening}
+              disabled={isLoading}
+              className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all disabled:opacity-50 ${isListening
+                  ? "bg-destructive text-destructive-foreground animate-pulse shadow-lg shadow-destructive/30"
+                  : "bg-secondary text-muted-foreground hover:bg-secondary/80 hover:text-foreground"
+                }`}
+              title={isListening ? "Stop listening" : "Start voice input"}
+            >
+              {isListening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+            </button>
+          )}
           <button
             onClick={handleSend}
             disabled={isLoading}
@@ -183,6 +218,13 @@ export function AIChatSidebar({ isOpen, onClose }: AIChatSidebarProps) {
             {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
           </button>
         </div>
+        {/* Voice status indicator */}
+        {isListening && (
+          <div className="mt-2 flex items-center gap-2 text-xs text-primary animate-pulse">
+            <div className="w-2 h-2 rounded-full bg-primary" />
+            <span>Listening... Speak now</span>
+          </div>
+        )}
       </div>
     </div>
   );
