@@ -104,7 +104,9 @@ Focus on industrial safety entities. Return ONLY valid JSON, no markdown."""
             # Cache the model
             if not hasattr(self, '_embedding_model'):
                 print("Loading embedding model (first time only)...")
-                self._embedding_model = SentenceTransformer('all-MiniLM-L6-v2')
+                # Use all-mpnet-base-v2 which produces 768 dimensions
+                # This matches the Supabase knowledge_hub table schema (vector(768))
+                self._embedding_model = SentenceTransformer('all-mpnet-base-v2')
             
             embedding = self._embedding_model.encode(text[:8000], convert_to_numpy=True)
             return embedding.tolist()
@@ -114,12 +116,12 @@ Focus on industrial safety entities. Return ONLY valid JSON, no markdown."""
             import hashlib
             hash_obj = hashlib.sha256(text[:8000].encode())
             hash_bytes = hash_obj.digest()
-            # Convert to 384-dim vector (all-MiniLM-L6-v2 dimension)
-            embedding = [float(b) / 255.0 for b in hash_bytes] * 12
-            return embedding[:384]
+            # Convert to 768-dim vector to match database schema
+            embedding = [float(b) / 255.0 for b in hash_bytes] * 24
+            return embedding[:768]
         except Exception as e:
             print(f"Embedding Error: {e}")
-            return [0.0] * 384  # Return zero vector on error
+            return [0.0] * 768  # Return zero vector on error
 
     def generate_role_insights(self, text: str, role: str, doc_name: str = "", language: str = "English") -> Dict:
         """Generate role-specific AI insights for a document."""

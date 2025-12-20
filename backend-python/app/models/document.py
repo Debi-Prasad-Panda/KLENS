@@ -25,7 +25,7 @@ class Document(Base):
     status = Column(Enum(DocumentStatus), default=DocumentStatus.uploading)
     ocr_text = Column(Text)
     ai_summary = Column(Text)
-    embedding = Column(Vector(384))  # sentence-transformers all-MiniLM-L6-v2 dimension
+    embedding = Column(Vector(768))  # sentence-transformers all-mpnet-base-v2 dimension
     # Cached AI insights (JSON strings)
     engineer_insights = Column(Text, nullable=True)
     manager_insights = Column(Text, nullable=True)
