@@ -10,7 +10,7 @@
  * - Premium glassmorphism styling
  */
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import {
   Search, Loader2, FileText, ArrowRight, Clock, Sparkles, Filter, X,
   History, Star, StarOff, TrendingUp, BarChart3, Calendar, FolderOpen,
@@ -57,6 +57,7 @@ interface SearchFilters {
 
 interface SearchDiscoveryViewProps {
   onOpenDocument: (doc: any) => void;
+  voiceSearchQuery?: string;
 }
 
 // Mock recent searches for demo
@@ -90,7 +91,7 @@ const generateSearchAnalytics = () => ({
   peakHours: [9, 10, 11, 14, 15, 16],
 });
 
-export function SearchDiscoveryView({ onOpenDocument }: SearchDiscoveryViewProps) {
+export function SearchDiscoveryView({ onOpenDocument, voiceSearchQuery }: SearchDiscoveryViewProps) {
   const { user } = useAuth();
   const { toast } = useToast();
 
@@ -144,7 +145,7 @@ export function SearchDiscoveryView({ onOpenDocument }: SearchDiscoveryViewProps
     }
   }, [transcript]);
 
-  const performSearch = async (searchQuery: string) => {
+  const performSearch = useCallback(async (searchQuery: string) => {
     if (!searchQuery.trim()) return;
 
     setIsSearching(true);
@@ -186,7 +187,15 @@ export function SearchDiscoveryView({ onOpenDocument }: SearchDiscoveryViewProps
     } finally {
       setIsSearching(false);
     }
-  };
+  }, [filters, toast]);
+
+  // Auto-search when voice command provides a search query
+  useEffect(() => {
+    if (voiceSearchQuery && voiceSearchQuery.trim()) {
+      console.log('[SearchDiscovery] Received voice search query:', voiceSearchQuery);
+      performSearch(voiceSearchQuery);
+    }
+  }, [voiceSearchQuery, performSearch]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
@@ -368,8 +377,8 @@ export function SearchDiscoveryView({ onOpenDocument }: SearchDiscoveryViewProps
                   onClick={isListening ? stopListening : startListening}
                   disabled={isSearching}
                   className={`p-3 mr-2 rounded-xl transition-all disabled:opacity-50 ${isListening
-                      ? "bg-destructive text-destructive-foreground animate-pulse shadow-lg shadow-destructive/30"
-                      : "text-muted-foreground hover:bg-secondary hover:text-foreground"
+                    ? "bg-destructive text-destructive-foreground animate-pulse shadow-lg shadow-destructive/30"
+                    : "text-muted-foreground hover:bg-secondary hover:text-foreground"
                     }`}
                   title={isListening ? "Stop listening" : "Voice search"}
                 >

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Sidebar } from "@/components/klens/Sidebar";
 import { TopNav } from "@/components/klens/TopNav";
 import { DashboardView } from "@/components/klens/DashboardView";
@@ -18,6 +18,7 @@ import { SettingsView } from "@/components/klens/SettingsView";
 import { SearchDiscoveryView } from "@/components/klens/SearchDiscoveryView";
 import SuccessionPlanningView from "@/components/klens/SuccessionPlanningView";
 import { AnalyticsView } from "@/components/klens/AnalyticsView";
+import { EmergencyVoiceMode } from "@/components/klens/EmergencyVoiceMode";
 
 type TabType = "dashboard" | "search" | "graph" | "iot" | "ar" | "compliance" | "documents" | "document-view" | "features" | "profile" | "settings" | "succession" | "analytics";
 
@@ -26,15 +27,67 @@ const Index = () => {
   const [selectedDocument, setSelectedDocument] = useState<any>(null);
   const [isAIChatOpen, setIsAIChatOpen] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [voiceSearchQuery, setVoiceSearchQuery] = useState<string>(""); const pendingSearchQueryRef = useRef<string | null>(null);
+
+  // Handler for voice command navigation
+  const handleVoiceNavigate = useCallback((tab: string, searchQuery?: string) => {
+    console.log('[Index] Voice navigation to:', tab, 'with query:', searchQuery);
+
+    // Store the search query in a ref if provided
+    if (searchQuery) {
+      console.log('[Index] Storing search query in ref:', searchQuery);
+      pendingSearchQueryRef.current = searchQuery;
+    }
+
+    // Navigate to the appropriate tab
+    switch (tab) {
+      case 'search':
+        setActiveTab('search');
+        break;
+      case 'iot':
+        setActiveTab('iot');
+        break;
+      case 'dashboard':
+        setActiveTab('dashboard');
+        break;
+      case 'profile':
+        setActiveTab('profile');
+        break;
+      case 'compliance':
+        setActiveTab('compliance');
+        break;
+      case 'graph':
+        setActiveTab('graph');
+        break;
+      default:
+        console.log('[Index] Unknown tab:', tab);
+    }
+  }, []);
+
+  // When switching to search tab, apply any pending search query
+  useEffect(() => {
+    if (activeTab === 'search' && pendingSearchQueryRef.current) {
+      const query = pendingSearchQueryRef.current;
+      console.log('[Index] Applying pending search query:', query);
+      setVoiceSearchQuery(query);
+      pendingSearchQueryRef.current = null;
+
+      // Clear the query after it's been consumed
+      const timeout = setTimeout(() => {
+        setVoiceSearchQuery("");
+      }, 1000);
+      return () => clearTimeout(timeout);
+    }
+  }, [activeTab]);
 
   // Listen for navigation events from TopNav
   useEffect(() => {
     const handleNavigateProfile = () => setActiveTab("profile");
     const handleNavigateSettings = () => setActiveTab("settings");
-    
+
     window.addEventListener('navigate-profile', handleNavigateProfile);
     window.addEventListener('navigate-settings', handleNavigateSettings);
-    
+
     return () => {
       window.removeEventListener('navigate-profile', handleNavigateProfile);
       window.removeEventListener('navigate-settings', handleNavigateSettings);
@@ -69,10 +122,13 @@ const Index = () => {
       case "compliance":
         return <ComplianceView />;
       case "search":
-        return <SearchDiscoveryView onOpenDocument={(doc) => {
-          setSelectedDocument(doc);
-          setActiveTab("document-view");
-        }} />;
+        return <SearchDiscoveryView
+          voiceSearchQuery={voiceSearchQuery}
+          onOpenDocument={(doc) => {
+            setSelectedDocument(doc);
+            setActiveTab("document-view");
+          }}
+        />;
       case "ar":
         return <PlaceholderView type="ar" />;
       case "features":
@@ -96,20 +152,18 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Sidebar */}
-      <Sidebar 
-        activeTab={activeTab} 
+      <Sidebar
+        activeTab={activeTab}
         setActiveTab={setActiveTab}
         isCollapsed={isSidebarCollapsed}
         setIsCollapsed={setIsSidebarCollapsed}
       />
 
       {/* Main Content */}
-      <div className={`transition-all duration-300 ${
-        isSidebarCollapsed ? 'pl-0' : 'pl-0 lg:pl-64'
-      } ${
-        isAIChatOpen ? "pr-[480px]" : "pr-0"
-      }`}>
-        <TopNav 
+      <div className={`transition-all duration-300 ${isSidebarCollapsed ? 'pl-0' : 'pl-0 lg:pl-64'
+        } ${isAIChatOpen ? "pr-[480px]" : "pr-0"
+        }`}>
+        <TopNav
           onAIChatToggle={setIsAIChatOpen}
           onMenuToggle={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
         />
@@ -123,6 +177,9 @@ const Index = () => {
         <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-primary/5 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2" />
         <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-success/5 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/2" />
       </div>
+
+      {/* Emergency Voice Mode - Hands-free voice command interface */}
+      <EmergencyVoiceMode onNavigate={handleVoiceNavigate} isAIChatOpen={isAIChatOpen} />
     </div>
   );
 };
