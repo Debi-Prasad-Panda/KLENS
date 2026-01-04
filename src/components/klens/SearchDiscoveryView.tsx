@@ -120,8 +120,26 @@ export function SearchDiscoveryView({ onOpenDocument, voiceSearchQuery }: Search
   const [expandedResults, setExpandedResults] = useState<Set<string>>(new Set());
   const [bookmarkedResults, setBookmarkedResults] = useState<Set<string>>(new Set());
 
+  // Load search history from localStorage on mount
   useEffect(() => {
-    setRecentSearches(generateRecentSearches());
+    try {
+      const saved = localStorage.getItem('klens-search-history');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        // Convert date strings back to Date objects
+        const withDates = parsed.map((s: any) => ({
+          ...s,
+          createdAt: new Date(s.createdAt)
+        }));
+        setRecentSearches(withDates);
+      } else {
+        // Use mock data only if no saved history
+        setRecentSearches(generateRecentSearches());
+      }
+    } catch (error) {
+      console.error('Failed to load search history:', error);
+      setRecentSearches(generateRecentSearches());
+    }
   }, []);
 
   // Voice-to-text integration
@@ -175,7 +193,15 @@ export function SearchDiscoveryView({ onOpenDocument, voiceSearchQuery }: Search
         resultCount: filteredResults.length,
         isFavorite: false
       };
-      setRecentSearches(prev => [newSearch, ...prev.slice(0, 9)]);
+      const updatedSearches = [newSearch, ...recentSearches.slice(0, 9)];
+      setRecentSearches(updatedSearches);
+
+      // Save to localStorage
+      try {
+        localStorage.setItem('klens-search-history', JSON.stringify(updatedSearches));
+      } catch (error) {
+        console.error('Failed to save search history:', error);
+      }
 
     } catch (error) {
       console.error("Search failed:", error);
@@ -227,9 +253,17 @@ export function SearchDiscoveryView({ onOpenDocument, voiceSearchQuery }: Search
   };
 
   const toggleFavoriteSearch = (id: string) => {
-    setRecentSearches(prev => prev.map(s =>
+    const updated = recentSearches.map(s =>
       s.id === id ? { ...s, isFavorite: !s.isFavorite } : s
-    ));
+    );
+    setRecentSearches(updated);
+
+    // Save to localStorage
+    try {
+      localStorage.setItem('klens-search-history', JSON.stringify(updated));
+    } catch (error) {
+      console.error('Failed to save search favorites:', error);
+    }
   };
 
   const clearFilters = () => {
@@ -689,7 +723,10 @@ export function SearchDiscoveryView({ onOpenDocument, voiceSearchQuery }: Search
           <div className="flex items-center justify-between">
             <h3 className="font-semibold">Recent Searches</h3>
             {recentSearches.length > 0 && (
-              <Button variant="ghost" size="sm" onClick={() => setRecentSearches([])}>
+              <Button variant="ghost" size="sm" onClick={() => {
+                setRecentSearches([]);
+                localStorage.removeItem('klens-search-history');
+              }}>
                 Clear history
               </Button>
             )}

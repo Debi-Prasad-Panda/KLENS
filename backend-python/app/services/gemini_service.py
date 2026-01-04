@@ -20,6 +20,10 @@ class GeminiService:
     - Uses Gemini for embeddings (OpenRouter doesn't have embedding API)
     """
     
+    # Class-level cache for embedding model (shared across all instances)
+    _embedding_model = None
+    _model_loading = False
+    
     def __init__(self):
         self.openrouter_key = settings.OPENROUTER_API_KEY
         self.model = "mistralai/devstral-2512:free"
@@ -101,14 +105,23 @@ Focus on industrial safety entities. Return ONLY valid JSON, no markdown."""
             # Use sentence-transformers for embeddings (free, local)
             from sentence_transformers import SentenceTransformer
             
-            # Cache the model
-            if not hasattr(self, '_embedding_model'):
-                print("Loading embedding model (first time only)...")
+            # Cache the model at class level (shared across all instances)
+            if GeminiService._embedding_model is None and not GeminiService._model_loading:
+                GeminiService._model_loading = True
+                print("🔄 Loading embedding model all-mpnet-base-v2 (first time only)...")
+                print("   This will take ~10-30 seconds to download (~420MB)")
                 # Use all-mpnet-base-v2 which produces 768 dimensions
                 # This matches the Supabase knowledge_hub table schema (vector(768))
-                self._embedding_model = SentenceTransformer('all-mpnet-base-v2')
+                GeminiService._embedding_model = SentenceTransformer('all-mpnet-base-v2')
+                GeminiService._model_loading = False
+                print("✅ Embedding model loaded and cached! Future searches will be instant.")
             
-            embedding = self._embedding_model.encode(text[:8000], convert_to_numpy=True)
+            # Wait if model is being loaded by another thread
+            while GeminiService._model_loading:
+                import time
+                time.sleep(0.1)
+            
+            embedding = GeminiService._embedding_model.encode(text[:8000], convert_to_numpy=True)
             return embedding.tolist()
         except ImportError:
             print("sentence-transformers not installed. Install: pip install sentence-transformers")
