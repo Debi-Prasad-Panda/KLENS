@@ -7,29 +7,83 @@
 # **/.env.example
 # **/.env.local
 # **/.env.local.example
-
 # Dependencies
-node_modules/
-# backend-python/venv/
-backend-python/__pycache__/
-backend-python/**/__pycache__/
+/node_modules
+/.pnp
+.pnp.js
 
-# Build outputs
-dist/
-build/
-*.pyc
+# Testing
+/coverage
 
-# IDE
-.vscode/
-.idea/
+# Production
+/build
 
-# OS
+# Misc
 .DS_Store
+
+## ==================== SECURITY: SECRETS & API KEYS ====================
+# CRITICAL: Never commit these files - they contain sensitive credentials
+
+# Environment files (contains API keys and secrets)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.env
+backend-python/.env
+backend-python/.env.*
+
+# Backup or temp env files
+*.env.backup
+*.env.bak
+*.env.save
+*.env.old
+
+# IDE and editor files (may contain secrets)
+.idea/
+.vscode/settings.json
+*.swp
+*.swo
+*~
+
+# Logs (may contain sensitive data)
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
+
+# Python cache and compiled files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Database files (may contain sensitive data)
+*.db
+*.sqlite
+*.sqlite3
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
 
-# Uploads
-backend-python/uploads/*
-!backend-python/uploads/.gitkeep
+# Temporary files
+tmp/
+temp/
+*.tmp
 
-# Docker
+# Security and key files
+*.pem
+*.key
+*.cert
+*.crt
+secrets.yml
+secrets.yamlr
 *.log

@@ -2,14 +2,16 @@ import google.generativeai as genai
 import os
 import sys
 
-# Get API key from env or argument
+# SECURITY: Get API key from environment variable only
+# Never hard-code API keys in source code
 api_key = os.environ.get("GEMINI_API_KEY")
 if not api_key and len(sys.argv) > 1:
     api_key = sys.argv[1]
 
 if not api_key:
-    # Fallback to the known key if not found in env
-    api_key = "AIzaSyCfDLK5EvsJaIkBf-CcTRA05QnZVa-K54o"
+    print("❌ Error: GEMINI_API_KEY environment variable not set")
+    print("Please set the API key: export GEMINI_API_KEY='your-api-key-here'")
+    sys.exit(1)
 
 print(f"Testing Gemini API with key: {api_key[:10]}...")
 

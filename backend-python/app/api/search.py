@@ -4,21 +4,46 @@ Uses Supabase knowledge_hub table with pgvector.
 """
 
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, field_validator
 from typing import List, Optional, Dict, Any
 
 # Use new Supabase Auth dependency
 from ..dependencies.auth import get_current_user, IndustrialUser
 from ..services.gemini_service import gemini_service
 from ..services.supabase_service import supabase_service
+from ..utils.validation import (
+    validate_no_xss,
+    sanitize_text,
+    StrictBaseModel,
+)
 
 router = APIRouter(prefix="/search", tags=["search"])
 
 
-class SearchRequest(BaseModel):
-    query: str
-    limit: int = 10
-    filters: Optional[Dict[str, Any]] = None  # For metadata filtering
+class SearchRequest(StrictBaseModel):
+    """Search request with strict validation"""
+    query: str = Field(
+        ...,
+        min_length=2,
+        max_length=500,
+        description="Search query"
+    )
+    limit: int = Field(
+        10,
+        ge=1,  # Greater than or equal to 1
+        le=100,  # Less than or equal to 100
+        description="Result limit"
+    )
+    filters: Optional[Dict[str, Any]] = Field(
+        None,
+        description="Metadata filters"
+    )
+    
+    @field_validator('query')
+    @classmethod
+    def validate_query_field(cls, v: str) -> str:
+        validate_no_xss(v)
+        return sanitize_text(v, 500)
 
 
 class SearchResult(BaseModel):

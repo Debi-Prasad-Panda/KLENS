@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, field_validator
 from typing import List, Optional
 from datetime import datetime
 import google.generativeai as genai
@@ -9,6 +9,12 @@ from ..core.config import settings
 from ..dependencies.auth import get_current_user, IndustrialUser
 from ..services.gemini_service import gemini_service
 from ..services.supabase_service import supabase_service
+from ..utils.validation import (
+    validate_no_xss,
+    sanitize_text,
+    StrictBaseModel,
+    MAX_MESSAGE_LENGTH,
+)
 
 router = APIRouter(prefix="/chat", tags=["chat"])
 
@@ -16,14 +22,46 @@ router = APIRouter(prefix="/chat", tags=["chat"])
 genai.configure(api_key=settings.GEMINI_API_KEY)
 
 
-class ChatMessage(BaseModel):
-    role: str  # "user" or "assistant"
-    content: str
+class ChatMessage(StrictBaseModel):
+    """Chat message with validation"""
+    role: str = Field(
+        ...,
+        pattern=r'^(user|assistant)$',
+        description="Message role (user or assistant)"
+    )
+    content: str = Field(
+        ...,
+        min_length=1,
+        max_length=MAX_MESSAGE_LENGTH,
+        description="Message content"
+    )
+    
+    @field_validator('content')
+    @classmethod
+    def validate_content_field(cls, v: str) -> str:
+        validate_no_xss(v)
+        return sanitize_text(v, MAX_MESSAGE_LENGTH)
 
 
-class ChatRequest(BaseModel):
-    message: str
-    conversationHistory: Optional[List[ChatMessage]] = []
+class ChatRequest(StrictBaseModel):
+    """Chat request with strict validation"""
+    message: str = Field(
+        ...,
+        min_length=1,
+        max_length=MAX_MESSAGE_LENGTH,
+        description="User message"
+    )
+    conversationHistory: Optional[List[ChatMessage]] = Field(
+        default=[],
+        max_length=50,  # Limit conversation history length
+        description="Previous conversation messages"
+    )
+    
+    @field_validator('message')
+    @classmethod
+    def validate_message_field(cls, v: str) -> str:
+        validate_no_xss(v)
+        return sanitize_text(v, MAX_MESSAGE_LENGTH)
 
 
 class ChatResponse(BaseModel):

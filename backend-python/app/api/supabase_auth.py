@@ -5,21 +5,30 @@ Replaces the old SQLAlchemy-based auth system.
 """
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field, field_validator
 from typing import Optional, List
 from datetime import datetime
 
 from ..dependencies.auth import (
     get_current_user,
-    get_optional_user,
     require_role,
-    require_on_shift,
-    require_valid_certs,
     verify_kiosk_pin,
     set_kiosk_pin,
     IndustrialUser,
 )
 from ..services.supabase_service import supabase_service
+from ..utils.validation import (
+    validate_email_address,
+    validate_password_strength,
+    validate_user_role,
+    validate_shift_status,
+    sanitize_text,
+    validate_no_xss,
+    StrictBaseModel,
+    MAX_NAME_LENGTH,
+    MAX_DEPARTMENT_LENGTH,
+    MAX_ROLE_LENGTH,
+)
 
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -27,44 +36,195 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 
 # ==================== REQUEST/RESPONSE MODELS ====================
 
-class LoginRequest(BaseModel):
-    email: EmailStr
-    password: str
+class LoginRequest(StrictBaseModel):
+    """Login request with strict validation"""
+    email: str = Field(
+        ...,
+        min_length=3,
+        max_length=254,
+        description="User email address"
+    )
+    password: str = Field(
+        ...,
+        min_length=1,
+        max_length=128,
+        description="User password"
+    )
+    
+    @field_validator('email')
+    @classmethod
+    def validate_email_field(cls, v: str) -> str:
+        return validate_email_address(v)
 
 
-class RegisterRequest(BaseModel):
-    email: EmailStr
-    password: str
-    full_name: str
-    role: str = "OPERATOR"
-    department: Optional[str] = None
+class RegisterRequest(StrictBaseModel):
+    """Registration request with strict validation"""
+    email: str = Field(
+        ...,
+        min_length=3,
+        max_length=254,
+        description="User email address"
+    )
+    password: str = Field(
+        ...,
+        min_length=8,
+        max_length=128,
+        description="User password (min 8 chars, must include upper, lower, digit, special)"
+    )
+    full_name: str = Field(
+        ...,
+        min_length=1,
+        max_length=MAX_NAME_LENGTH,
+        description="Full name"
+    )
+    role: str = Field(
+        "OPERATOR",
+        min_length=1,
+        max_length=MAX_ROLE_LENGTH,
+        description="User role"
+    )
+    department: Optional[str] = Field(
+        None,
+        max_length=MAX_DEPARTMENT_LENGTH,
+        description="Department name"
+    )
+    
+    @field_validator('email')
+    @classmethod
+    def validate_email_field(cls, v: str) -> str:
+        return validate_email_address(v)
+    
+    @field_validator('password')
+    @classmethod
+    def validate_password_field(cls, v: str) -> str:
+        return validate_password_strength(v)
+    
+    @field_validator('full_name')
+    @classmethod
+    def validate_full_name_field(cls, v: str) -> str:
+        validate_no_xss(v)
+        return sanitize_text(v, MAX_NAME_LENGTH)
+    
+    @field_validator('role')
+    @classmethod
+    def validate_role_field(cls, v: str) -> str:
+        return validate_user_role(v)
+    
+    @field_validator('department')
+    @classmethod
+    def validate_department_field(cls, v: Optional[str]) -> Optional[str]:
+        if v:
+            validate_no_xss(v)
+            return sanitize_text(v, MAX_DEPARTMENT_LENGTH)
+        return v
 
 
-class UpdateProfileRequest(BaseModel):
-    full_name: Optional[str] = None
-    department: Optional[str] = None
-    shift_pattern: Optional[str] = None
-    avatar_url: Optional[str] = None
+class UpdateProfileRequest(StrictBaseModel):
+    """Profile update request with strict validation"""
+    full_name: Optional[str] = Field(
+        None,
+        max_length=MAX_NAME_LENGTH,
+        description="Full name"
+    )
+    department: Optional[str] = Field(
+        None,
+        max_length=MAX_DEPARTMENT_LENGTH,
+        description="Department"
+    )
+    shift_pattern: Optional[str] = Field(
+        None,
+        max_length=50,
+        description="Shift pattern"
+    )
+    avatar_url: Optional[str] = Field(
+        None,
+        max_length=500,
+        description="Avatar URL"
+    )
+    
+    @field_validator('full_name', 'department', 'shift_pattern')
+    @classmethod
+    def validate_text_fields(cls, v: Optional[str]) -> Optional[str]:
+        if v:
+            validate_no_xss(v)
+            return sanitize_text(v, 100)
+        return v
 
 
-class UpdateShiftStatusRequest(BaseModel):
-    status: str  # ON_SHIFT, ON_BREAK, OFF_SHIFT
+class UpdateShiftStatusRequest(StrictBaseModel):
+    """Shift status update with validation"""
+    status: str = Field(
+        ...,
+        min_length=1,
+        max_length=50,
+        description="Shift status"
+    )
+    
+    @field_validator('status')
+    @classmethod
+    def validate_status_field(cls, v: str) -> str:
+        return validate_shift_status(v)
 
 
-class SetPinRequest(BaseModel):
-    pin: str  # 4-digit PIN
+class SetPinRequest(StrictBaseModel):
+    """PIN set request with validation"""
+    pin: str = Field(
+        ...,
+        min_length=4,
+        max_length=6,
+        pattern=r'^\d{4,6}$',
+        description="4-6 digit PIN"
+    )  # 4-digit PIN
 
 
-class VerifyPinRequest(BaseModel):
-    pin: str
+class VerifyPinRequest(StrictBaseModel):
+    """PIN verification request with validation"""
+    pin: str = Field(
+        ...,
+        min_length=4,
+        max_length=6,
+        pattern=r'^\d{4,6}$',
+        description="4-6 digit PIN"
+    )
 
 
-class AddCertificationRequest(BaseModel):
-    cert_name: str
-    expiry_date: str  # YYYY-MM-DD
-    cert_issuer: Optional[str] = None
-    issue_date: Optional[str] = None
-    document_url: Optional[str] = None
+class AddCertificationRequest(StrictBaseModel):
+    """Certification add request with strict validation"""
+    cert_name: str = Field(
+        ...,
+        min_length=1,
+        max_length=200,
+        description="Certification name"
+    )
+    expiry_date: str = Field(
+        ...,
+        min_length=1,
+        max_length=50,
+        description="Expiry date (ISO format)"
+    )
+    cert_issuer: Optional[str] = Field(
+        None,
+        max_length=200,
+        description="Certification issuer"
+    )
+    issue_date: Optional[str] = Field(
+        None,
+        max_length=50,
+        description="Issue date (ISO format)"
+    )
+    document_url: Optional[str] = Field(
+        None,
+        max_length=500,
+        description="Document URL"
+    )
+    
+    @field_validator('cert_name', 'cert_issuer')
+    @classmethod
+    def validate_text_fields(cls, v: Optional[str]) -> Optional[str]:
+        if v:
+            validate_no_xss(v)
+            return sanitize_text(v, 200)
+        return v
 
 
 class UserResponse(BaseModel):

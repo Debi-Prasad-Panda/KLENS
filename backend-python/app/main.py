@@ -14,6 +14,9 @@ from .models.audit_log import AuditLog
 from .models.approval import Approval
 from .models.document_version import DocumentVersion
 
+# Import middleware
+from .middleware.rate_limit import RateLimitMiddleware
+
 from .api import auth, documents, approvals, chat, websocket, search, upload, handover, notifications
 from .api import supabase_auth  # New Supabase Auth router
 from .api import user_management  # User Management (Admin) router
@@ -23,6 +26,10 @@ from .api import audit  # Audit Trail API
 from .api import graph  # Knowledge Graph API
 
 app = FastAPI(title="K-LENS API", version="2.0.0")
+
+# SECURITY: Rate Limiting (must be added before routes)
+# Protects against brute force, DoS, and API abuse
+app.add_middleware(RateLimitMiddleware)
 
 # CORS
 app.add_middleware(
