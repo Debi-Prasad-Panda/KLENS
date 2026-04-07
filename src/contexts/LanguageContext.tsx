@@ -140,7 +140,6 @@ export const translations = {
     "Approve": "Approve",
     "Reject": "Reject",
     "Request Changes": "Request Changes",
-    "Compliance Status": "Compliance Status",
     "Audit Trail": "Audit Trail",
     "Violations": "Violations",
     // IoT Dashboard  

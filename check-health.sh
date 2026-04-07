@@ -11,7 +11,7 @@ else
 fi
 
 echo "[2/5] Checking Backend API..."
-if curl -s http://localhost:3000/api > /dev/null 2>&1; then
+if curl -s http://localhost:8000/health > /dev/null 2>&1; then
     echo "✓ Backend API: OK"
 else
     echo "✗ Backend API: DOWN"
@@ -31,11 +31,11 @@ else
     echo "✗ Redis: DOWN"
 fi
 
-echo "[5/5] Checking MQTT..."
-if docker ps | grep klens-mosquitto > /dev/null 2>&1; then
-    echo "✓ MQTT: OK"
+echo "[5/5] Checking Neo4j..."
+if docker exec klens-neo4j cypher-shell -u neo4j -p klens_neo4j_2024 "RETURN 1" > /dev/null 2>&1; then
+    echo "✓ Neo4j: OK"
 else
-    echo "✗ MQTT: DOWN"
+    echo "✗ Neo4j: DOWN"
 fi
 
 echo ""

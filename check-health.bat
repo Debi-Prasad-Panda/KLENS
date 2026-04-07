@@ -11,7 +11,7 @@ if %errorlevel% equ 0 (
 )
 
 echo [2/5] Checking Backend API...
-curl -s http://localhost:3000/api > nul 2>&1
+curl -s http://localhost:8000/health > nul 2>&1
 if %errorlevel% equ 0 (
     echo ✓ Backend API: OK
 ) else (
@@ -34,12 +34,12 @@ if %errorlevel% equ 0 (
     echo ✗ Redis: DOWN
 )
 
-echo [5/5] Checking MQTT...
-docker ps | findstr klens-mosquitto > nul 2>&1
+echo [5/5] Checking Neo4j...
+docker exec klens-neo4j cypher-shell -u neo4j -p klens_neo4j_2024 "RETURN 1" > nul 2>&1
 if %errorlevel% equ 0 (
-    echo ✓ MQTT: OK
+    echo ✓ Neo4j: OK
 ) else (
-    echo ✗ MQTT: DOWN
+    echo ✗ Neo4j: DOWN
 )
 
 echo.

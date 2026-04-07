@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Cpu, Loader2 } from "lucide-react";
-import { api } from "@/lib/api";
 import { useAuth } from "@/contexts/AuthContext";
 
 export default function Login() {
@@ -18,8 +17,7 @@ export default function Login() {
     setLoading(true);
 
     try {
-      const data = await api.login(email, password);
-      login(data.user, data.token);
+      await login(email, password);
       navigate("/dashboard");
     } catch (err: any) {
       setError("Invalid email or password");
@@ -93,7 +91,8 @@ export default function Login() {
 
           <div className="mt-6 text-center text-sm text-muted-foreground">
             <p>Demo Credentials:</p>
-            <p className="font-mono text-xs mt-1">admin@klens.local / Admin@123</p>
+            <p className="font-mono text-xs mt-1">Email: admin@klens.local</p>
+            <p className="font-mono text-xs">Password: Admin@123456</p>
           </div>
         </div>
       </div>

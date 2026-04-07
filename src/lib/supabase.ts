@@ -7,17 +7,21 @@
 
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || ''
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || ''
+const fallbackUrl = 'http://127.0.0.1:54321'
+const fallbackAnonKey = 'public-anon-key'
 
-if (!supabaseUrl || !supabaseAnonKey) {
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || fallbackUrl
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || fallbackAnonKey
+const supabaseStorageKey = import.meta.env.VITE_SUPABASE_STORAGE_KEY || 'klens-auth'
+
+if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
   console.warn('⚠️ Supabase environment variables not set. Auth features will not work.')
 }
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
-    // Store session in memory for security (not localStorage)
-    // Supabase will handle refresh tokens automatically
+    // Use a project-specific key to avoid sharing session state with other localhost apps.
+    storageKey: supabaseStorageKey,
     persistSession: true,
     autoRefreshToken: true,
     detectSessionInUrl: true,

@@ -19,7 +19,7 @@ class Settings(BaseSettings):
     JWT_EXPIRES_MINUTES: int = 30
     
     # Gemini AI (still used for embeddings)
-    GEMINI_API_KEY: str
+    GEMINI_API_KEY: str = ""
     
     # OpenRouter API (for LLM completions - free Mistral model)
     OPENROUTER_API_KEY: str = ""

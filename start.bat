@@ -5,6 +5,24 @@ echo ========================================
 echo.
 
 REM Check if .env exists
+if not exist ".env" (
+    if exist ".env.example" (
+        echo Creating root .env file...
+        copy .env.example .env
+        echo.
+        echo IMPORTANT: Edit .env and set your API keys before continuing.
+        notepad .env
+        echo.
+        echo Press any key after saving your .env file...
+        pause
+    ) else (
+        echo ERROR: .env.example not found!
+        pause
+        exit /b 1
+    )
+)
+
+REM Check if backend .env exists
 if not exist "backend-python\.env" (
     if exist "backend-python\.env.example" (
         echo Creating .env file...
@@ -25,7 +43,7 @@ if not exist "backend-python\.env" (
 
 echo Starting all services...
 echo.
-docker-compose up -d --build
+docker-compose -f docker-compose.yml up -d --build
 
 echo.
 if errorlevel 1 (

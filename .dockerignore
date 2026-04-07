@@ -1,10 +1,32 @@
 node_modules
 dist
 dist-ssr
+build
+coverage
 *.local
 .npm
 .DS_Store
 .git/
 .gitignore
+.vscode
+.idea
+*.swp
+*.tmp
+
+# Local env and secrets
+.env
+.env.local
+.env.*.local
+backend-python/.env
+backend-python/.env.*
+
+# Python artifacts
 backend-python/venv
 backend-python/__pycache__
+backend-python/.pytest_cache
+backend-python/*.pyc
+
+# Generated/large local data
+swark-output
+videos
+uploads
