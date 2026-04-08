@@ -1,231 +1,197 @@
-<p align="center">
-  <h1 align="center">K-LENS Intelligence Nexus</h1>
-  <p align="center">
-    <strong>Industrial AI Platform for Document Management, IoT Monitoring & Knowledge Graphs</strong>
-  </p>
-  <p align="center">
-    <img src="https://img.shields.io/badge/Python-FastAPI-009688?style=flat-square&logo=fastapi" alt="FastAPI" />
-    <img src="https://img.shields.io/badge/React-18-61DAFB?style=flat-square&logo=react" alt="React" />
-    <img src="https://img.shields.io/badge/TypeScript-5.8-3178C6?style=flat-square&logo=typescript" alt="TypeScript" />
-    <img src="https://img.shields.io/badge/PostgreSQL-pgvector-4169E1?style=flat-square&logo=postgresql" alt="PostgreSQL" />
-    <img src="https://img.shields.io/badge/Neo4j-5-008CC1?style=flat-square&logo=neo4j" alt="Neo4j" />
-    <img src="https://img.shields.io/badge/Docker-Ready-2496ED?style=flat-square&logo=docker" alt="Docker" />
-  </p>
-</p>
+# K-LENS Intelligence Nexus
+
+> **🚀 Industrial AI Platform for Document Management, IoT Monitoring, and Knowledge Graphs**
+
+A modern, real-time industrial intelligence platform powered by Python FastAPI backend and React frontend.
 
 ---
 
-A real-time industrial intelligence platform that combines **AI-powered document analysis**, **knowledge graph visualization**, **IoT sensor monitoring**, and **compliance tracking** — built with a Python FastAPI backend and React frontend.
+## 🚀 Quick Start (2 Commands)
+
+### Prerequisites
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed
+- [Gemini API Key](https://makersuite.google.com/app/apikey) (free)
+
+### Steps
+
+**1. Get your Gemini API key** from https://makersuite.google.com/app/apikey
+
+**2. Run the startup script:**
+```bash
+cd KLENS
+start.bat
+```
+
+The script will:
+- ✅ Create `.env` file (add your API key when prompted)
+- ✅ Start all services (PostgreSQL, Redis, Neo4j, Backend, Frontend)
+- ✅ Create admin user automatically
+- ✅ Show login credentials
+
+**3. Login at http://localhost**
+- Email: `admin@example.com`
+- Password: `Admin@123`
+
+### Other Commands
+```bash
+stop.bat       # Stop all services
+restart.bat    # Restart services
+start-dev.bat  # Development mode (auto-reload)
+```
+
+### Development vs Production
+
+**Production Mode** (`start.bat`):
+- ✅ Everything in Docker
+- ✅ One command startup
+- ❌ Need to rebuild for changes
+- Use for: Demos, deployment
+
+**Development Mode** (`start-dev.bat`):
+- ✅ Auto-reload on file changes
+- ✅ Faster development
+- ❌ Requires Node.js & Python installed
+- Use for: Active development
+
+### Access Points
+- **Frontend**: http://localhost
+- **Backend API**: http://localhost:8000
+- **API Docs**: http://localhost:8000/docs
+- **Neo4j Browser**: http://localhost:7474
 
 ---
 
-## Table of Contents
+### Option 2: Manual Setup (Development)
 
-- [Features](#-features)
-- [Tech Stack](#-tech-stack)
-- [Quick Start](#-quick-start)
-- [Manual Setup](#-manual-setup-development)
-- [Project Structure](#-project-structure)
-- [API Endpoints](#-api-endpoints)
-- [Configuration](#-configuration)
-- [Development](#-development)
-- [Docker Commands](#-docker-commands)
-- [Troubleshooting](#-troubleshooting)
-- [Security](#-security)
-- [Roadmap](#-roadmap)
-- [Contributing](#-contributing)
-- [License](#-license)
+#### Prerequisites
+- Node.js 20+
+- Python 3.11+
+- PostgreSQL 16 with pgvector
+- Redis
+- Neo4j
+
+#### Backend Setup
+```bash
+# Navigate to backend
+cd backend-python
+
+# Create virtual environment
+python -m venv venv
+
+# Activate virtual environment
+# Windows:
+venv\Scripts\activate
+# Linux/Mac:
+source venv/bin/activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Copy environment file
+copy .env.example .env
+
+# Edit .env and add your Gemini API key
+
+# Run database migrations (if needed)
+# alembic upgrade head
+
+# Start backend
+uvicorn app.main:app --reload --port 8000
+```
+
+Backend will be available at: http://localhost:8000
+
+#### Frontend Setup
+```bash
+# Navigate to project root
+cd KLENS
+
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+```
+
+Frontend will be available at: http://localhost:5173
+
+#### Update Frontend API URL
+Edit `src/lib/api.ts`:
+```typescript
+const API_URL = 'http://localhost:8000/api';
+```
+
+**You're ready!** 🎉
 
 ---
 
-## ✨ Features
+## 🎯 Features
 
 ### 🔐 Authentication & Security
-- **JWT authentication** with bcrypt password hashing
-- **Role-Based Access Control (RBAC)** — Admin, Manager, Engineer, Safety Officer
-- **Cinderella Access** — Time-bound privilege escalation with auto-expiry (Redis TTL)
-- **Nuclear Keys** — Multi-signature (2-of-3) approval for high-risk operations
-- Secure session management with configurable token expiration
+- JWT-based authentication with bcrypt
+- Role-based access control (Admin, Manager, Engineer, Safety Officer)
+- Secure session management
 
 ### 📄 AI-Powered Document Processing
-- **Multi-format support** — PDF, DOCX, Excel, Images
-- **OCR Engine** — Pytesseract for scanned documents
-- **Fast PDF parsing** — PyMuPDF (10x faster than alternatives)
-- **AI Analysis** — Google Gemini 1.5 Flash for summarization, risk detection, entity extraction
-- **Background processing** — Non-blocking async uploads
-- **Vector embeddings** — Semantic search with pgvector (768-dim)
-- **5-stage pipeline** — Upload → OCR → AI Analysis → Graph Linking → Complete
+- **Multi-format support**: PDF, DOCX, Excel, Images
+- **OCR Engine**: Pytesseract for scanned documents
+- **Fast PDF parsing**: PyMuPDF (10x faster)
+- **AI Analysis**: Google Gemini 1.5 Flash
+- **Background processing**: Non-blocking uploads
+- **Vector embeddings**: Semantic search with pgvector
 
 ### 🧠 AI Intelligence
 - Automatic document summarization
-- Risk identification and scoring
-- Compliance checking (Factory Act 1948, Boiler Regulations 2017, Railway Safety Standards)
+- Risk identification
+- Compliance checking (Factory Act 1948)
 - Entity extraction for knowledge graphs
-- Multilingual support (16+ languages including Hindi, Tamil, Telugu, Bengali)
-- **Role-specific views** — Same document, different perspective for Engineers, Managers, and Safety Officers
+- Multilingual support (16+ languages)
 
-### 🕸️ Knowledge Graph
-- **React Flow** for 2D schematic visualization with Dagre auto-layout
-- **3D visualization** — Force-directed graph with Three.js/WebGL
-- **Entity types** — Documents, Risks, People, Machines, Departments
-- **Interactive** — Click nodes for AI intelligence panel
-- **Risk filter** — Toggle to show only critical risks
-- **Time Slider Forensics** — Browse document state at any past date
-- **Neo4j backend** — Persistent graph database for entity relationships
+### 🕸️ Knowledge Graph (2D Blueprint)
+- **React Flow visualization**: Clean 2D schematic view
+- **Auto-layout**: Dagre algorithm for perfect positioning
+- **Entity types**: Documents, Risks, People, Machines, Departments
+- **Interactive**: Click nodes for AI intelligence panel
+- **Risk filter**: Toggle to show only critical risks
+- **Neo4j backend**: Graph database for relationships
 
-### 📊 Dashboard & Analytics
-- Morning briefing with AI-extracted prioritized tasks
-- Kanban-style action cards (color-coded by priority)
+### 📊 Dashboard
+- Morning briefing with AI-extracted tasks
 - Live telemetry ticker
-- Department activity feed with real-time charts
-- Document processing status tracking
+- Department activity feed
+- Real-time processing status
 
 ### 🛡️ Governance & Audit
-- **Git-style audit trail** — Every action versioned with commit messages
-- **Tamper-proof logging** — View, edit, delete, download tracking
-- **Instant revert** — One-click rollback to any document version
-- **Compliance Watchdog** — Auto-scan against regulatory frameworks
-
-### 📡 IoT & Real-Time Monitoring
-- Live sensor telemetry (temperature, pressure, vibration)
-- Auto-triggered alerts with relevant document retrieval
-- WebSocket real-time updates
-
-### 🚀 Additional Features
-- **Semantic Search** — Natural language queries via pgvector
-- **AI Chat** — Conversational interface powered by Gemini
-- **Emergency Voice Mode** — Voice-activated interface for field use
-- **Workforce Command Center** — Team management and succession planning
-- **Enterprise Connectors** (architecture ready) — SharePoint, WhatsApp, IBM Maximo, Email Gateway
-- **Kiosk Mode** — Lock screen for shared terminals
-- **QR Code** support
-- Responsive design — mobile, tablet, desktop
+- Complete audit trail
+- Document versioning
+- Tamper-proof logging
 
 ---
 
 ## 🛠️ Tech Stack
 
 ### Frontend
-| Technology | Purpose |
-|-----------|---------|
-| React 18 + TypeScript 5.8 | UI framework |
-| Vite 5 + SWC | Build tooling |
-| Tailwind CSS + shadcn/ui | Styling & component library |
-| React Flow + Dagre | 2D knowledge graph |
-| Three.js + react-force-graph-3d | 3D graph visualization |
-| Recharts | Data visualization charts |
-| TanStack Query | Server state management |
-| React Hook Form + Zod | Form management & validation |
-| React Router DOM 6 | Client-side routing |
+- **Framework**: React 18 + TypeScript
+- **Build Tool**: Vite
+- **UI**: shadcn/ui + Radix UI + Tailwind CSS
+- **Graph**: React Flow (2D Blueprint)
+- **Charts**: Recharts
+- **State**: TanStack Query
 
-### Backend
-| Technology | Purpose |
-|-----------|---------|
-| Python 3.11 + FastAPI | Async web framework |
-| SQLAlchemy + Pydantic | ORM & validation |
-| PostgreSQL 16 + pgvector | Database + vector search |
-| Neo4j 5 | Graph database |
-| Redis 7 | Cache, rate limiting, Cinderella access |
-| Google Gemini 1.5 Flash | AI analysis & embeddings |
-| PyMuPDF (fitz) | PDF text extraction |
-| Pytesseract | OCR for scanned documents |
-| JWT + bcrypt | Authentication |
+### Backend (Python)
+- **Framework**: FastAPI (async)
+- **Database**: PostgreSQL + pgvector
+- **Graph DB**: Neo4j
+- **Cache**: Redis
+- **AI**: Google Gemini 1.5 Flash
+- **PDF**: PyMuPDF (fitz)
+- **OCR**: Pytesseract
+- **Auth**: JWT + bcrypt
 
 ### Infrastructure
-| Technology | Purpose |
-|-----------|---------|
-| Docker + Docker Compose | Containerization |
-| Nginx | Reverse proxy |
-| Mosquitto | MQTT broker for IoT |
-
----
-
-## 🚀 Quick Start
-
-### Prerequisites
-- [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed and running
-- [Gemini API Key](https://makersuite.google.com/app/apikey) (free)
-
-### Start in 2 Steps
-
-**1. Run the startup script:**
-```bash
-cd KLENS
-start.bat          # Windows
-./start.sh         # Linux/Mac
-```
-
-The script will automatically:
-- Create `.env` file (add your Gemini API key when prompted)
-- Start all services (PostgreSQL, Redis, Neo4j, Backend, Frontend)
-- Create the admin user
-- Display login credentials
-
-**2. Open http://localhost and login:**
-| Field | Value |
-|-------|-------|
-| Email | `admin@example.com` |
-| Password | `Admin@123` |
-
-### Access Points
-| Service | URL |
-|---------|-----|
-| Frontend | http://localhost |
-| Backend API | http://localhost:8000 |
-| API Docs (Swagger) | http://localhost:8000/docs |
-| Neo4j Browser | http://localhost:7474 |
-
-### Other Commands
-```bash
-stop.bat           # Stop all services
-restart.bat        # Restart services
-start-dev.bat      # Development mode (auto-reload)
-check-health.bat   # Verify all services are healthy
-```
-
----
-
-## 🔧 Manual Setup (Development)
-
-### Prerequisites
-- Node.js 20+
-- Python 3.11+
-- PostgreSQL 16 with pgvector extension
-- Redis 7
-- Neo4j 5
-
-### Backend Setup
-```bash
-cd backend-python
-
-# Create and activate virtual environment
-python -m venv venv
-venv\Scripts\activate          # Windows
-source venv/bin/activate       # Linux/Mac
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Configure environment
-copy .env.example .env         # Windows
-cp .env.example .env           # Linux/Mac
-# Edit .env — add your GEMINI_API_KEY
-
-# Start backend
-uvicorn app.main:app --reload --port 8000
-```
-
-### Frontend Setup
-```bash
-# From project root
-npm install
-npm run dev
-```
-
-Frontend runs at http://localhost:5173 — update `src/lib/api.ts` if needed:
-```typescript
-const API_URL = 'http://localhost:8000/api';
-```
+- **Containers**: Docker + Docker Compose
+- **Reverse Proxy**: Nginx
+- **Message Queue**: Redis (ready for Celery)
 
 ---
 
@@ -233,104 +199,63 @@ const API_URL = 'http://localhost:8000/api';
 
 ```
 KLENS/
-├── src/                          # React Frontend
-│   ├── components/
-│   │   ├── klens/               # Core app components (33 files)
-│   │   │   ├── DashboardView.tsx
-│   │   │   ├── DocumentViewer.tsx
-│   │   │   ├── KnowledgeGraphView.tsx
-│   │   │   ├── KnowledgeGraph3D.tsx
-│   │   │   ├── SearchDiscoveryView.tsx
-│   │   │   ├── ComplianceView.tsx
-│   │   │   ├── IoTView.tsx
-│   │   │   ├── AuditTrail.tsx
-│   │   │   ├── NuclearKeys.tsx
-│   │   │   ├── RoleManagementView.tsx
-│   │   │   ├── EmergencyVoiceMode.tsx
-│   │   │   ├── AIChatSidebar.tsx
-│   │   │   ├── UploadView.tsx
-│   │   │   ├── Sidebar.tsx
-│   │   │   ├── TopNav.tsx
-│   │   │   └── ...more
-│   │   └── ui/                  # shadcn/ui components (49 files)
-│   ├── contexts/                # Auth, Language, Theme contexts
-│   ├── hooks/                   # Custom React hooks
-│   ├── lib/                     # API client, utilities, websocket
-│   ├── pages/                   # Route pages
-│   ├── types/                   # TypeScript type definitions
-│   ├── data/                    # Demo graph data
-│   └── styles/                  # Additional styles
-│
-├── backend-python/              # Python FastAPI Backend
+├── backend-python/          # Python FastAPI backend
 │   ├── app/
-│   │   ├── api/                 # API routers (auth, documents, approvals, chat)
-│   │   ├── core/                # Config, database, security
-│   │   ├── models/              # SQLAlchemy models
-│   │   ├── services/            # Gemini AI service
-│   │   ├── middleware/          # Rate limiting, validation
-│   │   ├── dependencies/        # FastAPI dependencies
-│   │   └── main.py              # FastAPI application
-│   ├── *.sql                    # Database schema files
+│   │   ├── api/            # API endpoints
+│   │   ├── core/           # Config, database, security
+│   │   ├── models/         # SQLAlchemy models
+│   │   ├── services/       # Gemini AI service
+│   │   └── main.py         # FastAPI app
 │   ├── requirements.txt
 │   ├── Dockerfile
 │   └── .env
-│
-├── docker-compose.yml           # Production Docker services
-├── docker-compose.override.yml  # Development overrides (live-reload)
-├── Dockerfile / Dockerfile.dev  # Frontend Docker images
-├── nginx.conf                   # Reverse proxy config
-├── start.bat / start.sh         # Production startup scripts
-├── start-dev.bat / start-dev.sh # Development startup scripts
-└── package.json                 # Frontend dependencies
+├── src/                     # React frontend
+│   ├── components/
+│   │   ├── klens/          # Core components
+│   │   └── ui/             # Reusable UI (shadcn)
+│   ├── lib/                # Utilities
+│   ├── pages/              # Route pages
+│   └── main.tsx
+├── docker-compose.python.yml
+├── start-python-backend.bat
+└── README.md
 ```
 
 ---
 
-## 📡 API Endpoints
+## 🎮 Usage
 
-### Authentication
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `POST` | `/api/auth/register` | Register new user |
-| `POST` | `/api/auth/login` | Login (returns JWT) |
-| `POST` | `/api/auth/cinderella` | Grant time-bound access |
-| `GET`  | `/api/auth/cinderella` | Check Cinderella access status |
+### Upload Documents
+1. Navigate to **Upload** tab
+2. Drag & drop PDF files
+3. Watch real-time processing:
+   - Uploading → OCR → AI Analysis → Graph Linking → Complete
 
-### Documents
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `POST` | `/api/documents/` | Upload document (triggers AI processing) |
-| `GET`  | `/api/documents/` | List documents |
-| `GET`  | `/api/documents/{id}` | Get document details |
-| `PUT`  | `/api/documents/{id}` | Update document (creates version) |
-| `POST` | `/api/documents/{id}/revert/{version}` | Revert to a specific version |
-| `GET`  | `/api/documents/{id}/versions` | List document versions |
+### View Knowledge Graph
+1. Navigate to **Knowledge Graph** tab
+2. See auto-generated 2D blueprint
+3. Click nodes to see AI intelligence
+4. Use **FILTER: RISKS ONLY** to focus on critical items
+5. Click **RESET VIEW** to recenter
 
-### Approvals (Nuclear Keys)
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `POST` | `/api/approvals` | Create approval request |
-| `POST` | `/api/approvals/{id}/approve` | Vote on approval |
-| `GET`  | `/api/approvals` | List pending approvals |
+### Search Documents
+1. Use semantic search (powered by pgvector)
+2. Find similar documents by meaning, not just keywords
 
-### AI Chat
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `POST` | `/api/chat` | Chat with K-LENS AI |
-
-### System
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET`  | `/` | API info |
-| `GET`  | `/health` | Health check (DB, Redis, Neo4j status) |
-
-> **Interactive API Docs:** http://localhost:8000/docs (Swagger UI)
+### Explore Neo4j Graph
+1. Open http://localhost:7474
+2. Login: `neo4j` / `klens_neo4j_2024`
+3. Run Cypher queries:
+```cypher
+MATCH (n) RETURN n LIMIT 25
+```
 
 ---
 
-## ⚙️ Configuration
+## 🔧 Configuration
 
-### Backend Environment Variables (`backend-python/.env`)
+### Backend Environment Variables
+Edit `backend-python/.env`:
 
 ```env
 # Database
@@ -344,182 +269,277 @@ NEO4J_URI=bolt://neo4j:7687
 NEO4J_USER=neo4j
 NEO4J_PASSWORD=klens_neo4j_2024
 
-# Authentication
+# JWT
 JWT_SECRET=klens_jwt_secret_key_change_in_production_min_32_chars
 
-# AI
+# Gemini AI
 GEMINI_API_KEY=your_gemini_api_key_here
 
-# Uploads
+# Upload
 UPLOAD_DIR=./uploads
 MAX_FILE_SIZE=52428800
 ```
 
-### Frontend API URL (`src/lib/api.ts`)
+### Frontend API URL
+Edit `src/lib/api.ts`:
 ```typescript
 const API_URL = 'http://localhost:8000/api';
 ```
 
 ---
 
-## 💻 Development
+## 🧪 Testing
+
+### Health Check
+```bash
+curl http://localhost:8000/health
+```
+
+### Create User
+```bash
+curl -X POST http://localhost:8000/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "test@klens.local",
+    "password": "Test@123",
+    "name": "Test User",
+    "role": "engineer",
+    "department": "Engineering"
+  }'
+```
+
+### Upload Document
+```bash
+curl -X POST http://localhost:8000/api/documents/ \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -F "file=@document.pdf"
+```
+
+### Interactive API Testing
+Open http://localhost:8000/docs for Swagger UI
+
+---
+
+## 🐛 Troubleshooting
+
+### Services won't start?
+```bash
+docker-compose -f docker-compose.python.yml down -v
+docker-compose -f docker-compose.python.yml up -d --build
+```
+
+### Check logs
+```bash
+docker-compose -f docker-compose.python.yml logs -f backend
+```
+
+### Backend not responding?
+```bash
+docker-compose -f docker-compose.python.yml restart backend
+```
+
+### Neo4j connection refused?
+Wait 60 seconds - Neo4j takes time to initialize
+
+### Gemini API errors?
+Verify your API key in `backend-python/.env`
+
+### Frontend can't connect?
+Check that backend is running: http://localhost:8000/health
+
+---
+
+## 🚀 Development Commands
 
 ### Frontend Commands
 ```bash
-npm install          # Install dependencies
-npm run dev          # Development server (hot reload)
-npm run build        # Production build
-npm run preview      # Preview production build
-npm run lint         # Run ESLint
+# Install dependencies
+npm install
+
+# Start development server (with hot reload)
+npm run dev
+
+# Build for production
+npm run build
+
+# Preview production build
+npm run preview
+
+# Run linter
+npm run lint
+
+# Run tests
+npm run test
 ```
 
 ### Backend Commands
 ```bash
+# Navigate to backend
 cd backend-python
-pip install -r requirements.txt                    # Install dependencies
-uvicorn app.main:app --reload --port 8000          # Dev server (auto-reload)
-uvicorn app.main:app --host 0.0.0.0 --port 8000   # Production server
+
+# Create virtual environment
+python -m venv venv
+
+# Activate virtual environment
+venv\Scripts\activate  # Windows
+source venv/bin/activate  # Linux/Mac
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Start development server (with auto-reload)
+uvicorn app.main:app --reload --port 8000
+
+# Start production server
+uvicorn app.main:app --host 0.0.0.0 --port 8000
+
+# Run tests
+pytest
+
+# Run with coverage
+pytest --cov=app
 ```
 
-### Development Mode (Docker)
+### Docker Commands
 ```bash
-start-dev.bat       # Windows — starts with live-reload volumes
-./start-dev.sh      # Linux/Mac
-```
-This mounts source code as volumes so changes reflect immediately without rebuilding.
-
----
-
-## 🐳 Docker Commands
-
-```bash
-# Start all services (production)
-docker-compose up -d --build
-
-# Start with dev overrides (live-reload)
-docker-compose -f docker-compose.yml -f docker-compose.override.yml up --build
+# Start all services
+docker-compose -f docker-compose.python.yml up -d
 
 # Stop all services
-docker-compose down
-
-# Stop and delete all data (fresh start)
-docker-compose down -v
+docker-compose -f docker-compose.python.yml down
 
 # View logs
-docker-compose logs -f              # All services
-docker-compose logs -f backend      # Specific service
+docker-compose -f docker-compose.python.yml logs -f
 
-# Restart a service
-docker-compose restart backend
+# View specific service logs
+docker-compose -f docker-compose.python.yml logs -f backend
 
-# Rebuild a specific service
-docker-compose up -d --build backend
+# Rebuild and start
+docker-compose -f docker-compose.python.yml up -d --build
 
-# Open shell in container
-docker-compose exec backend sh
-docker-compose exec postgres psql -U klens_user -d klens
+# Stop and remove volumes (fresh start)
+docker-compose -f docker-compose.python.yml down -v
+
+# Check service status
+docker-compose -f docker-compose.python.yml ps
 ```
 
 ---
 
-## 🔍 Troubleshooting
+## 📊 API Endpoints
 
-### Services won't start
-```bash
-docker-compose down -v
-docker-compose up -d --build
-```
+### Authentication
+- `POST /api/auth/register` - Create user
+- `POST /api/auth/login` - Login
 
-### Backend not responding
-```bash
-docker-compose logs -f backend
-docker-compose restart backend
-```
+### Documents
+- `POST /api/documents/` - Upload document
+- `GET /api/documents/` - List documents
+- `GET /api/documents/{id}` - Get document
 
-### Can't connect to database
-```bash
-docker-compose restart postgres
-# Wait 30 seconds, then restart backend
-docker-compose restart backend
-```
+### Health
+- `GET /` - API info
+- `GET /health` - Health check
 
-### Neo4j connection refused
-Neo4j takes ~60 seconds to initialize. Wait and retry.
-
-### Gemini API errors
-Verify your API key in `backend-python/.env` and ensure it's valid at https://makersuite.google.com/app/apikey
-
-### Frontend can't reach API
-1. Check backend is running: `curl http://localhost:8000/health`
-2. Verify API URL in `src/lib/api.ts`
-
-### Port already in use
-```bash
-# Windows
-netstat -ano | findstr :80
-taskkill /PID <PID> /F
-
-# Or change ports in docker-compose.yml
-```
-
-### 403 Forbidden during Docker build (network/proxy issue)
-- **Easiest fix:** Connect to a mobile hotspot and retry
-- **Alternative:** Pull images manually first:
-  ```bash
-  docker pull python:3.11-slim
-  docker pull node:20-alpine
-  docker pull nginx:alpine
-  docker pull pgvector/pgvector:pg16
-  docker pull redis:7-alpine
-  docker pull neo4j:5-community
-  ```
+**Full API docs**: http://localhost:8000/docs
 
 ---
 
-## 🔐 Security
+## 🎬 Demo Script (For Hackathon)
 
-- All API keys are stored server-side in environment variables — never exposed to the client
-- JWT tokens with configurable expiration
-- bcrypt password hashing (10 rounds)
-- Redis-backed rate limiting
-- Input validation and sanitization (XSS prevention)
-- Row-Level Security ready
+1. **Show Architecture** (30 sec)
+   - "Python FastAPI backend with Neo4j knowledge graph"
+   - Open http://localhost:8000/docs
 
-For detailed API key management and rotation procedures, see **[SECURITY-API-KEYS.md](./SECURITY-API-KEYS.md)**.
+2. **Upload Document** (1 min)
+   - Drag PDF to upload
+   - Show real-time processing stages
+   - "AI extracts entities in background"
+
+3. **Show AI Analysis** (1 min)
+   - Click processed document
+   - "Gemini identified 3 critical risks"
+   - Show compliance issues
+
+4. **Knowledge Graph** (1 min)
+   - Navigate to graph view
+   - "Auto-generated from document analysis"
+   - Click node → Show intelligence panel
+   - Click **FILTER: RISKS ONLY**
+
+5. **Show Neo4j** (30 sec)
+   - Open http://localhost:7474
+   - "Live graph database"
+   - Run: `MATCH (n) RETURN n LIMIT 25`
+
+**Total: 4 minutes**
 
 ---
 
-## 🗺️ Roadmap
+## 🏆 Why This Wins
 
-### ✅ Completed
-- Python FastAPI backend with async processing
-- AI-powered document analysis (Gemini 1.5 Flash)
-- Vector search with pgvector
-- Knowledge graph (Neo4j + React Flow + 3D)
-- Role-based access control with Cinderella Access & Nuclear Keys
-- Git-style audit trail
-- IoT telemetry dashboard
-- Emergency Voice Mode
-- Semantic search & AI Chat
+### Technical Depth
+- ✅ Production-grade Python AI stack
+- ✅ Vector search (cutting-edge)
+- ✅ Knowledge graph database
+- ✅ Async processing (scalable)
+- ✅ Type-safe (Pydantic + TypeScript)
 
-### 🔮 Planned
-- [ ] Celery for distributed task processing
+### Innovation
+- ✅ Auto-entity extraction
+- ✅ Semantic document search
+- ✅ Real-time graph updates
+- ✅ Multi-modal AI
+
+### Practical Value
+- ✅ Solves real industrial problems
+- ✅ Scales to 1000s of documents
+- ✅ Fast response times
+- ✅ Enterprise-ready
+
+---
+
+## 📚 Documentation
+
+- **[PYTHON-BACKEND-README.md](./PYTHON-BACKEND-README.md)** - Backend details
+- **[PYTHON-MIGRATION-COMPLETE.md](./PYTHON-MIGRATION-COMPLETE.md)** - Migration guide
+- **[GRAPH-DEMO-GUIDE.md](./GRAPH-DEMO-GUIDE.md)** - Graph demo script
+- **[TROUBLESHOOTING.md](./TROUBLESHOOTING.md)** - Common issues
+
+---
+
+## 🔮 Roadmap
+
+### Phase 1 (Current)
+- ✅ Python FastAPI backend
+- ✅ AI document analysis
+- ✅ Vector search
+- ✅ Knowledge graph
+- ✅ 2D Blueprint visualization
+
+### Phase 2 (Post-Hackathon)
+- [ ] Celery for heavy processing
 - [ ] WebSocket real-time updates
-- [ ] Advanced graph queries and analytics
+- [ ] Advanced graph queries
+- [ ] Semantic search UI
 - [ ] Export reports (PDF, Excel)
+
+### Phase 3 (Production)
 - [ ] Multi-tenant architecture
+- [ ] Advanced analytics
 - [ ] Mobile app
-- [ ] Enterprise connectors (SharePoint, IBM Maximo)
+- [ ] Enterprise connectors (SharePoint, Maximo)
+- [ ] Blockchain audit trail
 
 ---
 
 ## 🤝 Contributing
 
 1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+2. Create feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit changes (`git commit -m 'Add amazing feature'`)
+4. Push to branch (`git push origin feature/amazing-feature`)
+5. Open Pull Request
 
 ---
 
@@ -529,6 +549,20 @@ This project is private and proprietary.
 
 ---
 
-<p align="center">
-  <strong>Built with ❤️ using Python FastAPI, React & Google Gemini AI</strong>
-</p>
+## 👥 Team
+
+Built for Vizag Hackathon 2024
+
+---
+
+## 🆘 Support
+
+**Issues?** Check [TROUBLESHOOTING.md](./TROUBLESHOOTING.md)
+
+**Questions?** Open an issue on GitHub
+
+---
+
+**Built with ❤️ using Python FastAPI, React, and AI**
+
+🚀 **Ready to win the hackathon!**
