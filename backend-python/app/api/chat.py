@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, ConfigDict
 from typing import List, Optional
 from datetime import datetime
 import google.generativeai as genai
@@ -22,8 +22,78 @@ router = APIRouter(prefix="/chat", tags=["chat"])
 genai.configure(api_key=settings.GEMINI_API_KEY)
 
 
-class ChatMessage(StrictBaseModel):
+def generate_ai_response(messages: List[dict]) -> str:
+    """
+    Generate an AI response with provider failover.
+    Primary: OpenRouter (Mistral)
+    Fallback: Gemini
+    """
+    import requests as http_requests
+
+    openrouter_key = (settings.OPENROUTER_API_KEY or "").strip()
+    gemini_key = (settings.GEMINI_API_KEY or "").strip()
+
+    # Primary provider: OpenRouter
+    if openrouter_key:
+        openrouter_models = [
+            "openai/gpt-oss-20b:free",
+            "meta-llama/llama-3.3-70b-instruct:free",
+        ]
+        for model_id in openrouter_models:
+            try:
+                openrouter_response = http_requests.post(
+                    "https://openrouter.ai/api/v1/chat/completions",
+                    headers={
+                        "Authorization": f"Bearer {openrouter_key}",
+                        "Content-Type": "application/json",
+                        "HTTP-Referer": "https://klens.local",
+                        "X-Title": "K-LENS Industrial Platform",
+                    },
+                    json={
+                        "model": model_id,
+                        "messages": messages,
+                        "max_tokens": 2000,
+                    },
+                    timeout=60
+                )
+
+                if openrouter_response.status_code == 200:
+                    return openrouter_response.json()["choices"][0]["message"]["content"]
+
+                print(
+                    f"OpenRouter Error ({openrouter_response.status_code}) model={model_id}: "
+                    f"{openrouter_response.text}"
+                )
+            except Exception as e:
+                print(f"OpenRouter request failed for model={model_id}: {e}")
+
+    # Fallback provider: Gemini
+    if gemini_key:
+        try:
+            model = genai.GenerativeModel("models/gemini-2.5-flash")
+            gemini_messages = []
+            for msg in messages:
+                if msg["role"] == "system":
+                    gemini_messages.append({"role": "user", "parts": [msg["content"]]})
+                elif msg["role"] == "assistant":
+                    gemini_messages.append({"role": "model", "parts": [msg["content"]]})
+                else:
+                    gemini_messages.append({"role": "user", "parts": [msg["content"]]})
+
+            result = model.generate_content(gemini_messages)
+            if result and getattr(result, "text", None):
+                return result.text
+            raise ValueError("Gemini returned an empty response")
+        except Exception as e:
+            print(f"Gemini fallback failed: {e}")
+
+    raise HTTPException(status_code=500, detail="AI service unavailable")
+
+
+class ChatMessage(BaseModel):
     """Chat message with validation"""
+    model_config = ConfigDict(extra="ignore", str_strip_whitespace=True)
+
     role: str = Field(
         ...,
         pattern=r'^(user|assistant)$',
@@ -52,7 +122,7 @@ class ChatRequest(StrictBaseModel):
         description="User message"
     )
     conversationHistory: Optional[List[ChatMessage]] = Field(
-        default=[],
+        default_factory=list,
         max_length=50,  # Limit conversation history length
         description="Previous conversation messages"
     )
@@ -183,9 +253,7 @@ async def send_message(
         if context_text:
             enhanced_message = f"{context_text}\n\n---\n\n**User Question:** {request.message}"
         
-        # Step 3: Generate response with OpenRouter (Mistral Devstral)
-        import requests as http_requests
-        
+        # Step 3: Generate response with provider failover
         # Build conversation history for OpenRouter format
         messages = [{"role": "system", "content": SYSTEM_INSTRUCTION}]
         for msg in request.conversationHistory or []:
@@ -194,28 +262,8 @@ async def send_message(
                 "content": msg.content
             })
         messages.append({"role": "user", "content": enhanced_message})
-        
-        openrouter_response = http_requests.post(
-            "https://openrouter.ai/api/v1/chat/completions",
-            headers={
-                "Authorization": f"Bearer {settings.OPENROUTER_API_KEY}",
-                "Content-Type": "application/json",
-                "HTTP-Referer": "https://klens.local",
-                "X-Title": "K-LENS Industrial Platform",
-            },
-            json={
-                "model": "mistralai/devstral-2512:free",
-                "messages": messages,
-                "max_tokens": 2000,
-            },
-            timeout=60
-        )
-        
-        if openrouter_response.status_code != 200:
-            print(f"OpenRouter Error: {openrouter_response.text}")
-            raise HTTPException(status_code=500, detail="AI service unavailable")
-        
-        ai_response = openrouter_response.json()["choices"][0]["message"]["content"]
+
+        ai_response = generate_ai_response(messages)
         
         # Format sources for response
         sources = [

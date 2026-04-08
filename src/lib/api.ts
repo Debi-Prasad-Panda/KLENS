@@ -167,9 +167,14 @@ class ApiClient {
   }
 
   async sendChatMessage(message: string, conversationHistory: any[]) {
-    return this.request('/chat', {
+    const sanitizedHistory = (conversationHistory || []).map((msg) => ({
+      role: msg.role,
+      content: msg.content,
+    }));
+
+    return this.request('/chat/', {
       method: 'POST',
-      body: JSON.stringify({ message, conversationHistory }),
+      body: JSON.stringify({ message, conversationHistory: sanitizedHistory }),
     });
   }
 
