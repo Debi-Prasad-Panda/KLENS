@@ -24,6 +24,7 @@ from .api import profile  # Digital Identity Hub
 from .api import roles  # Role Management API
 from .api import audit  # Audit Trail API
 from .api import graph  # Knowledge Graph API
+from .api import pomodoro  # Legacy compatibility API
 
 app = FastAPI(title="K-LENS API", version="2.0.0")
 
@@ -62,6 +63,9 @@ app.include_router(profile.router, prefix="/api")  # Digital Identity Hub
 app.include_router(roles.router, prefix="/api")  # Role Management API
 app.include_router(audit.router, prefix="/api")  # Audit Trail API
 app.include_router(graph.router, prefix="/api")  # Knowledge Graph API
+
+# Compatibility routes for older frontend bundles
+app.include_router(pomodoro.router, prefix="/api/v1")
 
 
 def create_initial_data():

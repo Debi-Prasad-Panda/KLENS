@@ -76,7 +76,8 @@ services:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
       interval: 20s
       timeout: 5s
-      retries: 5
+      retries: 10
+      start_period: 45s
     restart: unless-stopped
 
   frontend:
@@ -92,7 +93,7 @@ services:
       - "80:80"
     depends_on:
       backend:
-        condition: service_healthy
+        condition: service_started
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1"]
       interval: 20s

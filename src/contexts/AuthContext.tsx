@@ -87,7 +87,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const initAuth = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
+        const sessionResult = await Promise.race([
+          supabase.auth.getSession(),
+          new Promise<never>((_, reject) =>
+            setTimeout(() => reject(new Error("Auth session initialization timed out")), 6000)
+          ),
+        ]);
+
+        const { data: { session } } = sessionResult;
 
         if (session?.user && session.access_token) {
           // Set token for API client
