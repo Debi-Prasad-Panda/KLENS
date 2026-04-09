@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { FileText, Folder, Clock, User, Filter, Search, Upload, X, Lock } from "lucide-react";
+import { FileText, Folder, Clock, User, Filter, Search, Upload, X, Lock, Trash2, Loader2 } from "lucide-react";
 import { api } from "@/lib/api";
 import { DocumentProcessor } from "./DocumentProcessor";
 import { EnterpriseConnectors } from "./EnterpriseConnectors";
@@ -7,7 +7,7 @@ import { usePermissions } from "@/hooks/usePermissions";
 import { toast } from "@/hooks/use-toast";
 
 interface Document {
-  id: number;
+  id: string | number;
   filename: string;
   original_name: string;
   file_type: string;
@@ -26,6 +26,7 @@ export function DocumentLibrary({ onOpenDocument }: DocumentLibraryProps) {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [showUploadModal, setShowUploadModal] = useState(false);
+  const [deletingDocId, setDeletingDocId] = useState<string | null>(null);
 
   // Permission checks
   const { can, roleDisplayName } = usePermissions();
@@ -83,69 +84,11 @@ export function DocumentLibrary({ onOpenDocument }: DocumentLibraryProps) {
 
         setDocuments(Array.from(uniqueDocsMap.values()));
       } else {
-        // Show demo documents if no documents exist
-        setDocuments([
-          {
-            id: 1,
-            filename: "boiler_b7_specs.pdf",
-            original_name: "Boiler B7 Specifications.pdf",
-            file_type: "application/pdf",
-            status: "complete",
-            created_at: new Date().toISOString(),
-            uploaded_by: 1
-          },
-          {
-            id: 2,
-            filename: "safety_manual.pdf",
-            original_name: "Safety Manual v2.3.pdf",
-            file_type: "application/pdf",
-            status: "complete",
-            created_at: new Date().toISOString(),
-            uploaded_by: 1
-          },
-          {
-            id: 3,
-            filename: "maintenance_log.xlsx",
-            original_name: "Maintenance Log 2024.xlsx",
-            file_type: "application/vnd.ms-excel",
-            status: "processing",
-            created_at: new Date().toISOString(),
-            uploaded_by: 1
-          }
-        ]);
+        setDocuments([]);
       }
     } catch (error) {
       console.error("Failed to load documents:", error);
-      // Show demo documents if API fails
-      setDocuments([
-        {
-          id: 1,
-          filename: "boiler_b7_specs.pdf",
-          original_name: "Boiler B7 Specifications.pdf",
-          file_type: "application/pdf",
-          status: "complete",
-          created_at: new Date().toISOString(),
-          uploaded_by: 1
-        },
-        {
-          id: 2,
-          filename: "safety_manual.pdf",
-          original_name: "Safety Manual v2.3.pdf",
-          file_type: "application/pdf",
-          status: "complete",
-          created_at: new Date().toISOString(),
-          uploaded_by: 1
-        },
-        {
-          id: 3,
-          filename: "maintenance_log.xlsx",
-          original_name: "Maintenance Log 2024.xlsx",
-          file_type: "application/vnd.ms-excel",
-          status: "processing",
-          created_at: new Date().toISOString(),
-          uploaded_by: 1
-        }
-      ]);
+      setDocuments([]);
     } finally {
       setLoading(false);
     }
@@ -192,6 +135,34 @@ export function DocumentLibrary({ onOpenDocument }: DocumentLibraryProps) {
       console.error("Knowledge Hub search failed:", error);
     } finally {
       setIsSearchingKnowledge(false);
+    }
+  };
+
+  const handleDeleteDocument = async (doc: Document) => {
+    if (!canDelete) return;
+
+    const confirmed = window.confirm(`Delete ${doc.original_name}? This will remove it from the database and Supabase storage.`);
+    if (!confirmed) return;
+
+    const id = String(doc.id);
+    setDeletingDocId(id);
+
+    try {
+      await api.deleteKnowledgeHubDocument(id);
+      setDocuments(prev => prev.filter(d => String(d.id) !== id));
+      toast({
+        title: "Document deleted",
+        description: `${doc.original_name} was removed from database and storage.`,
+      });
+    } catch (error) {
+      console.error("Failed to delete document:", error);
+      toast({
+        variant: "destructive",
+        title: "Delete failed",
+        description: error instanceof Error ? error.message : "Unable to delete document",
+      });
+    } finally {
+      setDeletingDocId(null);
     }
   };
 
@@ -350,12 +321,15 @@ export function DocumentLibrary({ onOpenDocument }: DocumentLibraryProps) {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredDocs.map((doc) => (
-            <button
+            <div
               key={doc.id}
-              onClick={() => onOpenDocument(doc)}
-              className="glass-card p-4 text-left hover:border-primary/50 transition-all group"
+              className="glass-card p-4 hover:border-primary/50 transition-all group"
             >
-              <div className="flex items-start gap-3">
+              <div className="flex items-start justify-between gap-3">
+                <button
+                  onClick={() => onOpenDocument(doc)}
+                  className="flex items-start gap-3 flex-1 min-w-0 text-left"
+                >
                 <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center group-hover:bg-primary/30 transition-colors">
                   <FileText className="w-5 h-5 text-primary" />
                 </div>
@@ -376,8 +350,25 @@ export function DocumentLibrary({ onOpenDocument }: DocumentLibraryProps) {
                     </div>
                   </div>
                 </div>
+                </button>
+
+                {canDelete && (
+                  <button
+                    onClick={() => handleDeleteDocument(doc)}
+                    disabled={deletingDocId === String(doc.id)}
+                    className="ml-2 w-9 h-9 rounded-lg border border-destructive/30 bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                    aria-label={`Delete ${doc.original_name}`}
+                    title="Delete document"
+                  >
+                    {deletingDocId === String(doc.id) ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Trash2 className="w-4 h-4" />
+                    )}
+                  </button>
+                )}
               </div>
-            </button>
+            </div>
           ))}
         </div>
       )}

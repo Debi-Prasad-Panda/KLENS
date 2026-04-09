@@ -11,6 +11,7 @@ from datetime import datetime
 import tempfile
 import os
 import json
+import redis
 
 from ..models.access_rules import AccessRules, AccessLevel
 # Use new Supabase Auth dependency
@@ -35,6 +36,22 @@ class UploadStatus(BaseModel):
     stage: str
     progress: int
     message: str
+
+
+def publish_upload_status(doc_id: str, stage: str, progress: int, message: str = ""):
+    """Publish upload status for websocket subscribers."""
+    try:
+        r = redis.from_url(settings.REDIS_URL)
+        payload = json.dumps({
+            "doc_id": doc_id,
+            "stage": stage,
+            "progress": progress,
+            "message": message,
+        })
+        r.publish(f"doc_status:{doc_id}", payload)
+        r.close()
+    except Exception as e:
+        print(f"Failed to publish upload status: {e}")
 
 
 def chunk_text(text: str, chunk_size: int = 500, overlap: int = 50) -> list:
@@ -80,10 +97,12 @@ def extract_text_from_pdf(file_path: str) -> str:
 
 
 def process_document_supabase(
+    tracking_id: str,
     file_bytes: bytes,
     original_name: str,
     content_type: str,
-    metadata: Dict[str, Any]
+    metadata: Dict[str, Any],
+    pre_uploaded: Optional[Dict[str, str]] = None,
 ):
     """
     Background task: Full document processing pipeline.
@@ -103,19 +122,25 @@ def process_document_supabase(
             temp_path = tmp.name
         
         print(f"📄 Processing: {original_name}")
+        publish_upload_status(tracking_id, "uploading", 10, "Upload confirmed. Preparing pipeline...")
         
         # Step 1: Upload to Supabase Storage
         print("  ⬆️ Uploading to Storage...")
-        storage_result = supabase_service.upload_file_bytes(
-            file_bytes=file_bytes,
-            original_name=original_name,
-            content_type=content_type
-        )
-        s3_url = storage_result["public_url"]
-        print(f"  ✅ Uploaded: {s3_url}")
+        if pre_uploaded:
+            s3_url = pre_uploaded["public_url"]
+            print(f"  ✅ Reusing uploaded file: {s3_url}")
+        else:
+            storage_result = supabase_service.upload_file_bytes(
+                file_bytes=file_bytes,
+                original_name=original_name,
+                content_type=content_type
+            )
+            s3_url = storage_result["public_url"]
+            print(f"  ✅ Uploaded: {s3_url}")
         
         # Step 2: Extract text
         print("  📝 Extracting text...")
+        publish_upload_status(tracking_id, "ocr", 30, "Extracting text...")
         full_text = extract_text_from_pdf(temp_path)
         if not full_text.strip():
             print("  ⚠️ No text extracted from PDF")
@@ -123,11 +148,13 @@ def process_document_supabase(
         
         # Step 3: Chunk text
         print("  ✂️ Chunking text...")
+        publish_upload_status(tracking_id, "analyzing", 50, "Preparing chunks for AI analysis...")
         chunks = chunk_text(full_text, chunk_size=400, overlap=50)
         print(f"  📊 Created {len(chunks)} chunks")
         
         # Step 4: Generate embeddings and store
         print("  🧠 Generating embeddings...")
+        publish_upload_status(tracking_id, "analyzing", 65, "Generating embeddings...")
         stored_chunks = []
         
         for i, chunk in enumerate(chunks):
@@ -155,6 +182,7 @@ def process_document_supabase(
         
         # Step 5: Batch insert to database
         print("  💾 Saving to database...")
+        publish_upload_status(tracking_id, "linking", 85, "Saving indexed chunks...")
         result = supabase_service.insert_document_chunks(
             file_name=original_name,
             s3_url=s3_url,
@@ -162,9 +190,11 @@ def process_document_supabase(
         )
         
         print(f"✅ Complete! Stored {len(result)} chunks for {original_name}")
+        publish_upload_status(tracking_id, "complete", 100, "Document processing complete")
         return result
         
     except Exception as e:
+        publish_upload_status(tracking_id, "error", 0, f"Processing failed: {e}")
         print(f"❌ Processing failed for {original_name}: {e}")
         raise e
     finally:
@@ -248,10 +278,12 @@ async def upload_document(
     # Start background processing (embedding + DB insert)
     background_tasks.add_task(
         process_document_supabase,
+        tracking_id=storage_result["storage_path"],
         file_bytes=file_bytes,
         original_name=file.filename,
         content_type=file.content_type or "application/pdf",
-        metadata=metadata
+        metadata=metadata,
+        pre_uploaded=storage_result,
     )
     
     return UploadResponse(
@@ -313,6 +345,7 @@ async def upload_document_sync(
     
     try:
         result = process_document_supabase(
+            tracking_id=f"sync:{file.filename}",
             file_bytes=file_bytes,
             original_name=file.filename,
             content_type=file.content_type or "application/pdf",

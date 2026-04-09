@@ -147,7 +147,7 @@ def has_permission(role: str, permission: str | Permission) -> bool:
         True if role has permission, False otherwise
     """
     try:
-        role_enum = Role(role)
+        role_enum = Role((role or "").upper())
     except ValueError:
         return False
     
@@ -172,7 +172,7 @@ def get_role_permissions(role: str) -> List[str]:
         List of permission strings
     """
     try:
-        role_enum = Role(role)
+        role_enum = Role((role or "").upper())
     except ValueError:
         return []
     

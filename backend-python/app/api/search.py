@@ -6,9 +6,12 @@ Uses Supabase knowledge_hub table with pgvector.
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field, field_validator
 from typing import List, Optional, Dict, Any
+from urllib.parse import urlparse
 
 # Use new Supabase Auth dependency
 from ..dependencies.auth import get_current_user, IndustrialUser
+from ..core.config import settings
+from ..core.permissions import has_permission
 from ..services.gemini_service import gemini_service
 from ..services.supabase_service import supabase_service
 from ..utils.validation import (
@@ -143,6 +146,52 @@ async def get_document(
     if not doc:
         raise HTTPException(status_code=404, detail="Document not found")
     return doc
+
+
+@router.delete("/documents/{doc_id}")
+async def delete_document(
+    doc_id: str,
+    current_user: IndustrialUser = Depends(get_current_user)
+):
+    """
+    Delete a knowledge hub document and its associated storage object.
+
+    Deletes all chunk rows sharing the same s3_url and then removes the file
+    from Supabase Storage bucket.
+    """
+    if not (has_permission(current_user.role, "DOC_DELETE") or current_user.role == "ADMIN"):
+        raise HTTPException(status_code=403, detail="Permission denied for document deletion")
+
+    doc = supabase_service.get_document_by_id(doc_id)
+    if not doc:
+        raise HTTPException(status_code=404, detail="Document not found")
+
+    s3_url = doc.get("s3_url")
+    if not s3_url:
+        raise HTTPException(status_code=400, detail="Document has no storage URL")
+
+    delete_rows_ok = supabase_service.delete_documents_by_s3_url(s3_url)
+    if not delete_rows_ok:
+        raise HTTPException(status_code=500, detail="Failed to delete document rows from database")
+
+    # Extract storage object path from public URL: .../<bucket>/<path>
+    parsed = urlparse(s3_url)
+    storage_path = None
+    match_segment = f"/{settings.SUPABASE_BUCKET}/"
+    if match_segment in parsed.path:
+        storage_path = parsed.path.split(match_segment, 1)[1]
+
+    storage_deleted = False
+    if storage_path:
+        storage_deleted = supabase_service.delete_file(storage_path)
+
+    return {
+        "success": True,
+        "doc_id": doc_id,
+        "file_name": doc.get("file_name"),
+        "storage_deleted": storage_deleted,
+        "message": "Document deleted from database and storage" if storage_deleted else "Document rows deleted; storage object was not removed"
+    }
 
 
 @router.get("/documents/{doc_id}/insights", response_model=Dict[str, Any])

@@ -11,6 +11,7 @@ import {
   Timer, UserCheck, AlertCircle
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { usePermissions } from "@/hooks/usePermissions";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -177,7 +178,8 @@ function formatTimeAgo(date: Date): string {
 }
 
 export function NuclearKeys() {
-  const { user, grantCinderellaAccess } = useAuth();
+  const { user, cinderellaAccess, grantCinderellaAccess } = useAuth();
+  const { can } = usePermissions();
   const { toast } = useToast();
   const [requests, setRequests] = useState<NuclearRequest[]>(mockRequests);
   const [history, setHistory] = useState<NuclearRequest[]>(mockHistory);
@@ -185,6 +187,7 @@ export function NuclearKeys() {
   const [detailModalOpen, setDetailModalOpen] = useState(false);
   const [newRequestModalOpen, setNewRequestModalOpen] = useState(false);
   const [configModalOpen, setConfigModalOpen] = useState(false);
+  const [lastBreakGlassEvent, setLastBreakGlassEvent] = useState<{ title: string; at: Date; by: string } | null>(null);
   const [config, setConfig] = useState<QuorumConfig>({
     defaultRequiredApprovals: 2,
     maxApprovers: 5,
@@ -195,10 +198,22 @@ export function NuclearKeys() {
   });
 
   const isAdmin = user?.role === "ADMIN" || user?.role === "MANAGER";
+  const canBreakGlass = can('EMERGENCY_GRANT') || isAdmin;
   const pendingCount = requests.filter(r => r.status === "PENDING").length;
   const urgentCount = requests.filter(r =>
     r.status === "PENDING" && r.severity === "CATASTROPHIC"
   ).length;
+
+  // Keep detail modal request object fresh as approvals/status update.
+  useEffect(() => {
+    if (!selectedRequest) return;
+    const latest = requests.find(r => r.id === selectedRequest.id);
+    if (!latest) {
+      setSelectedRequest(null);
+      return;
+    }
+    setSelectedRequest(latest);
+  }, [requests, selectedRequest]);
 
   // Handle approval/rejection
   const handleApproval = (requestId: string, approverId: string, decision: boolean, comment?: string) => {
@@ -259,6 +274,100 @@ export function NuclearKeys() {
     toast({
       title: "🎃 Cinderella Access Granted",
       description: "You have 15 minutes of elevated permissions.",
+    });
+  };
+
+  const handleBreakGlass = () => {
+    if (!canBreakGlass) {
+      toast({
+        title: "Permission Denied",
+        description: "You do not have permission to trigger Break Glass.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const confirmed = window.confirm(
+      "BREAK GLASS EMERGENCY OVERRIDE\n\nThis bypasses normal approval workflows and will trigger high-priority alerts. Continue?"
+    );
+
+    if (!confirmed) return;
+
+    const now = new Date();
+    const requestId = `BG-${Math.floor(now.getTime() / 1000)}`;
+    const title = `Break Glass Emergency Override - ${user?.department || "Plant"}`;
+
+    setRequests(prev => [
+      {
+        id: requestId,
+        type: "EMERGENCY",
+        title,
+        description: "Emergency override triggered via Break Glass. Safety/operations alerts dispatched.",
+        resourceType: "SYSTEM",
+        severity: "CATASTROPHIC",
+        requestedBy: user?.name || "Unknown",
+        requestedAt: now,
+        expiresAt: new Date(now.getTime() + 15 * 60 * 1000),
+        requiredApprovals: 1,
+        approvers: [
+          {
+            id: String(user?.id || "0"),
+            name: user?.name || "Current User",
+            role: user?.role || "OPERATOR",
+            email: user?.email || "",
+            approved: true,
+            approvedAt: now,
+            comment: "Break Glass trigger",
+          },
+        ],
+        status: "APPROVED",
+      },
+      ...prev,
+    ]);
+
+    // Record immediate executed event so users see a concrete state change.
+    setHistory(prev => [
+      {
+        id: requestId,
+        type: "EMERGENCY",
+        title,
+        description: "Break Glass emergency override executed.",
+        resourceType: "SYSTEM",
+        severity: "CATASTROPHIC",
+        requestedBy: user?.name || "Unknown",
+        requestedAt: now,
+        expiresAt: new Date(now.getTime() + 15 * 60 * 1000),
+        requiredApprovals: 1,
+        approvers: [
+          {
+            id: String(user?.id || "0"),
+            name: user?.name || "Current User",
+            role: user?.role || "OPERATOR",
+            email: user?.email || "",
+            approved: true,
+            approvedAt: now,
+            comment: "Break Glass trigger",
+          },
+        ],
+        status: "EXECUTED",
+        executedAt: now,
+        executedBy: user?.name || "Current User",
+      },
+      ...prev,
+    ]);
+
+    setLastBreakGlassEvent({
+      title,
+      at: now,
+      by: user?.name || "Current User",
+    });
+
+    grantCinderellaAccess(15);
+
+    toast({
+      title: "Break Glass Activated",
+      description: "Emergency override enabled for 15 minutes. All actions are now under critical audit.",
+      variant: "destructive",
     });
   };
 
@@ -551,6 +660,8 @@ export function NuclearKeys() {
               <Button
                 variant="destructive"
                 className="w-full gap-2"
+                onClick={handleBreakGlass}
+                disabled={!canBreakGlass}
               >
                 <Shield className="w-4 h-4" />
                 Break Glass (Requires 2FA)
@@ -568,28 +679,40 @@ export function NuclearKeys() {
                 Active Emergency Sessions
               </h4>
               <div className="space-y-3">
-                <div className="flex items-center justify-between p-3 bg-fuchsia-500/10 rounded-lg border border-fuchsia-500/30">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-fuchsia-500/20 flex items-center justify-center">
-                      <Timer className="w-4 h-4 text-fuchsia-400" />
-                    </div>
+                {lastBreakGlassEvent && (
+                  <div className="flex items-center justify-between p-3 bg-red-500/10 rounded-lg border border-red-500/30">
                     <div>
-                      <p className="font-medium text-sm">John Smith</p>
-                      <p className="text-xs text-muted-foreground">Cinderella Access • Started 5m ago</p>
+                      <p className="font-medium text-sm text-red-300">{lastBreakGlassEvent.title}</p>
+                      <p className="text-xs text-muted-foreground">
+                        Triggered by {lastBreakGlassEvent.by} at {lastBreakGlassEvent.at.toLocaleTimeString()}
+                      </p>
+                    </div>
+                    <Badge className="bg-red-500/20 text-red-300 border-red-500/30">EXECUTED</Badge>
+                  </div>
+                )}
+
+                {cinderellaAccess ? (
+                  <div className="flex items-center justify-between p-3 bg-fuchsia-500/10 rounded-lg border border-fuchsia-500/30">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-fuchsia-500/20 flex items-center justify-center">
+                        <Timer className="w-4 h-4 text-fuchsia-400" />
+                      </div>
+                      <div>
+                        <p className="font-medium text-sm">{user?.name || "Current User"}</p>
+                        <p className="text-xs text-muted-foreground">Cinderella Access • Emergency mode active</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Badge className="bg-fuchsia-500/20 text-fuchsia-400 border-fuchsia-500/30">
+                        Until {new Date(cinderellaAccess.expiresAt).toLocaleTimeString()}
+                      </Badge>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Badge className="bg-fuchsia-500/20 text-fuchsia-400 border-fuchsia-500/30">
-                      10m remaining
-                    </Badge>
-                    <Button variant="ghost" size="sm" className="text-red-400 hover:text-red-300">
-                      Revoke
-                    </Button>
-                  </div>
-                </div>
-                <p className="text-sm text-muted-foreground text-center py-2">
-                  No other active emergency sessions
-                </p>
+                ) : (
+                  <p className="text-sm text-muted-foreground text-center py-2">
+                    No active emergency sessions
+                  </p>
+                )}
               </div>
             </div>
           </div>

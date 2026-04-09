@@ -91,7 +91,8 @@ const ROLE_PERMISSIONS: Record<Role, Set<Permission>> = {
  */
 export function hasPermission(role: string | undefined, permission: Permission): boolean {
   if (!role) return false;
-  const rolePerms = ROLE_PERMISSIONS[role as Role];
+  const normalizedRole = role.toUpperCase() as Role;
+  const rolePerms = ROLE_PERMISSIONS[normalizedRole];
   if (!rolePerms) return false;
   return rolePerms.has(permission);
 }
@@ -115,7 +116,8 @@ export function hasAllPermissions(role: string | undefined, permissions: Permiss
  */
 export function getRolePermissions(role: string | undefined): Permission[] {
   if (!role) return [];
-  const rolePerms = ROLE_PERMISSIONS[role as Role];
+  const normalizedRole = role.toUpperCase() as Role;
+  const rolePerms = ROLE_PERMISSIONS[normalizedRole];
   if (!rolePerms) return [];
   return Array.from(rolePerms);
 }

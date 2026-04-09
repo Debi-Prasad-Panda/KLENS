@@ -13,7 +13,7 @@ from ..core.config import settings
 router = APIRouter(prefix="/ws", tags=["websocket"])
 
 # Store active WebSocket connections by document ID
-active_connections: Dict[int, Set[WebSocket]] = {}
+active_connections: Dict[str, Set[WebSocket]] = {}
 
 # Async Redis client for pub/sub
 redis_client = None
@@ -29,21 +29,21 @@ class ConnectionManager:
     """Manages WebSocket connections for document processing updates."""
     
     def __init__(self):
-        self.connections: Dict[int, Set[WebSocket]] = {}
+        self.connections: Dict[str, Set[WebSocket]] = {}
     
-    async def connect(self, doc_id: int, websocket: WebSocket):
+    async def connect(self, doc_id: str, websocket: WebSocket):
         await websocket.accept()
         if doc_id not in self.connections:
             self.connections[doc_id] = set()
         self.connections[doc_id].add(websocket)
     
-    def disconnect(self, doc_id: int, websocket: WebSocket):
+    def disconnect(self, doc_id: str, websocket: WebSocket):
         if doc_id in self.connections:
             self.connections[doc_id].discard(websocket)
             if not self.connections[doc_id]:
                 del self.connections[doc_id]
     
-    async def broadcast_to_doc(self, doc_id: int, message: dict):
+    async def broadcast_to_doc(self, doc_id: str, message: dict):
         """broadcast message to all connections watching this document."""
         if doc_id in self.connections:
             disconnected = set()
@@ -75,8 +75,8 @@ def publish_status_sync(doc_id: int, stage: str, progress: int, message: str = "
     r.close()
 
 
-@router.websocket("/documents/{doc_id}/status")
-async def websocket_document_status(websocket: WebSocket, doc_id: int):
+@router.websocket("/documents/{doc_id:path}/status")
+async def websocket_document_status(websocket: WebSocket, doc_id: str):
     """
     WebSocket endpoint for document processing status updates.
     

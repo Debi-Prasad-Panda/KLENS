@@ -36,6 +36,11 @@ class IndustrialUser(BaseModel):
     expired_cert_count: int = 0
 
 
+def normalize_role(role: Optional[str]) -> str:
+    """Normalize role values from JWT/profile (e.g. 'admin' -> 'ADMIN')."""
+    return (role or "OPERATOR").upper()
+
+
 async def get_current_user(
     credentials: Optional[HTTPAuthorizationCredentials] = Depends(security)
 ) -> IndustrialUser:
@@ -103,7 +108,7 @@ async def get_current_user(
                     id=user_id,
                     email=profile.get("email", user_email or ""),
                     full_name=profile.get("full_name"),
-                    role=profile.get("role", "OPERATOR"),
+                    role=normalize_role(profile.get("role", "OPERATOR")),
                     department=profile.get("department"),
                     shift_pattern=profile.get("shift_pattern"),
                     current_status=profile.get("current_status", "OFF_SHIFT"),
@@ -120,7 +125,7 @@ async def get_current_user(
             id=user_id,
             email=user_email or "",
             full_name=user_metadata.get("full_name"),
-            role=user_metadata.get("role", "OPERATOR"),
+            role=normalize_role(user_metadata.get("role", "OPERATOR")),
         )
         
     except HTTPException:

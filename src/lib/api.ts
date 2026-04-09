@@ -298,6 +298,15 @@ class ApiClient {
     return this.request(`/search/documents/${docId}/insights?role=${role}&refresh=${refresh}&language=${encodeURIComponent(language)}`);
   }
 
+  /**
+   * Delete a Supabase knowledge hub document and its storage file.
+   */
+  async deleteKnowledgeHubDocument(docId: string) {
+    return this.request(`/search/documents/${encodeURIComponent(docId)}`, {
+      method: 'DELETE',
+    });
+  }
+
   // ==================== SILENT HANDOVER ENDPOINTS ====================
 
   /**

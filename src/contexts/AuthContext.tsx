@@ -35,7 +35,7 @@ const transformUser = (
     id: supabaseUser.id,
     email: supabaseUser.email || "",
     name: profile?.full_name || supabaseUser.user_metadata?.full_name || supabaseUser.email || "",
-    role: (profile?.role as UserRole) || (supabaseUser.user_metadata?.role as UserRole) || "OPERATOR",
+    role: (((profile?.role as string) || (supabaseUser.user_metadata?.role as string) || "OPERATOR").toUpperCase() as UserRole),
     department: profile?.department || supabaseUser.user_metadata?.department || null,
     avatar: supabaseUser.user_metadata?.avatar_url,
   };

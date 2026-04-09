@@ -189,6 +189,15 @@ class SupabaseService:
         except Exception as e:
             print(f"Failed to delete document: {e}")
             return False
+
+    def delete_documents_by_s3_url(self, s3_url: str) -> bool:
+        """Delete all chunks that belong to the same stored file URL."""
+        try:
+            self.client.table("knowledge_hub").delete().eq("s3_url", s3_url).execute()
+            return True
+        except Exception as e:
+            print(f"Failed to delete document chunks by s3_url: {e}")
+            return False
     
     # ==================== SEARCH OPERATIONS ====================
     

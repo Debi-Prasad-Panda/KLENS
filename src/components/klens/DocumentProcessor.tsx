@@ -18,9 +18,14 @@ interface DocumentProcessorProps {
 // Map backend stage names to frontend stage indices
 const STAGE_MAP: Record<string, number> = {
   "uploading": 0,
+  "uploaded": 0,
   "ocr": 1,
+  "ocr_extraction": 1,
   "analyzing": 2,
+  "analysis": 2,
+  "ai_analysis": 2,
   "linking": 3,
+  "graph_linking": 3,
   "complete": 4,
   "error": -1
 };
@@ -29,7 +34,7 @@ export function DocumentProcessor({ onUploadComplete }: DocumentProcessorProps) 
   const { user } = useAuth();
   const [file, setFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [docId, setDocId] = useState<number | null>(null);
+  const [docId, setDocId] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [accessRules, setAccessRules] = useState<AccessRules>({
     access_level: "public",
@@ -65,16 +70,45 @@ export function DocumentProcessor({ onUploadComplete }: DocumentProcessorProps) 
     e.preventDefault();
   };
 
-  const connectWebSocket = (documentId: number) => {
+  const runFallbackProgress = async () => {
+    // Used when backend does not provide realtime per-stage status updates.
+    for (let i = 1; i < stages.length; i++) {
+      setStages(prev => prev.map((s, idx) => {
+        if (idx < i) return { ...s, status: "complete" };
+        if (idx === i) return { ...s, status: "processing" };
+        return s;
+      }));
+
+      await new Promise(resolve => setTimeout(resolve, 900));
+
+      setStages(prev => prev.map((s, idx) =>
+        idx === i ? { ...s, status: "complete" } : s
+      ));
+    }
+
+    setIsUploading(false);
+    onUploadComplete?.();
+  };
+
+  const connectWebSocket = (documentId: string) => {
     // Determine WebSocket URL based on current location
     const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     const wsHost = window.location.hostname;
     const wsPort = window.location.port || (wsProtocol === 'wss:' ? '443' : '80');
-    const wsUrl = `${wsProtocol}//${wsHost}:${wsPort}/api/ws/documents/${documentId}/status`;
+    const wsUrl = `${wsProtocol}//${wsHost}:${wsPort}/api/ws/documents/${encodeURIComponent(documentId)}/status`;
 
     console.log('Connecting to WebSocket:', wsUrl);
 
     const ws = new WebSocket(wsUrl);
+
+    let hasReceivedUpdate = false;
+    let hasStartedFallback = false;
+
+    const startFallbackOnce = () => {
+      if (hasStartedFallback) return;
+      hasStartedFallback = true;
+      void runFallbackProgress();
+    };
 
     ws.onopen = () => {
       console.log('WebSocket connected for document:', documentId);
@@ -86,21 +120,24 @@ export function DocumentProcessor({ onUploadComplete }: DocumentProcessorProps) 
         console.log('WebSocket message:', data);
 
         if (data.type === 'status_update' || data.stage) {
-          const stageIndex = STAGE_MAP[data.stage];
+          hasReceivedUpdate = true;
+          const stageKey = String(data.stage || "").toLowerCase();
+          const stageIndex = STAGE_MAP[stageKey];
 
           if (stageIndex >= 0) {
             // Mark all previous stages as complete, current as processing
             setStages(prev => prev.map((s, idx) => {
               if (idx < stageIndex) return { ...s, status: "complete" };
-              if (idx === stageIndex) return { ...s, status: data.stage === "complete" ? "complete" : "processing" };
+              if (idx === stageIndex) return { ...s, status: stageKey === "complete" ? "complete" : "processing" };
               return s;
             }));
           }
 
-          if (data.stage === 'complete') {
+          if (stageKey === 'complete') {
             // Mark all stages complete
             setStages(prev => prev.map(s => ({ ...s, status: "complete" })));
             ws.close();
+            setIsUploading(false);
 
             toast({
               title: "Processing complete!",
@@ -113,12 +150,13 @@ export function DocumentProcessor({ onUploadComplete }: DocumentProcessorProps) 
             }, 1500);
           }
 
-          if (data.stage === 'error') {
+          if (stageKey === 'error') {
             setError(data.message || 'Processing failed');
             setStages(prev => prev.map(s =>
               s.status === "processing" ? { ...s, status: "error" } : s
             ));
             ws.close();
+            setIsUploading(false);
           }
         }
       } catch (err) {
@@ -128,11 +166,16 @@ export function DocumentProcessor({ onUploadComplete }: DocumentProcessorProps) 
 
     ws.onerror = (err) => {
       console.error('WebSocket error:', err);
-      // Fallback to polling or just assume processing
+      if (!hasReceivedUpdate) {
+        startFallbackOnce();
+      }
     };
 
     ws.onclose = () => {
       console.log('WebSocket closed');
+      if (!hasReceivedUpdate && isUploading) {
+        startFallbackOnce();
+      }
     };
 
     return ws;
@@ -161,34 +204,26 @@ export function DocumentProcessor({ onUploadComplete }: DocumentProcessorProps) 
       ));
 
       // Get document ID from response and connect WebSocket
-      const documentId = response.id;
-      setDocId(documentId);
+      const responseDocId = response?.id != null ? String(response.id) : null;
+      setDocId(responseDocId);
 
       toast({
         title: "Document uploaded!",
         description: `${uploadFile.name} is being processed...`,
       });
 
-      if (documentId) {
-        // Connect to WebSocket for real-time updates
-        connectWebSocket(documentId);
+      if (responseDocId) {
+        // Connect to WebSocket for real-time updates.
+        connectWebSocket(responseDocId);
       } else {
-        // Fallback: simulate stages if no doc ID
-        for (let i = 1; i < stages.length; i++) {
-          setStages(prev => prev.map((s, idx) =>
-            idx === i ? { ...s, status: "processing" } : s
-          ));
-          await new Promise(resolve => setTimeout(resolve, 1000));
-          setStages(prev => prev.map((s, idx) =>
-            idx === i ? { ...s, status: "complete" } : s
-          ));
-        }
-        onUploadComplete?.();
+        // No tracking ID returned; use fallback progress UI.
+        await runFallbackProgress();
       }
 
     } catch (err) {
       console.error("Upload failed:", err);
       setError(err instanceof Error ? err.message : "Upload failed");
+      setIsUploading(false);
       setStages(prev => prev.map(s =>
         s.status === "processing" ? { ...s, status: "error" } : s
       ));
