@@ -5,12 +5,21 @@ interface AnalyticsLayoutProps {
   children: ReactNode;
   title?: string;
   subtitle?: string;
+  dateRange?: DateRange;
+  onDateRangeChange?: (range: DateRange) => void;
 }
 
-type DateRange = '24h' | '7d' | '30d' | '90d' | 'custom';
+export type DateRange = '24h' | '7d' | '30d' | '90d' | 'custom';
 
-export function AnalyticsLayout({ children, title, subtitle }: AnalyticsLayoutProps) {
-  const [dateRange, setDateRange] = useState<DateRange>('7d');
+export function AnalyticsLayout({
+  children,
+  title,
+  subtitle,
+  dateRange,
+  onDateRangeChange,
+}: AnalyticsLayoutProps) {
+  const [internalDateRange, setInternalDateRange] = useState<DateRange>('24h');
+  const selectedDateRange = dateRange ?? internalDateRange;
 
   const dateRangeOptions: { value: DateRange; label: string }[] = [
     { value: '24h', label: 'Last 24 Hours' },
@@ -37,6 +46,14 @@ export function AnalyticsLayout({ children, title, subtitle }: AnalyticsLayoutPr
     // Would generate comprehensive PDF report
   };
 
+  const updateDateRange = (range: DateRange) => {
+    if (onDateRangeChange) {
+      onDateRangeChange(range);
+      return;
+    }
+    setInternalDateRange(range);
+  };
+
   return (
     <div className="space-y-6">
       {/* Header with Controls */}
@@ -52,9 +69,9 @@ export function AnalyticsLayout({ children, title, subtitle }: AnalyticsLayoutPr
             {dateRangeOptions.map((option) => (
               <button
                 key={option.value}
-                onClick={() => setDateRange(option.value)}
+                onClick={() => updateDateRange(option.value)}
                 className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
-                  dateRange === option.value
+                  selectedDateRange === option.value
                     ? 'bg-primary text-primary-foreground'
                     : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
                 }`}
@@ -62,7 +79,14 @@ export function AnalyticsLayout({ children, title, subtitle }: AnalyticsLayoutPr
                 {option.label}
               </button>
             ))}
-            <button className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-secondary rounded-md transition-colors">
+            <button
+              onClick={() => updateDateRange('custom')}
+              className={`flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+                selectedDateRange === 'custom'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
+              }`}
+            >
               <Calendar className="w-3.5 h-3.5" />
               Custom
             </button>

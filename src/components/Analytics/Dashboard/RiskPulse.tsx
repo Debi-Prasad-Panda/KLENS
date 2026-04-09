@@ -19,9 +19,10 @@ interface RiskPulseProps {
     incident?: string;
   }>;
   onIncidentClick?: (time: string) => void;
+  rangeLabel?: string;
 }
 
-export function RiskPulse({ data, onIncidentClick }: RiskPulseProps) {
+export function RiskPulse({ data, onIncidentClick, rangeLabel = 'Last 24 Hours' }: RiskPulseProps) {
   // Use mock data if no real data provided
   const chartData = data ?? getMissionControlData().riskPulse;
 
@@ -74,7 +75,7 @@ export function RiskPulse({ data, onIncidentClick }: RiskPulseProps) {
   return (
     <ChartCard
       title="Risk Pulse Monitor"
-      subtitle="Real-time safety compliance over 24 hours"
+      subtitle={`Real-time safety compliance over ${rangeLabel.toLowerCase()}`}
       headerAction={
         <div className="flex items-center gap-2">
           <div className={`w-2 h-2 rounded-full ${

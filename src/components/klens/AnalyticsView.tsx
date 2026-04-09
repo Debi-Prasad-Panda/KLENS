@@ -6,7 +6,7 @@ import {
   Shield,
   ChevronRight
 } from 'lucide-react';
-import { AnalyticsLayout } from '../Analytics/AnalyticsLayout';
+import { AnalyticsLayout, type DateRange } from '../Analytics/AnalyticsLayout';
 
 // Dashboard Module
 import { MissionControl } from '../Analytics/Dashboard/MissionControl';
@@ -56,11 +56,12 @@ const tabs: Array<{ id: AnalyticsTab; label: string; icon: typeof Activity; desc
 
 export function AnalyticsView() {
   const [activeTab, setActiveTab] = useState<AnalyticsTab>('mission-control');
+  const [dateRange, setDateRange] = useState<DateRange>('24h');
 
   const renderTabContent = () => {
     switch (activeTab) {
       case 'mission-control':
-        return <MissionControl />;
+        return <MissionControl dateRange={dateRange} />;
       
       case 'documents':
         return (
@@ -134,6 +135,8 @@ export function AnalyticsView() {
     <AnalyticsLayout
       title="K-LENS Analytics"
       subtitle="Industrial Intelligence Suite • Real-time Monitoring & Insights"
+      dateRange={dateRange}
+      onDateRangeChange={setDateRange}
     >
       {/* Tab Navigation */}
       <div className="flex flex-wrap gap-2 p-1 bg-card/50 rounded-xl border border-border mb-6">

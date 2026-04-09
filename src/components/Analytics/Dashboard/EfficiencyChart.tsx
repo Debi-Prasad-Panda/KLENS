@@ -17,9 +17,10 @@ interface EfficiencyChartProps {
     manual: number;
     ai: number;
   }>;
+  rangeLabel?: string;
 }
 
-export function EfficiencyChart({ data }: EfficiencyChartProps) {
+export function EfficiencyChart({ data, rangeLabel = 'Last 7 Days' }: EfficiencyChartProps) {
   // Use mock data if no real data provided
   const chartData = data ?? getMissionControlData().efficiency;
 
@@ -65,7 +66,7 @@ export function EfficiencyChart({ data }: EfficiencyChartProps) {
       className="lg:col-span-2"
       headerAction={
         <span className="px-2 py-1 text-xs font-mono text-success bg-success/20 rounded-full">
-          Last 7 Days
+          {rangeLabel}
         </span>
       }
     >
