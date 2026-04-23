@@ -1,0 +1,95 @@
+{
+  "nodes": [
+    {"id": "klens", "label": "K-LENS Platform", "file_type": "document"},
+    {"id": "frontend_react", "label": "React 18 Frontend", "file_type": "code"},
+    {"id": "backend_fastapi", "label": "FastAPI Backend", "file_type": "code"},
+    {"id": "postgres", "label": "PostgreSQL 16", "file_type": "code"},
+    {"id": "pgvector", "label": "pgvector Extension", "file_type": "code"},
+    {"id": "neo4j", "label": "Neo4j 5", "file_type": "code"},
+    {"id": "redis", "label": "Redis", "file_type": "code"},
+    {"id": "supabase", "label": "Supabase Auth & Storage", "file_type": "code"},
+    {"id": "gemini_api", "label": "Google Gemini API", "file_type": "code"},
+    {"id": "openrouter_api", "label": "OpenRouter API", "file_type": "code"},
+    {"id": "docker_compose", "label": "Docker Compose", "file_type": "code"},
+    {"id": "nginx", "label": "Nginx Reverse Proxy", "file_type": "code"},
+    {"id": "mqtt", "label": "Mosquitto MQTT", "file_type": "code"},
+    {"id": "document_processing", "label": "Document Processing Pipeline", "file_type": "document"},
+    {"id": "knowledge_graph", "label": "Knowledge Graph System", "file_type": "document"},
+    {"id": "auth_system", "label": "Authentication & RBAC", "file_type": "document"},
+    {"id": "audit_logging", "label": "Audit Logging", "file_type": "document"},
+    {"id": "dashboard", "label": "Operational Dashboard", "file_type": "document"},
+    {"id": "search_semantic", "label": "Semantic Search", "file_type": "document"},
+    {"id": "chat_interface", "label": "Chat Interface", "file_type": "document"},
+    {"id": "notifications", "label": "Notifications System", "file_type": "document"},
+    {"id": "handover_workflow", "label": "Shift Handover Workflow", "file_type": "document"},
+    {"id": "ocr_extraction", "label": "OCR & Document Extraction", "file_type": "document"},
+    {"id": "embeddings", "label": "Vector Embeddings", "file_type": "document"},
+    {"id": "document_ai", "label": "Document AI Analysis", "file_type": "document"},
+    {"id": "security_management", "label": "API Key Management", "file_type": "document"}
+  ],
+  "edges": [
+    {"source": "klens", "target": "frontend_react", "relation": "uses", "confidence": "EXTRACTED"},
+    {"source": "klens", "target": "backend_fastapi", "relation": "uses", "confidence": "EXTRACTED"},
+    {"source": "frontend_react", "target": "nginx", "relation": "served_by", "confidence": "EXTRACTED"},
+    {"source": "frontend_react", "target": "backend_fastapi", "relation": "communicates_with", "confidence": "EXTRACTED"},
+    {"source": "backend_fastapi", "target": "postgres", "relation": "persists_data_in", "confidence": "EXTRACTED"},
+    {"source": "backend_fastapi", "target": "neo4j", "relation": "stores_graph_in", "confidence": "EXTRACTED"},
+    {"source": "backend_fastapi", "target": "redis", "relation": "uses_for_cache_and_pubsub", "confidence": "EXTRACTED"},
+    {"source": "postgres", "target": "pgvector", "relation": "extends_with", "confidence": "EXTRACTED"},
+    {"source": "backend_fastapi", "target": "supabase", "relation": "integrates_with", "confidence": "EXTRACTED"},
+    {"source": "backend_fastapi", "target": "gemini_api", "relation": "calls_for_ai_analysis", "confidence": "EXTRACTED"},
+    {"source": "backend_fastapi", "target": "openrouter_api", "relation": "calls_for_chat_completions", "confidence": "EXTRACTED"},
+    {"source": "docker_compose", "target": "backend_fastapi", "relation": "orchestrates", "confidence": "EXTRACTED"},
+    {"source": "docker_compose", "target": "postgres", "relation": "orchestrates", "confidence": "EXTRACTED"},
+    {"source": "docker_compose", "target": "neo4j", "relation": "orchestrates", "confidence": "EXTRACTED"},
+    {"source": "docker_compose", "target": "redis", "relation": "orchestrates", "confidence": "EXTRACTED"},
+    {"source": "docker_compose", "target": "mqtt", "relation": "orchestrates", "confidence": "EXTRACTED"},
+    {"source": "nginx", "target": "backend_fastapi", "relation": "routes_to", "confidence": "EXTRACTED"},
+    {"source": "document_processing", "target": "ocr_extraction", "relation": "includes", "confidence": "EXTRACTED"},
+    {"source": "document_processing", "target": "document_ai", "relation": "includes", "confidence": "EXTRACTED"},
+    {"source": "document_processing", "target": "embeddings", "relation": "includes", "confidence": "EXTRACTED"},
+    {"source": "document_ai", "target": "gemini_api", "relation": "powered_by", "confidence": "EXTRACTED"},
+    {"source": "embeddings", "target": "pgvector", "relation": "stored_in", "confidence": "EXTRACTED"},
+    {"source": "search_semantic", "target": "embeddings", "relation": "relies_on", "confidence": "EXTRACTED"},
+    {"source": "knowledge_graph", "target": "neo4j", "relation": "persisted_in", "confidence": "EXTRACTED"},
+    {"source": "knowledge_graph", "target": "document_ai", "relation": "extracted_by", "confidence": "EXTRACTED"},
+    {"source": "chat_interface", "target": "openrouter_api", "relation": "uses_for_responses", "confidence": "EXTRACTED"},
+    {"source": "auth_system", "target": "supabase", "relation": "implemented_by", "confidence": "EXTRACTED"},
+    {"source": "audit_logging", "target": "postgres", "relation": "stored_in", "confidence": "EXTRACTED"},
+    {"source": "notifications", "target": "redis", "relation": "uses_for_pubsub", "confidence": "EXTRACTED"},
+    {"source": "handover_workflow", "target": "auth_system", "relation": "requires", "confidence": "EXTRACTED"},
+    {"source": "dashboard", "target": "postgres", "relation": "draws_data_from", "confidence": "EXTRACTED"},
+    {"source": "dashboard", "target": "neo4j", "relation": "draws_data_from", "confidence": "EXTRACTED"},
+    {"source": "backend_fastapi", "target": "mqtt", "relation": "connects_to", "confidence": "EXTRACTED"},
+    {"source": "security_management", "target": "gemini_api", "relation": "manages", "confidence": "EXTRACTED"},
+    {"source": "security_management", "target": "openrouter_api", "relation": "manages", "confidence": "EXTRACTED"},
+    {"source": "security_management", "target": "supabase", "relation": "manages", "confidence": "EXTRACTED"}
+  ],
+  "hyperedges": [
+    {
+      "id": "data_tier",
+      "members": ["postgres", "pgvector", "neo4j", "redis", "supabase"],
+      "label": "Data & Storage Layer"
+    },
+    {
+      "id": "ai_services",
+      "members": ["gemini_api", "openrouter_api", "document_ai", "embeddings"],
+      "label": "AI & LLM Services"
+    },
+    {
+      "id": "core_infrastructure",
+      "members": ["docker_compose", "nginx", "mqtt"],
+      "label": "Infrastructure & DevOps"
+    },
+    {
+      "id": "frontend_features",
+      "members": ["dashboard", "knowledge_graph", "chat_interface", "search_semantic"],
+      "label": "Frontend Feature Set"
+    },
+    {
+      "id": "document_workflow",
+      "members": ["document_processing", "ocr_extraction", "document_ai", "knowledge_graph"],
+      "label": "Document Intelligence Pipeline"
+    }
+  ]
+}

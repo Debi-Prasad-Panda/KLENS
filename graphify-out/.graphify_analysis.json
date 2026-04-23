@@ -1,0 +1,1778 @@
+{
+  "communities": {
+    "0": [
+      "backend_python_app_api_chat_py",
+      "backend_python_app_api_supabase_auth_py",
+      "backend_python_app_utils_validation_py",
+      "chat_chatmessage",
+      "chat_chatrequest",
+      "chat_chatresponse",
+      "chat_format_context_for_prompt",
+      "chat_generate_ai_response",
+      "chat_rationale_117",
+      "chat_rationale_186",
+      "chat_rationale_207",
+      "chat_rationale_229",
+      "chat_rationale_26",
+      "chat_rationale_94",
+      "chat_retrieve_context",
+      "chat_send_message",
+      "chat_validate_content_field",
+      "chat_validate_message_field",
+      "f_all_cording_klens_v2_klens_backend_python_app_api_chat_py",
+      "f_all_cording_klens_v2_klens_backend_python_app_api_supabase_auth_py",
+      "f_all_cording_klens_v2_klens_backend_python_app_utils_validation_py",
+      "strictbasemodel",
+      "supabase_auth_add_certification",
+      "supabase_auth_addcertificationrequest",
+      "supabase_auth_authresponse",
+      "supabase_auth_get_current_user_info",
+      "supabase_auth_get_expiring_certifications",
+      "supabase_auth_get_my_certifications",
+      "supabase_auth_get_shift_schedules",
+      "supabase_auth_get_user_by_id",
+      "supabase_auth_list_users",
+      "supabase_auth_login",
+      "supabase_auth_loginrequest",
+      "supabase_auth_logout",
+      "supabase_auth_rationale_1",
+      "supabase_auth_rationale_123",
+      "supabase_auth_rationale_155",
+      "supabase_auth_rationale_170",
+      "supabase_auth_rationale_181",
+      "supabase_auth_rationale_192",
+      "supabase_auth_rationale_252",
+      "supabase_auth_rationale_310",
+      "supabase_auth_rationale_383",
+      "supabase_auth_rationale_394",
+      "supabase_auth_rationale_40",
+      "supabase_auth_rationale_413",
+      "supabase_auth_rationale_440",
+      "supabase_auth_rationale_454",
+      "supabase_auth_rationale_466",
+      "supabase_auth_rationale_489",
+      "supabase_auth_rationale_508",
+      "supabase_auth_rationale_518",
+      "supabase_auth_rationale_546",
+      "supabase_auth_rationale_562",
+      "supabase_auth_rationale_587",
+      "supabase_auth_rationale_61",
+      "supabase_auth_register",
+      "supabase_auth_registerrequest",
+      "supabase_auth_set_pin",
+      "supabase_auth_setpinrequest",
+      "supabase_auth_update_profile",
+      "supabase_auth_update_shift_status",
+      "supabase_auth_updateprofilerequest",
+      "supabase_auth_updateshiftstatusrequest",
+      "supabase_auth_userresponse",
+      "supabase_auth_validate_department_field",
+      "supabase_auth_validate_email_field",
+      "supabase_auth_validate_full_name_field",
+      "supabase_auth_validate_password_field",
+      "supabase_auth_validate_role_field",
+      "supabase_auth_validate_status_field",
+      "supabase_auth_validate_text_fields",
+      "supabase_auth_verify_pin",
+      "supabase_auth_verifypinrequest",
+      "supabase_service_rationale_589",
+      "supabase_service_supabaseservice_update_user_profile",
+      "validation_config",
+      "validation_rationale_1",
+      "validation_rationale_103",
+      "validation_rationale_141",
+      "validation_rationale_165",
+      "validation_rationale_195",
+      "validation_rationale_209",
+      "validation_rationale_224",
+      "validation_rationale_239",
+      "validation_rationale_255",
+      "validation_rationale_277",
+      "validation_rationale_308",
+      "validation_rationale_324",
+      "validation_rationale_343",
+      "validation_rationale_361",
+      "validation_rationale_377",
+      "validation_rationale_48",
+      "validation_rationale_72",
+      "validation_rationale_87",
+      "validation_sanitize_text",
+      "validation_strictbasemodel",
+      "validation_validate_document_status",
+      "validation_validate_email_address",
+      "validation_validate_email_field",
+      "validation_validate_filename",
+      "validation_validate_filename_field",
+      "validation_validate_json_object",
+      "validation_validate_message_field",
+      "validation_validate_name_field",
+      "validation_validate_no_xss",
+      "validation_validate_password_field",
+      "validation_validate_password_strength",
+      "validation_validate_pin_field",
+      "validation_validate_query_field",
+      "validation_validate_shift_status",
+      "validation_validate_text_field",
+      "validation_validate_user_role",
+      "validation_validatedchatmessage",
+      "validation_validatedemail",
+      "validation_validatedfilename",
+      "validation_validatedname",
+      "validation_validatedpassword",
+      "validation_validatedpin",
+      "validation_validatedsearchquery",
+      "validation_validatedtext"
+    ],
+    "1": [
+      "auth_industrialuser",
+      "auth_rationale_26",
+      "backend_python_app_api_profile_py",
+      "backend_python_app_api_roles_py",
+      "backend_python_app_api_user_management_py",
+      "backend_python_app_models_user_profile_py",
+      "basemodel",
+      "f_all_cording_klens_v2_klens_backend_python_app_api_profile_py",
+      "f_all_cording_klens_v2_klens_backend_python_app_api_roles_py",
+      "f_all_cording_klens_v2_klens_backend_python_app_api_user_management_py",
+      "f_all_cording_klens_v2_klens_backend_python_app_models_user_profile_py",
+      "profile_complete_handover",
+      "profile_compute_time_remaining",
+      "profile_config",
+      "profile_emergencysosrequest",
+      "profile_emergencysosresponse",
+      "profile_get_activity_summary",
+      "profile_get_analytics",
+      "profile_get_handover_status",
+      "profile_get_my_profile",
+      "profile_get_or_create_profile",
+      "profile_get_preferences",
+      "profile_get_user_profile",
+      "profile_handoverrequest",
+      "profile_handoverresponse",
+      "profile_initiate_handover",
+      "profile_preferencesrequest",
+      "profile_profileupdaterequest",
+      "profile_rationale_1",
+      "profile_rationale_101",
+      "profile_rationale_120",
+      "profile_rationale_151",
+      "profile_rationale_187",
+      "profile_rationale_216",
+      "profile_rationale_22",
+      "profile_rationale_254",
+      "profile_rationale_279",
+      "profile_rationale_302",
+      "profile_rationale_341",
+      "profile_rationale_365",
+      "profile_rationale_390",
+      "profile_rationale_428",
+      "profile_rationale_442",
+      "profile_rationale_476",
+      "profile_rationale_496",
+      "profile_rationale_53",
+      "profile_rationale_546",
+      "profile_rationale_64",
+      "profile_rationale_70",
+      "profile_rationale_76",
+      "profile_rationale_84",
+      "profile_rationale_91",
+      "profile_shiftstatusupdaterequest",
+      "profile_trigger_emergency_sos",
+      "profile_update_my_profile",
+      "profile_update_preferences",
+      "profile_update_shift_status",
+      "profile_userprofileresponse",
+      "roles_get_all_permissions",
+      "roles_get_all_roles",
+      "roles_get_permission_matrix",
+      "roles_get_permissions_by_category",
+      "roles_get_role",
+      "roles_get_user_permissions",
+      "roles_permission",
+      "roles_permissioncategory",
+      "roles_rationale_1",
+      "roles_rationale_110",
+      "roles_rationale_162",
+      "roles_rationale_181",
+      "roles_rationale_20",
+      "roles_rationale_216",
+      "roles_rationale_258",
+      "roles_rationale_28",
+      "roles_rationale_333",
+      "roles_rationale_386",
+      "roles_rationale_39",
+      "roles_rationale_436",
+      "roles_rationale_46",
+      "roles_rationale_52",
+      "roles_roleinfo",
+      "roles_rolepermissionupdate",
+      "roles_update_role_permissions",
+      "roles_update_user_permissions",
+      "roles_userpermissionoverride",
+      "user_management_add_certification",
+      "user_management_archive_user",
+      "user_management_certificationcreate",
+      "user_management_delete_certification",
+      "user_management_get_all_users",
+      "user_management_get_user",
+      "user_management_get_user_certifications",
+      "user_management_get_workforce_stats",
+      "user_management_promote_user",
+      "user_management_rationale_1",
+      "user_management_rationale_130",
+      "user_management_rationale_149",
+      "user_management_rationale_172",
+      "user_management_rationale_219",
+      "user_management_rationale_246",
+      "user_management_rationale_279",
+      "user_management_rationale_295",
+      "user_management_rationale_315",
+      "user_management_rationale_67",
+      "user_management_rationale_97",
+      "user_management_restore_user",
+      "user_management_update_user",
+      "user_management_userprofile",
+      "user_management_userupdate",
+      "user_management_workforcestats",
+      "user_profile_clearancelevel",
+      "user_profile_emergencysoslog",
+      "user_profile_rationale_1",
+      "user_profile_rationale_14",
+      "user_profile_rationale_21",
+      "user_profile_rationale_30",
+      "user_profile_rationale_74",
+      "user_profile_rationale_92",
+      "user_profile_shifthandover",
+      "user_profile_shiftstatus",
+      "user_profile_userprofile"
+    ],
+    "2": [
+      "audit_logging",
+      "backend_fastapi",
+      "backend_python_app_api_graph_py",
+      "backend_python_app_api_handover_py",
+      "backend_python_app_services_neo4j_service_py",
+      "chat_interface",
+      "dashboard",
+      "docker_compose",
+      "document_ai",
+      "document_processing",
+      "embeddings",
+      "f_all_cording_klens_v2_klens_backend_python_app_api_graph_py",
+      "f_all_cording_klens_v2_klens_backend_python_app_api_handover_py",
+      "f_all_cording_klens_v2_klens_backend_python_app_services_neo4j_service_py",
+      "frontend_react",
+      "gemini_api",
+      "graph_get_document_graph",
+      "graph_get_document_subgraph",
+      "graph_get_full_graph",
+      "graph_get_graph_data",
+      "graph_get_graph_stats",
+      "graph_graphdataresponse",
+      "graph_graphlink",
+      "graph_graphnode",
+      "graph_rationale_1",
+      "graph_rationale_114",
+      "graph_rationale_182",
+      "graph_rationale_223",
+      "graph_rationale_234",
+      "graph_rationale_267",
+      "graph_rationale_38",
+      "graph_seed_demo_data",
+      "handover_atriskuser",
+      "handover_create_user_asset_relationship",
+      "handover_generate_handover_report",
+      "handover_get_at_risk_users",
+      "handover_get_orphaned_assets",
+      "handover_get_user_dependencies",
+      "handover_handoverrequest",
+      "handover_handoverresponse",
+      "handover_rationale_1",
+      "handover_rationale_104",
+      "handover_rationale_124",
+      "handover_rationale_148",
+      "handover_rationale_165",
+      "handover_rationale_18",
+      "handover_rationale_24",
+      "handover_rationale_32",
+      "handover_rationale_41",
+      "handover_rationale_48",
+      "handover_rationale_59",
+      "handover_rationale_82",
+      "handover_service_handoverservice_simulate_departure",
+      "handover_service_rationale_278",
+      "handover_simulate_departure",
+      "handover_simulationresponse",
+      "handover_userassetrequest",
+      "klens",
+      "knowledge_graph",
+      "mqtt",
+      "neo4j",
+      "neo4j_service_driver",
+      "neo4j_service_neo4jservice",
+      "neo4j_service_neo4jservice_auto_infer_user_asset_relationship",
+      "neo4j_service_neo4jservice_create_or_update_user",
+      "neo4j_service_neo4jservice_create_user_manages_asset",
+      "neo4j_service_neo4jservice_find_orphaned_assets",
+      "neo4j_service_neo4jservice_get_at_risk_users",
+      "neo4j_service_neo4jservice_get_user_dependencies",
+      "neo4j_service_neo4jservice_init",
+      "neo4j_service_neo4jservice_save_graph_entities",
+      "neo4j_service_rationale_124",
+      "neo4j_service_rationale_153",
+      "neo4j_service_rationale_195",
+      "neo4j_service_rationale_221",
+      "neo4j_service_rationale_263",
+      "neo4j_service_rationale_317",
+      "neo4j_service_rationale_35",
+      "neo4j_service_rationale_7",
+      "nginx",
+      "ocr_extraction",
+      "openrouter_api",
+      "pgvector",
+      "postgres",
+      "search_semantic",
+      "security_management",
+      "str"
+    ],
+    "3": [
+      "approval_approval",
+      "approval_approvalstatus",
+      "approval_rationale_14",
+      "approvals_approvalcreate",
+      "approvals_approvalresponse",
+      "approvals_approvalvote",
+      "approvals_approve_action",
+      "approvals_approverinfo",
+      "approvals_config",
+      "approvals_create_approval",
+      "approvals_get_approvals",
+      "approvals_rationale_127",
+      "approvals_rationale_52",
+      "approvals_rationale_76",
+      "audit_log_auditlog",
+      "audit_log_rationale_7",
+      "backend_python_app_api_approvals_py",
+      "backend_python_app_api_documents_py",
+      "backend_python_app_core_database_py",
+      "backend_python_app_main_py",
+      "backend_python_app_models_approval_py",
+      "backend_python_app_models_audit_log_py",
+      "backend_python_app_models_document_py",
+      "backend_python_app_models_document_version_py",
+      "base",
+      "database_get_db",
+      "database_get_engine",
+      "database_get_session_local",
+      "database_init_db",
+      "database_rationale_36",
+      "database_sessionlocal",
+      "document_document",
+      "document_documentstatus",
+      "document_version_documentversion",
+      "document_version_rationale_7",
+      "documents_config",
+      "documents_documentresponse",
+      "documents_documentupdaterequest",
+      "documents_get_dashboard_stats",
+      "documents_get_document",
+      "documents_get_document_insights",
+      "documents_get_document_versions",
+      "documents_get_documents",
+      "documents_log_audit",
+      "documents_process_document",
+      "documents_publish_status",
+      "documents_rationale_159",
+      "documents_rationale_198",
+      "documents_rationale_214",
+      "documents_rationale_232",
+      "documents_rationale_271",
+      "documents_rationale_305",
+      "documents_rationale_327",
+      "documents_rationale_393",
+      "documents_rationale_47",
+      "documents_rationale_60",
+      "documents_rationale_78",
+      "documents_revert_document",
+      "documents_update_document",
+      "documents_upload_document",
+      "f_all_cording_klens_v2_klens_backend_python_app_api_approvals_py",
+      "f_all_cording_klens_v2_klens_backend_python_app_api_documents_py",
+      "f_all_cording_klens_v2_klens_backend_python_app_core_database_py",
+      "f_all_cording_klens_v2_klens_backend_python_app_main_py",
+      "f_all_cording_klens_v2_klens_backend_python_app_models_approval_py",
+      "f_all_cording_klens_v2_klens_backend_python_app_models_audit_log_py",
+      "f_all_cording_klens_v2_klens_backend_python_app_models_document_py",
+      "f_all_cording_klens_v2_klens_backend_python_app_models_document_version_py",
+      "f_all_cording_klens_v2_klens_backend_python_app_models_user_py",
+      "f_all_cording_klens_v2_klens_src_lib_websocket_ts",
+      "main_create_initial_data",
+      "main_create_mock_profiles",
+      "main_health",
+      "main_rationale_102",
+      "main_rationale_72",
+      "main_root",
+      "main_startup",
+      "neo4j_service_neo4jservice_close",
+      "neo4j_service_rationale_23",
+      "src_lib_websocket_ts",
+      "user_user",
+      "websocket_websocketclient",
+      "websocket_websocketclient_connect",
+      "websocket_websocketclient_disconnect",
+      "websocket_websocketclient_off",
+      "websocket_websocketclient_on"
+    ],
+    "4": [
+      "auth_system",
+      "authcontext_authprovider",
+      "authcontext_transformindustrialcontext",
+      "authcontext_transformuser",
+      "authcontext_useauth",
+      "backend_python_seed_handover_demo_py",
+      "digitalbadgeheader_digitalbadgeheader",
+      "documentlibrary_documentlibrary",
+      "f_all_cording_klens_v2_klens_backend_python_seed_handover_demo_py",
+      "f_all_cording_klens_v2_klens_src_components_klens_digitalbadgeheader_tsx",
+      "f_all_cording_klens_v2_klens_src_components_klens_documentlibrary_tsx",
+      "f_all_cording_klens_v2_klens_src_components_klens_kioskprovider_tsx",
+      "f_all_cording_klens_v2_klens_src_components_klens_morningbriefing_tsx",
+      "f_all_cording_klens_v2_klens_src_components_klens_permissiongate_tsx",
+      "f_all_cording_klens_v2_klens_src_components_klens_rolebasedview_tsx",
+      "f_all_cording_klens_v2_klens_src_components_klens_settingsview_tsx",
+      "f_all_cording_klens_v2_klens_src_components_notifications_notificationbell_tsx",
+      "f_all_cording_klens_v2_klens_src_contexts_authcontext_tsx",
+      "f_all_cording_klens_v2_klens_src_hooks_useaudit_ts",
+      "f_all_cording_klens_v2_klens_src_hooks_useautolock_ts",
+      "f_all_cording_klens_v2_klens_src_hooks_usepermissions_ts",
+      "f_all_cording_klens_v2_klens_src_pages_notifications_tsx",
+      "handover_workflow",
+      "kioskprovider_kioskprovider",
+      "morningbriefing_morningbriefing",
+      "notificationbell_acknowledgenotification",
+      "notificationbell_gettypebg",
+      "notificationbell_gettypeicon",
+      "notificationbell_handleclickoutside",
+      "notificationbell_markallasread",
+      "notificationbell_markasread",
+      "notificationbell_shownotificationtoast",
+      "notificationbell_timeago",
+      "notifications_acknowledgenotification",
+      "notifications_deletenotification",
+      "notifications_formattime",
+      "notifications_gettypebg",
+      "notifications_gettypeicon",
+      "notifications_handletabchange",
+      "notifications_markallasread",
+      "notifications_markasread",
+      "permissiongate_permissiongate",
+      "rolebasedview_rolebasedview",
+      "seed_handover_demo_print_neo4j_commands",
+      "seed_handover_demo_random_date",
+      "seed_handover_demo_rationale_1",
+      "seed_handover_demo_rationale_105",
+      "seed_handover_demo_rationale_162",
+      "seed_handover_demo_rationale_221",
+      "seed_handover_demo_rationale_268",
+      "seed_handover_demo_rationale_99",
+      "seed_handover_demo_seed_activity_logs",
+      "seed_handover_demo_seed_demo_users",
+      "seed_handover_demo_seed_resolution_memory",
+      "settingsview_settingsview",
+      "src_components_klens_digitalbadgeheader_tsx",
+      "src_components_klens_documentlibrary_tsx",
+      "src_components_klens_kioskprovider_tsx",
+      "src_components_klens_morningbriefing_tsx",
+      "src_components_klens_permissiongate_tsx",
+      "src_components_klens_rolebasedview_tsx",
+      "src_components_klens_settingsview_tsx",
+      "src_components_notifications_notificationbell_tsx",
+      "src_contexts_authcontext_tsx",
+      "src_hooks_useaudit_ts",
+      "src_hooks_useautolock_ts",
+      "src_hooks_usepermissions_ts",
+      "src_pages_notifications_tsx",
+      "supabase",
+      "useaudit_useaudit",
+      "useautolock_useautolock",
+      "usepermissions_usepermissions"
+    ],
+    "5": [
+      "auth_check_cinderella_access",
+      "auth_cinderellagrantrequest",
+      "auth_cinderellaresponse",
+      "auth_get_current_user",
+      "auth_get_optional_user",
+      "auth_grant_cinderella_access",
+      "auth_login",
+      "auth_normalize_role",
+      "auth_pinverifyrequest",
+      "auth_rationale_1",
+      "auth_rationale_125",
+      "auth_rationale_146",
+      "auth_rationale_149",
+      "auth_rationale_160",
+      "auth_rationale_179",
+      "auth_rationale_204",
+      "auth_rationale_225",
+      "auth_rationale_256",
+      "auth_rationale_279",
+      "auth_rationale_314",
+      "auth_rationale_343",
+      "auth_rationale_40",
+      "auth_rationale_47",
+      "auth_register",
+      "auth_require_all_permissions",
+      "auth_require_on_shift",
+      "auth_require_on_shift_for_write",
+      "auth_require_permission",
+      "auth_require_role",
+      "auth_require_valid_certs",
+      "auth_set_kiosk_pin",
+      "auth_tokenresponse",
+      "auth_usercreate",
+      "auth_userresponse",
+      "auth_verify_kiosk_pin",
+      "backend_python_app_api_auth_py",
+      "backend_python_app_core_config_py",
+      "backend_python_app_core_security_py",
+      "backend_python_app_core_seed_py",
+      "backend_python_app_dependencies_auth_py",
+      "backend_python_app_models_user_py",
+      "backend_python_app_services_handover_service_py",
+      "backend_python_app_services_supabase_service_py",
+      "basesettings",
+      "config_config",
+      "config_settings",
+      "f_all_cording_klens_v2_klens_backend_python_app_api_auth_py",
+      "f_all_cording_klens_v2_klens_backend_python_app_core_config_py",
+      "f_all_cording_klens_v2_klens_backend_python_app_core_security_py",
+      "f_all_cording_klens_v2_klens_backend_python_app_core_seed_py",
+      "f_all_cording_klens_v2_klens_backend_python_app_dependencies_auth_py",
+      "f_all_cording_klens_v2_klens_backend_python_app_services_handover_service_py",
+      "f_all_cording_klens_v2_klens_backend_python_app_services_supabase_service_py",
+      "handover_service_rationale_1",
+      "security_create_access_token",
+      "security_decode_token",
+      "security_get_password_hash",
+      "security_verify_password",
+      "seed_create_default_admin",
+      "seed_rationale_6",
+      "supabase_service_client",
+      "supabase_service_rationale_1",
+      "user_userrole"
+    ],
+    "6": [
+      "handover_service_handoverservice",
+      "handover_service_handoverservice_calculate_risk_level",
+      "handover_service_handoverservice_generate_fallback_report",
+      "handover_service_handoverservice_generate_handover_report",
+      "handover_service_handoverservice_get_at_risk_users",
+      "handover_service_handoverservice_init",
+      "handover_service_rationale_189",
+      "handover_service_rationale_20",
+      "handover_service_rationale_212",
+      "handover_service_rationale_247",
+      "handover_service_rationale_30",
+      "supabase_service_rationale_113",
+      "supabase_service_rationale_14",
+      "supabase_service_rationale_143",
+      "supabase_service_rationale_174",
+      "supabase_service_rationale_185",
+      "supabase_service_rationale_194",
+      "supabase_service_rationale_210",
+      "supabase_service_rationale_262",
+      "supabase_service_rationale_316",
+      "supabase_service_rationale_36",
+      "supabase_service_rationale_370",
+      "supabase_service_rationale_412",
+      "supabase_service_rationale_443",
+      "supabase_service_rationale_470",
+      "supabase_service_rationale_508",
+      "supabase_service_rationale_534",
+      "supabase_service_rationale_551",
+      "supabase_service_rationale_572",
+      "supabase_service_rationale_617",
+      "supabase_service_rationale_649",
+      "supabase_service_rationale_682",
+      "supabase_service_rationale_723",
+      "supabase_service_rationale_748",
+      "supabase_service_rationale_763",
+      "supabase_service_rationale_95",
+      "supabase_service_supabaseservice",
+      "supabase_service_supabaseservice_add_user_certification",
+      "supabase_service_supabaseservice_delete_document",
+      "supabase_service_supabaseservice_delete_documents_by_s3_url",
+      "supabase_service_supabaseservice_delete_file",
+      "supabase_service_supabaseservice_get_documents",
+      "supabase_service_supabaseservice_get_expiring_certifications",
+      "supabase_service_supabaseservice_get_shift_schedules",
+      "supabase_service_supabaseservice_get_user_activity_logs",
+      "supabase_service_supabaseservice_get_user_certifications",
+      "supabase_service_supabaseservice_get_user_expertise_summary",
+      "supabase_service_supabaseservice_get_user_profile",
+      "supabase_service_supabaseservice_get_user_profile_by_email",
+      "supabase_service_supabaseservice_get_user_resolutions",
+      "supabase_service_supabaseservice_get_users_by_shift",
+      "supabase_service_supabaseservice_hybrid_search",
+      "supabase_service_supabaseservice_init",
+      "supabase_service_supabaseservice_insert_document",
+      "supabase_service_supabaseservice_insert_document_chunks",
+      "supabase_service_supabaseservice_keyword_search",
+      "supabase_service_supabaseservice_log_user_activity",
+      "supabase_service_supabaseservice_save_resolution",
+      "supabase_service_supabaseservice_search_similar_resolutions",
+      "supabase_service_supabaseservice_update_shift_status",
+      "supabase_service_supabaseservice_upload_file",
+      "supabase_service_supabaseservice_vector_search"
+    ],
+    "7": [
+      "aichatsidebar_handlesend",
+      "api_apiclient",
+      "api_apiclient_approveaction",
+      "api_apiclient_checkcinderellaaccess",
+      "api_apiclient_completehandover",
+      "api_apiclient_createapproval",
+      "api_apiclient_createuserassetlink",
+      "api_apiclient_deleteknowledgehubdocument",
+      "api_apiclient_extractgraph",
+      "api_apiclient_generatehandoverreport",
+      "api_apiclient_getactivitysummary",
+      "api_apiclient_getanalytics",
+      "api_apiclient_getapprovals",
+      "api_apiclient_getatriskusers",
+      "api_apiclient_getdashboardstats",
+      "api_apiclient_getdocument",
+      "api_apiclient_getdocumentinsights",
+      "api_apiclient_getdocuments",
+      "api_apiclient_gethandoverstatus",
+      "api_apiclient_getknowledgehubdocuments",
+      "api_apiclient_getorphanedassets",
+      "api_apiclient_getpreferences",
+      "api_apiclient_getprofile",
+      "api_apiclient_getsupabasedocumentinsights",
+      "api_apiclient_gettoken",
+      "api_apiclient_getuserdependencies",
+      "api_apiclient_getuserprofile",
+      "api_apiclient_hybridsearch",
+      "api_apiclient_initiatehandover",
+      "api_apiclient_login",
+      "api_apiclient_register",
+      "api_apiclient_request",
+      "api_apiclient_revertdocument",
+      "api_apiclient_sendchatmessage",
+      "api_apiclient_settoken",
+      "api_apiclient_simulatedeparture",
+      "api_apiclient_triggeremergencysos",
+      "api_apiclient_updatedocument",
+      "api_apiclient_updatepreferences",
+      "api_apiclient_updateprofile",
+      "api_apiclient_updateshiftstatus",
+      "api_apiclient_uploaddocument",
+      "api_apiclient_uploadtosupabase",
+      "api_apiclient_uploadtosupabasesync",
+      "api_apiclient_uploadtosupabasewithaccess",
+      "documentprocessor_connectwebsocket",
+      "documentprocessor_handledragover",
+      "documentprocessor_handledrop",
+      "documentprocessor_handlefileupload",
+      "documentprocessor_handlestartupload",
+      "documentprocessor_processfile",
+      "documentprocessor_resetupload",
+      "documentprocessor_runfallbackprogress",
+      "f_all_cording_klens_v2_klens_src_components_klens_aichatsidebar_tsx",
+      "f_all_cording_klens_v2_klens_src_components_klens_documentprocessor_tsx",
+      "f_all_cording_klens_v2_klens_src_lib_api_ts",
+      "f_all_cording_klens_v2_klens_src_pages_login_tsx",
+      "login_handlesubmit",
+      "src_components_klens_aichatsidebar_tsx",
+      "src_components_klens_documentprocessor_tsx",
+      "src_lib_api_ts",
+      "src_pages_login_tsx"
+    ],
+    "8": [
+      "api_apiclient_grantcinderellaaccess",
+      "audittrail_fetchauditlogs",
+      "audittrail_formatfulltimestamp",
+      "audittrail_formattimestamp",
+      "audittrail_generatemocklogs",
+      "audittrail_handleexport",
+      "complianceview_handleapprove",
+      "complianceview_handledeleteattempt",
+      "documentviewer_getspecicon",
+      "documentviewer_handlecopyinsight",
+      "f_all_cording_klens_v2_klens_src_components_klens_audittrail_tsx",
+      "f_all_cording_klens_v2_klens_src_components_klens_complianceview_tsx",
+      "f_all_cording_klens_v2_klens_src_components_klens_documentviewer_tsx",
+      "f_all_cording_klens_v2_klens_src_components_klens_iotview_tsx",
+      "f_all_cording_klens_v2_klens_src_components_klens_nuclearkeys_tsx",
+      "f_all_cording_klens_v2_klens_src_components_klens_profile_securitytab_tsx",
+      "f_all_cording_klens_v2_klens_src_components_klens_rolemanagementview_tsx",
+      "f_all_cording_klens_v2_klens_src_components_klens_uploadview_tsx",
+      "f_all_cording_klens_v2_klens_src_components_ui_toaster_tsx",
+      "f_all_cording_klens_v2_klens_src_hooks_use_toast_ts",
+      "f_all_cording_klens_v2_klens_src_lib_supabase_ts",
+      "iotview_generatedata",
+      "iotview_handleacknowledgealert",
+      "iotview_handlecalibrate",
+      "iotview_handlemousemove",
+      "nuclearkeys_formattimeago",
+      "nuclearkeys_formattimeremaining",
+      "nuclearkeys_handleapproval",
+      "nuclearkeys_handlebreakglass",
+      "nuclearkeys_handleemergencyoverride",
+      "nuclearkeys_handleexecute",
+      "rolemanagementview_fetchdata",
+      "rolemanagementview_geteffectivepermissions",
+      "rolemanagementview_getrolebyid",
+      "rolemanagementview_loadlocaldata",
+      "rolemanagementview_savechanges",
+      "rolemanagementview_togglepermission",
+      "securitytab_handlelogoutsession",
+      "securitytab_handleremotewipe",
+      "securitytab_handlerequestaccess",
+      "src_components_klens_audittrail_tsx",
+      "src_components_klens_complianceview_tsx",
+      "src_components_klens_documentviewer_tsx",
+      "src_components_klens_iotview_tsx",
+      "src_components_klens_nuclearkeys_tsx",
+      "src_components_klens_profile_securitytab_tsx",
+      "src_components_klens_rolemanagementview_tsx",
+      "src_components_klens_uploadview_tsx",
+      "src_components_ui_toaster_tsx",
+      "src_hooks_use_toast_ts",
+      "src_lib_supabase_ts",
+      "supabase_getaccesstoken",
+      "toaster_toaster",
+      "uploadview_handleintegrationclick",
+      "use_toast_addtoremovequeue",
+      "use_toast_dispatch",
+      "use_toast_genid",
+      "use_toast_reducer",
+      "use_toast_toast",
+      "use_toast_usetoast"
+    ],
+    "9": [
+      "access_rules_accesslevel",
+      "access_rules_accessrules",
+      "access_rules_accessrules_to_metadata_dict",
+      "access_rules_accessrulesrequest",
+      "access_rules_config",
+      "access_rules_rationale_1",
+      "access_rules_rationale_12",
+      "access_rules_rationale_26",
+      "access_rules_rationale_38",
+      "access_rules_rationale_58",
+      "backend_python_app_api_upload_py",
+      "backend_python_app_middleware_init_py",
+      "backend_python_app_middleware_rate_limit_py",
+      "backend_python_app_models_access_rules_py",
+      "basehttpmiddleware",
+      "f_all_cording_klens_v2_klens_backend_python_app_api_upload_py",
+      "f_all_cording_klens_v2_klens_backend_python_app_middleware_init_py",
+      "f_all_cording_klens_v2_klens_backend_python_app_middleware_rate_limit_py",
+      "f_all_cording_klens_v2_klens_backend_python_app_models_access_rules_py",
+      "notifications",
+      "rate_limit_ratelimitmiddleware",
+      "rate_limit_ratelimitmiddleware_check_rate_limit_memory",
+      "rate_limit_ratelimitmiddleware_check_rate_limit_redis",
+      "rate_limit_ratelimitmiddleware_dispatch",
+      "rate_limit_ratelimitmiddleware_get_client_identifier",
+      "rate_limit_ratelimitmiddleware_get_rate_limit",
+      "rate_limit_ratelimitmiddleware_init",
+      "rate_limit_rationale_1",
+      "rate_limit_rationale_103",
+      "rate_limit_rationale_137",
+      "rate_limit_rationale_186",
+      "rate_limit_rationale_219",
+      "rate_limit_rationale_23",
+      "rate_limit_rationale_86",
+      "redis",
+      "supabase_service_rationale_67",
+      "supabase_service_supabaseservice_upload_file_bytes",
+      "upload_chunk_text",
+      "upload_extract_text_from_pdf",
+      "upload_process_document_supabase",
+      "upload_publish_upload_status",
+      "upload_rationale_1",
+      "upload_rationale_107",
+      "upload_rationale_213",
+      "upload_rationale_304",
+      "upload_rationale_42",
+      "upload_rationale_58",
+      "upload_rationale_89",
+      "upload_upload_document",
+      "upload_upload_document_sync",
+      "upload_uploadresponse",
+      "upload_uploadstatus"
+    ],
+    "10": [
+      "alert_service_alertservice",
+      "alert_service_alertservice_acknowledge_alert",
+      "alert_service_alertservice_check_dead_mans_switch",
+      "alert_service_alertservice_delete_notification",
+      "alert_service_alertservice_get_stale_critical_alerts",
+      "alert_service_alertservice_get_unread_count",
+      "alert_service_alertservice_get_user_notifications",
+      "alert_service_alertservice_mark_all_read",
+      "alert_service_alertservice_mark_as_read",
+      "alert_service_alertservice_trigger_alert",
+      "alert_service_rationale_1",
+      "alert_service_rationale_105",
+      "alert_service_rationale_118",
+      "alert_service_rationale_12",
+      "alert_service_rationale_131",
+      "alert_service_rationale_148",
+      "alert_service_rationale_175",
+      "alert_service_rationale_201",
+      "alert_service_rationale_250",
+      "alert_service_rationale_30",
+      "alert_service_rationale_77",
+      "backend_python_app_api_notifications_py",
+      "backend_python_app_services_alert_service_py",
+      "f_all_cording_klens_v2_klens_backend_python_app_api_notifications_py",
+      "f_all_cording_klens_v2_klens_backend_python_app_services_alert_service_py",
+      "notifications_acknowledge_notification",
+      "notifications_delete_notification",
+      "notifications_get_notifications",
+      "notifications_mark_all_notifications_read",
+      "notifications_mark_notification_read",
+      "notifications_notificationlistresponse",
+      "notifications_notificationresponse",
+      "notifications_rationale_1",
+      "notifications_rationale_115",
+      "notifications_rationale_131",
+      "notifications_rationale_179",
+      "notifications_rationale_44",
+      "notifications_rationale_67",
+      "notifications_rationale_80",
+      "notifications_rationale_94",
+      "notifications_simulate_meltdown",
+      "notifications_simulatemeltdownrequest",
+      "notifications_trigger_escalation_check"
+    ],
+    "11": [
+      "audit_auditaction",
+      "audit_auditcategory",
+      "audit_auditlogcreate",
+      "audit_auditlogresponse",
+      "audit_auditseverity",
+      "audit_auditstatsresponse",
+      "audit_create_audit_log",
+      "audit_get_audit_logs",
+      "audit_get_audit_stats",
+      "audit_get_client_ip",
+      "audit_get_security_alerts",
+      "audit_log_login",
+      "audit_log_logout",
+      "audit_rationale_1",
+      "audit_rationale_110",
+      "audit_rationale_175",
+      "audit_rationale_215",
+      "audit_rationale_268",
+      "audit_rationale_290",
+      "audit_rationale_308",
+      "audit_rationale_96",
+      "backend_python_app_api_audit_py",
+      "backend_python_app_core_permissions_py",
+      "enum",
+      "f_all_cording_klens_v2_klens_backend_python_app_api_audit_py",
+      "f_all_cording_klens_v2_klens_backend_python_app_core_permissions_py",
+      "permissions_can_bypass_shift",
+      "permissions_get_role_description",
+      "permissions_get_role_display_name",
+      "permissions_get_role_permissions",
+      "permissions_has_permission",
+      "permissions_permission",
+      "permissions_rationale_1",
+      "permissions_rationale_12",
+      "permissions_rationale_139",
+      "permissions_rationale_165",
+      "permissions_rationale_184",
+      "permissions_rationale_197",
+      "permissions_rationale_21",
+      "permissions_role"
+    ],
+    "12": [
+      "backend_python_app_api_search_py",
+      "backend_python_app_services_gemini_service_py",
+      "f_all_cording_klens_v2_klens_backend_python_app_api_search_py",
+      "f_all_cording_klens_v2_klens_backend_python_app_services_gemini_service_py",
+      "gemini_service_geminiservice",
+      "gemini_service_geminiservice_analyze_document",
+      "gemini_service_geminiservice_call_openrouter",
+      "gemini_service_geminiservice_extract_graph_entities",
+      "gemini_service_geminiservice_generate_embedding",
+      "gemini_service_geminiservice_generate_role_insights",
+      "gemini_service_geminiservice_init",
+      "gemini_service_rationale_1",
+      "gemini_service_rationale_103",
+      "gemini_service_rationale_140",
+      "gemini_service_rationale_17",
+      "gemini_service_rationale_38",
+      "gemini_service_rationale_62",
+      "gemini_service_rationale_82",
+      "search_delete_document",
+      "search_get_all_documents",
+      "search_get_document",
+      "search_get_document_insights",
+      "search_hybrid_search",
+      "search_rationale_1",
+      "search_rationale_127",
+      "search_rationale_142",
+      "search_rationale_156",
+      "search_rationale_205",
+      "search_rationale_27",
+      "search_rationale_73",
+      "search_searchrequest",
+      "search_searchresponse",
+      "search_searchresult",
+      "search_validate_query_field",
+      "supabase_service_rationale_169",
+      "supabase_service_supabaseservice_get_document_by_id"
+    ],
+    "13": [
+      "certstatus_certstatus",
+      "compliancescorecard_compliancescorecard",
+      "efficiencychart_efficiencychart",
+      "f_all_cording_klens_v2_klens_src_components_analytics_compliance_compliancescorecard_tsx",
+      "f_all_cording_klens_v2_klens_src_components_analytics_dashboard_efficiencychart_tsx",
+      "f_all_cording_klens_v2_klens_src_components_analytics_dashboard_liveanomalyfeed_tsx",
+      "f_all_cording_klens_v2_klens_src_components_analytics_documents_knowledgegaps_tsx",
+      "f_all_cording_klens_v2_klens_src_components_analytics_shared_mockdatagenerator_ts",
+      "f_all_cording_klens_v2_klens_src_components_analytics_users_certstatus_tsx",
+      "knowledgegaps_knowledgegaps",
+      "liveanomalyfeed_liveanomalyfeed",
+      "mockdatagenerator_formatcurrency",
+      "mockdatagenerator_formatnumber",
+      "mockdatagenerator_formattimeago",
+      "mockdatagenerator_generateriskpulsedata",
+      "mockdatagenerator_getcomplianceanalyticsdata",
+      "mockdatagenerator_getdocumentanalyticsdata",
+      "mockdatagenerator_getmissioncontroldata",
+      "mockdatagenerator_getworkforceanalyticsdata",
+      "src_components_analytics_compliance_compliancescorecard_tsx",
+      "src_components_analytics_dashboard_efficiencychart_tsx",
+      "src_components_analytics_dashboard_liveanomalyfeed_tsx",
+      "src_components_analytics_documents_knowledgegaps_tsx",
+      "src_components_analytics_shared_mockdatagenerator_ts",
+      "src_components_analytics_users_certstatus_tsx"
+    ],
+    "14": [
+      "backend_python_app_api_websocket_py",
+      "f_all_cording_klens_v2_klens_backend_python_app_api_websocket_py",
+      "websocket_connectionmanager",
+      "websocket_connectionmanager_broadcast_to_doc",
+      "websocket_connectionmanager_connect",
+      "websocket_connectionmanager_disconnect",
+      "websocket_connectionmanager_init",
+      "websocket_get_redis",
+      "websocket_publish_status_sync",
+      "websocket_rationale_1",
+      "websocket_rationale_29",
+      "websocket_rationale_47",
+      "websocket_rationale_65",
+      "websocket_rationale_80",
+      "websocket_websocket_document_status"
+    ],
+    "15": [
+      "api_apiclient_logout",
+      "f_all_cording_klens_v2_klens_src_components_klens_kiosklockscreen_tsx",
+      "f_all_cording_klens_v2_klens_src_components_klens_sidebar_tsx",
+      "kiosklockscreen_handleclear",
+      "kiosklockscreen_handlekeydown",
+      "kiosklockscreen_handlekeypadclick",
+      "kiosklockscreen_handlelogout",
+      "kiosklockscreen_handlepinchange",
+      "kiosklockscreen_handleverify",
+      "sidebar_handlelogout",
+      "sidebar_handlenavigateprofile",
+      "src_components_klens_kiosklockscreen_tsx",
+      "src_components_klens_sidebar_tsx"
+    ],
+    "16": [
+      "f_all_cording_klens_v2_klens_src_components_klens_workforcecommandcenter_tsx",
+      "src_components_klens_workforcecommandcenter_tsx",
+      "workforcecommandcenter_certindicator",
+      "workforcecommandcenter_confirmarchive",
+      "workforcecommandcenter_fetchdata",
+      "workforcecommandcenter_gettoken",
+      "workforcecommandcenter_handlearchive",
+      "workforcecommandcenter_handlepromote",
+      "workforcecommandcenter_handlerestore",
+      "workforcecommandcenter_roleicon",
+      "workforcecommandcenter_statcard"
+    ],
+    "17": [
+      "f_all_cording_klens_v2_klens_src_components_klens_searchdiscoveryview_tsx",
+      "searchdiscoveryview_clearfilters",
+      "searchdiscoveryview_generaterecentsearches",
+      "searchdiscoveryview_generatesearchanalytics",
+      "searchdiscoveryview_handlekeydown",
+      "searchdiscoveryview_togglebookmark",
+      "searchdiscoveryview_togglefavoritesearch",
+      "searchdiscoveryview_toggleresultexpand",
+      "src_components_klens_searchdiscoveryview_tsx"
+    ],
+    "18": [
+      "backend_python_app_api_pomodoro_py",
+      "f_all_cording_klens_v2_klens_backend_python_app_api_pomodoro_py",
+      "pomodoro_get_pomodoro_settings",
+      "pomodoro_get_pomodoro_stats",
+      "pomodoro_pomodorosettingsresponse",
+      "pomodoro_pomodorostatsresponse",
+      "pomodoro_rationale_30",
+      "pomodoro_rationale_48"
+    ],
+    "19": [
+      "f_all_cording_klens_v2_klens_src_components_klens_topnav_tsx",
+      "src_components_klens_topnav_tsx",
+      "topnav_clearsearch",
+      "topnav_handleclickoutside",
+      "topnav_handlelanguagechange",
+      "topnav_handleresultclick",
+      "topnav_handlesearchkeydown",
+      "topnav_toggleaichat"
+    ],
+    "20": [
+      "f_all_cording_klens_v2_klens_src_components_ui_pagination_tsx",
+      "pagination_pagination",
+      "pagination_paginationellipsis",
+      "pagination_paginationlink",
+      "pagination_paginationnext",
+      "pagination_paginationprevious",
+      "src_components_ui_pagination_tsx"
+    ],
+    "21": [
+      "f_all_cording_klens_v2_klens_src_lib_permissions_ts",
+      "permissions_canbypassshift",
+      "permissions_getrolepermissions",
+      "permissions_hasallpermissions",
+      "permissions_hasanypermission",
+      "permissions_haspermission",
+      "src_lib_permissions_ts"
+    ],
+    "22": [
+      "accesssettingspanel_addemail",
+      "accesssettingspanel_handleaccesslevelchange",
+      "accesssettingspanel_handledepartmentchange",
+      "accesssettingspanel_handlekeydown",
+      "accesssettingspanel_removeemail",
+      "f_all_cording_klens_v2_klens_src_components_klens_accesssettingspanel_tsx",
+      "src_components_klens_accesssettingspanel_tsx"
+    ],
+    "23": [
+      "f_all_cording_klens_v2_klens_src_components_ui_sonner_tsx",
+      "f_all_cording_klens_v2_klens_src_contexts_themecontext_tsx",
+      "sonner_toaster",
+      "src_components_ui_sonner_tsx",
+      "src_contexts_themecontext_tsx",
+      "themecontext_themeprovider",
+      "themecontext_usetheme"
+    ],
+    "24": [
+      "f_all_cording_klens_v2_klens_src_components_klens_profile_identitywallettab_tsx",
+      "identitywallettab_formatdate",
+      "identitywallettab_getstatusstyles",
+      "identitywallettab_handlerenew",
+      "identitywallettab_handleupload",
+      "src_components_klens_profile_identitywallettab_tsx"
+    ],
+    "25": [
+      "dashboardview_formattimeago",
+      "dashboardview_gettaskicon",
+      "dashboardview_gettasktype",
+      "f_all_cording_klens_v2_klens_src_components_klens_dashboardview_tsx",
+      "src_components_klens_dashboardview_tsx"
+    ],
+    "26": [
+      "f_all_cording_klens_v2_klens_src_components_klens_dashboard_pendingtasks_tsx",
+      "pendingtasks_getduestatusicon",
+      "pendingtasks_getprioritystyle",
+      "pendingtasks_gettaskicon",
+      "src_components_klens_dashboard_pendingtasks_tsx"
+    ],
+    "27": [
+      "f_all_cording_klens_v2_klens_src_components_klens_profile_overviewtab_tsx",
+      "overviewtab_generatemockactivitydata",
+      "overviewtab_getactivitycolor",
+      "overviewtab_getshiftstatusstyle",
+      "src_components_klens_profile_overviewtab_tsx"
+    ],
+    "28": [
+      "f_all_cording_klens_v2_klens_src_components_klens_profile_preferencestab_tsx",
+      "preferencestab_handlesave",
+      "preferencestab_handletestvoice",
+      "preferencestab_updatepref",
+      "src_components_klens_profile_preferencestab_tsx"
+    ],
+    "29": [
+      "drawer_drawer",
+      "drawer_drawerfooter",
+      "drawer_drawerheader",
+      "f_all_cording_klens_v2_klens_src_components_ui_drawer_tsx",
+      "src_components_ui_drawer_tsx"
+    ],
+    "30": [
+      "f_all_cording_klens_v2_klens_src_components_ui_sidebar_tsx",
+      "sidebar_cn",
+      "sidebar_handlekeydown",
+      "sidebar_usesidebar",
+      "src_components_ui_sidebar_tsx"
+    ],
+    "31": [
+      "f_all_cording_klens_v2_klens_src_components_klens_knowledgegraph3d_tsx",
+      "knowledgegraph3d_customnode",
+      "knowledgegraph3d_getnodesize",
+      "src_components_klens_knowledgegraph3d_tsx"
+    ],
+    "32": [
+      "activityfeed_getactivitycolor",
+      "activityfeed_getactivityicon",
+      "f_all_cording_klens_v2_klens_src_components_klens_dashboard_activityfeed_tsx",
+      "src_components_klens_dashboard_activityfeed_tsx"
+    ],
+    "33": [
+      "f_all_cording_klens_v2_klens_src_components_klens_dashboard_teamstatus_tsx",
+      "src_components_klens_dashboard_teamstatus_tsx",
+      "teamstatus_getsafetyscorecolor",
+      "teamstatus_getstatusstyle"
+    ],
+    "34": [
+      "f_all_cording_klens_v2_klens_src_pages_index_tsx",
+      "index_handlenavigateprofile",
+      "index_handlenavigatesettings",
+      "src_pages_index_tsx"
+    ],
+    "35": [
+      "f_all_cording_klens_v2_klens_src_pages_settings_tsx",
+      "settings_handlesetpin",
+      "settings_handletogglekiosk",
+      "src_pages_settings_tsx"
+    ],
+    "36": [
+      "analyticslayout_analyticslayout",
+      "f_all_cording_klens_v2_klens_src_components_analytics_analyticslayout_tsx",
+      "src_components_analytics_analyticslayout_tsx"
+    ],
+    "37": [
+      "auditreadiness_getprogresscolor",
+      "f_all_cording_klens_v2_klens_src_components_analytics_compliance_auditreadiness_tsx",
+      "src_components_analytics_compliance_auditreadiness_tsx"
+    ],
+    "38": [
+      "f_all_cording_klens_v2_klens_src_components_analytics_compliance_incidenthistory_tsx",
+      "incidenthistory_getseverityconfig",
+      "src_components_analytics_compliance_incidenthistory_tsx"
+    ],
+    "39": [
+      "f_all_cording_klens_v2_klens_src_components_analytics_dashboard_kpigrid_tsx",
+      "kpigrid_gettrendicon",
+      "src_components_analytics_dashboard_kpigrid_tsx"
+    ],
+    "40": [
+      "f_all_cording_klens_v2_klens_src_components_analytics_dashboard_missioncontrol_tsx",
+      "missioncontrol_simulatemeltdown",
+      "src_components_analytics_dashboard_missioncontrol_tsx"
+    ],
+    "41": [
+      "f_all_cording_klens_v2_klens_src_components_analytics_dashboard_riskpulse_tsx",
+      "riskpulse_getstatuscolor",
+      "src_components_analytics_dashboard_riskpulse_tsx"
+    ],
+    "42": [
+      "adoptioncurve_customtooltip",
+      "f_all_cording_klens_v2_klens_src_components_analytics_users_adoptioncurve_tsx",
+      "src_components_analytics_users_adoptioncurve_tsx"
+    ],
+    "43": [
+      "f_all_cording_klens_v2_klens_src_components_analytics_users_shiftradar_tsx",
+      "shiftradar_customtooltip",
+      "src_components_analytics_users_shiftradar_tsx"
+    ],
+    "44": [
+      "emergencyvoicemode_handlekeydown",
+      "f_all_cording_klens_v2_klens_src_components_klens_emergencyvoicemode_tsx",
+      "src_components_klens_emergencyvoicemode_tsx"
+    ],
+    "45": [
+      "enterpriseconnectors_handleconnect",
+      "f_all_cording_klens_v2_klens_src_components_klens_enterpriseconnectors_tsx",
+      "src_components_klens_enterpriseconnectors_tsx"
+    ],
+    "46": [
+      "f_all_cording_klens_v2_klens_src_components_klens_featuresshowcase_tsx",
+      "featuresshowcase_featuresshowcase",
+      "src_components_klens_featuresshowcase_tsx"
+    ],
+    "47": [
+      "f_all_cording_klens_v2_klens_src_components_klens_knowledgegraphview_tsx",
+      "knowledgegraphview_knowledgegraphview",
+      "src_components_klens_knowledgegraphview_tsx"
+    ],
+    "48": [
+      "f_all_cording_klens_v2_klens_src_components_klens_placeholderview_tsx",
+      "placeholderview_placeholderview",
+      "src_components_klens_placeholderview_tsx"
+    ],
+    "49": [
+      "f_all_cording_klens_v2_klens_src_components_klens_profiletabs_tsx",
+      "profiletabs_profiletabs",
+      "src_components_klens_profiletabs_tsx"
+    ],
+    "50": [
+      "f_all_cording_klens_v2_klens_src_components_klens_profileview_tsx",
+      "profileview_profileview",
+      "src_components_klens_profileview_tsx"
+    ],
+    "51": [
+      "f_all_cording_klens_v2_klens_src_components_layout_sidebarandheader_tsx",
+      "sidebarandheader_sidebarandheader",
+      "src_components_layout_sidebarandheader_tsx"
+    ],
+    "52": [
+      "calendar_calendar",
+      "f_all_cording_klens_v2_klens_src_components_ui_calendar_tsx",
+      "src_components_ui_calendar_tsx"
+    ],
+    "53": [
+      "carousel_usecarousel",
+      "f_all_cording_klens_v2_klens_src_components_ui_carousel_tsx",
+      "src_components_ui_carousel_tsx"
+    ],
+    "54": [
+      "chart_usechart",
+      "f_all_cording_klens_v2_klens_src_components_ui_chart_tsx",
+      "src_components_ui_chart_tsx"
+    ],
+    "55": [
+      "f_all_cording_klens_v2_klens_src_components_ui_form_tsx",
+      "form_useformfield",
+      "src_components_ui_form_tsx"
+    ],
+    "56": [
+      "f_all_cording_klens_v2_klens_src_contexts_languagecontext_tsx",
+      "languagecontext_uselanguage",
+      "src_contexts_languagecontext_tsx"
+    ],
+    "57": [
+      "f_all_cording_klens_v2_klens_src_hooks_use_mobile_tsx",
+      "src_hooks_use_mobile_tsx",
+      "use_mobile_useismobile"
+    ],
+    "58": [
+      "f_all_cording_klens_v2_klens_src_hooks_usedashboardstats_ts",
+      "src_hooks_usedashboardstats_ts",
+      "usedashboardstats_usedashboardstats"
+    ],
+    "59": [
+      "f_all_cording_klens_v2_klens_src_hooks_usedocumentinsights_ts",
+      "src_hooks_usedocumentinsights_ts",
+      "usedocumentinsights_usedocumentinsights"
+    ],
+    "60": [
+      "f_all_cording_klens_v2_klens_src_hooks_usevoicetotext_ts",
+      "src_hooks_usevoicetotext_ts",
+      "usevoicetotext_usevoicetotext"
+    ],
+    "61": [
+      "f_all_cording_klens_v2_klens_src_lib_utils_ts",
+      "src_lib_utils_ts",
+      "utils_cn"
+    ],
+    "62": [
+      "f_all_cording_klens_v2_klens_src_pages_notfound_tsx",
+      "notfound_notfound",
+      "src_pages_notfound_tsx"
+    ],
+    "63": [
+      "f_all_cording_klens_v2_klens_src_pages_users_tsx",
+      "src_pages_users_tsx",
+      "users_users"
+    ],
+    "64": [
+      "src_app_tsx",
+      "src_main_tsx"
+    ],
+    "65": [
+      "f_all_cording_klens_v2_klens_src_app_tsx",
+      "f_all_cording_klens_v2_klens_src_main_tsx"
+    ],
+    "66": [
+      "eslint_config_js"
+    ],
+    "67": [
+      "postcss_config_js"
+    ],
+    "68": [
+      "tailwind_config_ts"
+    ],
+    "69": [
+      "vite_config_ts"
+    ],
+    "70": [
+      "backend_python_app_init_py"
+    ],
+    "71": [
+      "backend_python_app_api_init_py"
+    ],
+    "72": [
+      "backend_python_app_core_init_py"
+    ],
+    "73": [
+      "backend_python_app_dependencies_init_py"
+    ],
+    "74": [
+      "backend_python_app_models_init_py"
+    ],
+    "75": [
+      "neo4j_service_rationale_14"
+    ],
+    "76": [
+      "supabase_service_rationale_26"
+    ],
+    "77": [
+      "backend_python_app_services_init_py"
+    ],
+    "78": [
+      "backend_python_app_utils_init_py"
+    ],
+    "79": [
+      "src_vite_env_d_ts"
+    ],
+    "80": [
+      "src_components_navlink_tsx"
+    ],
+    "81": [
+      "src_components_analytics_documents_processingstats_tsx"
+    ],
+    "82": [
+      "src_components_analytics_shared_chartcard_tsx"
+    ],
+    "83": [
+      "src_components_klens_analyticsview_tsx"
+    ],
+    "84": [
+      "src_components_klens_successionplanningview_tsx"
+    ],
+    "85": [
+      "src_components_klens_dashboard_index_ts"
+    ],
+    "86": [
+      "src_components_klens_profile_analyticstab_tsx"
+    ],
+    "87": [
+      "src_components_ui_accordion_tsx"
+    ],
+    "88": [
+      "src_components_ui_alert_dialog_tsx"
+    ],
+    "89": [
+      "src_components_ui_alert_tsx"
+    ],
+    "90": [
+      "src_components_ui_aspect_ratio_tsx"
+    ],
+    "91": [
+      "src_components_ui_avatar_tsx"
+    ],
+    "92": [
+      "src_components_ui_badge_tsx"
+    ],
+    "93": [
+      "src_components_ui_breadcrumb_tsx"
+    ],
+    "94": [
+      "src_components_ui_button_tsx"
+    ],
+    "95": [
+      "src_components_ui_card_tsx"
+    ],
+    "96": [
+      "src_components_ui_checkbox_tsx"
+    ],
+    "97": [
+      "src_components_ui_collapsible_tsx"
+    ],
+    "98": [
+      "src_components_ui_command_tsx"
+    ],
+    "99": [
+      "src_components_ui_context_menu_tsx"
+    ],
+    "100": [
+      "src_components_ui_dialog_tsx"
+    ],
+    "101": [
+      "src_components_ui_dropdown_menu_tsx"
+    ],
+    "102": [
+      "src_components_ui_hover_card_tsx"
+    ],
+    "103": [
+      "src_components_ui_input_otp_tsx"
+    ],
+    "104": [
+      "src_components_ui_input_tsx"
+    ],
+    "105": [
+      "src_components_ui_label_tsx"
+    ],
+    "106": [
+      "src_components_ui_menubar_tsx"
+    ],
+    "107": [
+      "src_components_ui_navigation_menu_tsx"
+    ],
+    "108": [
+      "src_components_ui_popover_tsx"
+    ],
+    "109": [
+      "src_components_ui_progress_tsx"
+    ],
+    "110": [
+      "src_components_ui_radio_group_tsx"
+    ],
+    "111": [
+      "src_components_ui_resizable_tsx"
+    ],
+    "112": [
+      "src_components_ui_scroll_area_tsx"
+    ],
+    "113": [
+      "src_components_ui_select_tsx"
+    ],
+    "114": [
+      "src_components_ui_separator_tsx"
+    ],
+    "115": [
+      "src_components_ui_sheet_tsx"
+    ],
+    "116": [
+      "src_components_ui_skeleton_tsx"
+    ],
+    "117": [
+      "src_components_ui_slider_tsx"
+    ],
+    "118": [
+      "src_components_ui_switch_tsx"
+    ],
+    "119": [
+      "src_components_ui_table_tsx"
+    ],
+    "120": [
+      "src_components_ui_tabs_tsx"
+    ],
+    "121": [
+      "src_components_ui_textarea_tsx"
+    ],
+    "122": [
+      "src_components_ui_toast_tsx"
+    ],
+    "123": [
+      "src_components_ui_toggle_group_tsx"
+    ],
+    "124": [
+      "src_components_ui_toggle_tsx"
+    ],
+    "125": [
+      "src_components_ui_tooltip_tsx"
+    ],
+    "126": [
+      "src_components_ui_use_toast_ts"
+    ],
+    "127": [
+      "src_types_auth_ts"
+    ],
+    "128": [
+      "f_all_cording_klens_v2_klens_eslint_config_js"
+    ],
+    "129": [
+      "f_all_cording_klens_v2_klens_postcss_config_js"
+    ],
+    "130": [
+      "f_all_cording_klens_v2_klens_tailwind_config_ts"
+    ],
+    "131": [
+      "f_all_cording_klens_v2_klens_vite_config_ts"
+    ],
+    "132": [
+      "f_all_cording_klens_v2_klens_backend_python_app_init_py"
+    ],
+    "133": [
+      "f_all_cording_klens_v2_klens_backend_python_app_api_init_py"
+    ],
+    "134": [
+      "f_all_cording_klens_v2_klens_backend_python_app_core_init_py"
+    ],
+    "135": [
+      "f_all_cording_klens_v2_klens_backend_python_app_dependencies_init_py"
+    ],
+    "136": [
+      "f_all_cording_klens_v2_klens_backend_python_app_models_init_py"
+    ],
+    "137": [
+      "f_all_cording_klens_v2_klens_backend_python_app_services_init_py"
+    ],
+    "138": [
+      "f_all_cording_klens_v2_klens_backend_python_app_utils_init_py"
+    ],
+    "139": [
+      "f_all_cording_klens_v2_klens_src_vite_env_d_ts"
+    ],
+    "140": [
+      "f_all_cording_klens_v2_klens_src_components_navlink_tsx"
+    ],
+    "141": [
+      "f_all_cording_klens_v2_klens_src_components_analytics_documents_processingstats_tsx"
+    ],
+    "142": [
+      "f_all_cording_klens_v2_klens_src_components_analytics_shared_chartcard_tsx"
+    ],
+    "143": [
+      "f_all_cording_klens_v2_klens_src_components_klens_analyticsview_tsx"
+    ],
+    "144": [
+      "f_all_cording_klens_v2_klens_src_components_klens_successionplanningview_tsx"
+    ],
+    "145": [
+      "f_all_cording_klens_v2_klens_src_components_klens_dashboard_index_ts"
+    ],
+    "146": [
+      "f_all_cording_klens_v2_klens_src_components_klens_profile_analyticstab_tsx"
+    ],
+    "147": [
+      "f_all_cording_klens_v2_klens_src_components_ui_accordion_tsx"
+    ],
+    "148": [
+      "f_all_cording_klens_v2_klens_src_components_ui_alert_dialog_tsx"
+    ],
+    "149": [
+      "f_all_cording_klens_v2_klens_src_components_ui_alert_tsx"
+    ],
+    "150": [
+      "f_all_cording_klens_v2_klens_src_components_ui_aspect_ratio_tsx"
+    ],
+    "151": [
+      "f_all_cording_klens_v2_klens_src_components_ui_avatar_tsx"
+    ],
+    "152": [
+      "f_all_cording_klens_v2_klens_src_components_ui_badge_tsx"
+    ],
+    "153": [
+      "f_all_cording_klens_v2_klens_src_components_ui_breadcrumb_tsx"
+    ],
+    "154": [
+      "f_all_cording_klens_v2_klens_src_components_ui_button_tsx"
+    ],
+    "155": [
+      "f_all_cording_klens_v2_klens_src_components_ui_card_tsx"
+    ],
+    "156": [
+      "f_all_cording_klens_v2_klens_src_components_ui_checkbox_tsx"
+    ],
+    "157": [
+      "f_all_cording_klens_v2_klens_src_components_ui_collapsible_tsx"
+    ],
+    "158": [
+      "f_all_cording_klens_v2_klens_src_components_ui_command_tsx"
+    ],
+    "159": [
+      "f_all_cording_klens_v2_klens_src_components_ui_context_menu_tsx"
+    ],
+    "160": [
+      "f_all_cording_klens_v2_klens_src_components_ui_dialog_tsx"
+    ],
+    "161": [
+      "f_all_cording_klens_v2_klens_src_components_ui_dropdown_menu_tsx"
+    ],
+    "162": [
+      "f_all_cording_klens_v2_klens_src_components_ui_hover_card_tsx"
+    ],
+    "163": [
+      "f_all_cording_klens_v2_klens_src_components_ui_input_otp_tsx"
+    ],
+    "164": [
+      "f_all_cording_klens_v2_klens_src_components_ui_input_tsx"
+    ],
+    "165": [
+      "f_all_cording_klens_v2_klens_src_components_ui_label_tsx"
+    ],
+    "166": [
+      "f_all_cording_klens_v2_klens_src_components_ui_menubar_tsx"
+    ],
+    "167": [
+      "f_all_cording_klens_v2_klens_src_components_ui_navigation_menu_tsx"
+    ],
+    "168": [
+      "f_all_cording_klens_v2_klens_src_components_ui_popover_tsx"
+    ],
+    "169": [
+      "f_all_cording_klens_v2_klens_src_components_ui_progress_tsx"
+    ],
+    "170": [
+      "f_all_cording_klens_v2_klens_src_components_ui_radio_group_tsx"
+    ],
+    "171": [
+      "f_all_cording_klens_v2_klens_src_components_ui_resizable_tsx"
+    ],
+    "172": [
+      "f_all_cording_klens_v2_klens_src_components_ui_scroll_area_tsx"
+    ],
+    "173": [
+      "f_all_cording_klens_v2_klens_src_components_ui_select_tsx"
+    ],
+    "174": [
+      "f_all_cording_klens_v2_klens_src_components_ui_separator_tsx"
+    ],
+    "175": [
+      "f_all_cording_klens_v2_klens_src_components_ui_sheet_tsx"
+    ],
+    "176": [
+      "f_all_cording_klens_v2_klens_src_components_ui_skeleton_tsx"
+    ],
+    "177": [
+      "f_all_cording_klens_v2_klens_src_components_ui_slider_tsx"
+    ],
+    "178": [
+      "f_all_cording_klens_v2_klens_src_components_ui_switch_tsx"
+    ],
+    "179": [
+      "f_all_cording_klens_v2_klens_src_components_ui_table_tsx"
+    ],
+    "180": [
+      "f_all_cording_klens_v2_klens_src_components_ui_tabs_tsx"
+    ],
+    "181": [
+      "f_all_cording_klens_v2_klens_src_components_ui_textarea_tsx"
+    ],
+    "182": [
+      "f_all_cording_klens_v2_klens_src_components_ui_toast_tsx"
+    ],
+    "183": [
+      "f_all_cording_klens_v2_klens_src_components_ui_toggle_group_tsx"
+    ],
+    "184": [
+      "f_all_cording_klens_v2_klens_src_components_ui_toggle_tsx"
+    ],
+    "185": [
+      "f_all_cording_klens_v2_klens_src_components_ui_tooltip_tsx"
+    ],
+    "186": [
+      "f_all_cording_klens_v2_klens_src_components_ui_use_toast_ts"
+    ],
+    "187": [
+      "f_all_cording_klens_v2_klens_src_types_auth_ts"
+    ]
+  },
+  "cohesion": {},
+  "god_nodes": [
+    {
+      "id": "auth_industrialuser",
+      "label": "IndustrialUser",
+      "degree": 187
+    },
+    {
+      "id": "validation_strictbasemodel",
+      "label": "StrictBaseModel",
+      "degree": 62
+    },
+    {
+      "id": "api_apiclient",
+      "label": "ApiClient",
+      "degree": 47
+    },
+    {
+      "id": "user_profile_userprofile",
+      "label": "UserProfile",
+      "degree": 40
+    },
+    {
+      "id": "user_profile_shiftstatus",
+      "label": "ShiftStatus",
+      "degree": 37
+    },
+    {
+      "id": "user_profile_emergencysoslog",
+      "label": "EmergencySOSLog",
+      "degree": 37
+    },
+    {
+      "id": "user_profile_shifthandover",
+      "label": "ShiftHandover",
+      "degree": 37
+    },
+    {
+      "id": "supabase_service_supabaseservice",
+      "label": "SupabaseService",
+      "degree": 31
+    },
+    {
+      "id": "user_user",
+      "label": "User",
+      "degree": 30
+    },
+    {
+      "id": "approval_approval",
+      "label": "Approval",
+      "degree": 29
+    }
+  ],
+  "surprises": [
+    {
+      "source": "Extract client IP from request headers",
+      "target": "IndustrialUser",
+      "source_files": [
+        "F:\\All\\CORDING\\KLENS-V2\\KLENS\\backend-python\\app\\api\\audit.py",
+        "F:\\All\\CORDING\\KLENS-V2\\KLENS\\backend-python\\app\\dependencies\\auth.py"
+      ],
+      "confidence": "INFERRED",
+      "relation": "uses",
+      "why": "inferred connection - not explicitly stated in source; connects across different repos/directories; bridges separate communities; peripheral node `Extract client IP from request headers` unexpectedly reaches hub `IndustrialUser`"
+    },
+    {
+      "source": "Create a new audit log entry.     Called automatically by frontend when user pe",
+      "target": "IndustrialUser",
+      "source_files": [
+        "F:\\All\\CORDING\\KLENS-V2\\KLENS\\backend-python\\app\\api\\audit.py",
+        "F:\\All\\CORDING\\KLENS-V2\\KLENS\\backend-python\\app\\dependencies\\auth.py"
+      ],
+      "confidence": "INFERRED",
+      "relation": "uses",
+      "why": "inferred connection - not explicitly stated in source; connects across different repos/directories; bridges separate communities; peripheral node `Create a new audit log entry.     Called automatically by frontend when user pe` unexpectedly reaches hub `IndustrialUser`"
+    },
+    {
+      "source": "Get audit logs with filtering.     Supports pagination, filtering by action/cat",
+      "target": "IndustrialUser",
+      "source_files": [
+        "F:\\All\\CORDING\\KLENS-V2\\KLENS\\backend-python\\app\\api\\audit.py",
+        "F:\\All\\CORDING\\KLENS-V2\\KLENS\\backend-python\\app\\dependencies\\auth.py"
+      ],
+      "confidence": "INFERRED",
+      "relation": "uses",
+      "why": "inferred connection - not explicitly stated in source; connects across different repos/directories; bridges separate communities; peripheral node `Get audit logs with filtering.     Supports pagination, filtering by action/cat` unexpectedly reaches hub `IndustrialUser`"
+    },
+    {
+      "source": "Get audit statistics for dashboard.",
+      "target": "IndustrialUser",
+      "source_files": [
+        "F:\\All\\CORDING\\KLENS-V2\\KLENS\\backend-python\\app\\api\\audit.py",
+        "F:\\All\\CORDING\\KLENS-V2\\KLENS\\backend-python\\app\\dependencies\\auth.py"
+      ],
+      "confidence": "INFERRED",
+      "relation": "uses",
+      "why": "inferred connection - not explicitly stated in source; connects across different repos/directories; bridges separate communities; peripheral node `Get audit statistics for dashboard.` unexpectedly reaches hub `IndustrialUser`"
+    },
+    {
+      "source": "Get recent security-related audit logs (CRITICAL and ERROR severity).",
+      "target": "IndustrialUser",
+      "source_files": [
+        "F:\\All\\CORDING\\KLENS-V2\\KLENS\\backend-python\\app\\api\\audit.py",
+        "F:\\All\\CORDING\\KLENS-V2\\KLENS\\backend-python\\app\\dependencies\\auth.py"
+      ],
+      "confidence": "INFERRED",
+      "relation": "uses",
+      "why": "inferred connection - not explicitly stated in source; connects across different repos/directories; bridges separate communities; peripheral node `Get recent security-related audit logs (CRITICAL and ERROR severity).` unexpectedly reaches hub `IndustrialUser`"
+    }
+  ]
+}

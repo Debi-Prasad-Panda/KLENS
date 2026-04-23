@@ -1,0 +1,7 @@
+F:\All\CORDING\KLENS-V2\KLENS\detailed.md
+F:\All\CORDING\KLENS-V2\KLENS\index.html
+F:\All\CORDING\KLENS-V2\KLENS\README.md
+F:\All\CORDING\KLENS-V2\KLENS\SECURITY-API-KEYS.md
+F:\All\CORDING\KLENS-V2\KLENS\backend-python\requirements.txt
+F:\All\CORDING\KLENS-V2\KLENS\public\robots.txt
+F:\All\CORDING\KLENS-V2\KLENS\public\placeholder.svg
